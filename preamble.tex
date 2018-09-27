@@ -6,6 +6,11 @@
 % generate file which complaints PDF/A standard
 % \usepackage[a-1b]{pdfx}
 
+% utility packages
+\usepackage{etoolbox}
+\usepackage{xifthen}
+\usepackage{xpatch}
+
 % font settings
 \usepackage[utf8]{inputenc}
 \usepackage{newtxtext}
@@ -184,8 +189,23 @@
 
 % table of contents/list of figures/list of tables
 \usepackage[titles]{tocloft}
+\usepackage{appendix}
+\usepackage{titletoc}
 \usepackage{tocbibind}
+\usepackage{tocvsec2}
 \renewcommand{\contentsname}{Table of Contents}
+\titlecontents{chapter}[0pt]{\addvspace{0.5ex}}%
+  {\bfseries\chaptername\space\thecontentslabel\quad}%
+  {\bfseries}%
+  {\bfseries\hfill\contentspage}
+\appto\appendix{%
+  \titlecontents{chapter}[0pt]{\addvspace{0.5ex}}%
+    {\bfseries\appendixname\space\thecontentslabel\quad}%
+    {\bfseries}%
+    {\bfseries\hfill\contentspage}
+    \addtocontents{toc}{\protect\setcounter{tocdepth}{0}}
+    \bookmarksetup{openlevel=0}
+}
 
 % bibliography
 \usepackage[
