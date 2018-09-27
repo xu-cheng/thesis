@@ -1,0 +1,194 @@
+% Ref: https://gs.hkbu.edu.hk/handbook/handbook-for-research-postgraduate-students/writing-format
+
+% check for obsoleted LaTeX packages
+\usepackage[l2tabu,orthodox]{nag}
+
+% generate file which complaints PDF/A standard
+% \usepackage[a-1b]{pdfx}
+
+% font settings
+\usepackage[utf8]{inputenc}
+\usepackage{newtxtext}
+\usepackage[T1]{fontenc}
+\usepackage{textcomp}
+
+% linespread
+\usepackage{setspace}
+\doublespacing%
+
+% page layout
+\usepackage{geometry}
+\geometry{
+  a4paper,
+  top=2.5cm,
+  bottom=2.5cm,
+  left=3.5cm,
+  right=3.5cm,
+}
+
+% pagination
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\fancyhf{}
+\renewcommand{\headrulewidth}{0pt}
+\renewcommand{\footrulewidth}{0pt}
+\fancyfoot[C]{\thepage}
+
+% color related packages
+\usepackage{color}
+\usepackage[table,dvipsnames]{xcolor}
+
+% hyperref setting
+\usepackage[unicode]{hyperref}
+\definecolor{linkcolor}{RGB}{128,23,31}
+\hypersetup{
+  bookmarksnumbered=true,
+  bookmarksopen=true,
+  bookmarksopenlevel=3,
+  colorlinks=true,
+  allcolors=linkcolor,
+  linktoc=page,
+  plainpages=false,
+  pdfstartview={XYZ null null 1},
+  pdfpagemode={UseOutlines},
+  pdfpagelayout={OneColumn}
+}
+\usepackage{bookmark}
+
+% math related packages
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsfonts}
+\usepackage{mathrsfs}
+\usepackage{latexsym}
+\usepackage{bm}
+\usepackage{fancynum}
+\setfnumgsym{\,}
+\usepackage[ruled,vlined]{algorithm2e}
+\SetVlineSkip{0pt}
+
+% caption related packages
+\usepackage{caption}
+\usepackage{subcaption}
+
+% figure related packages
+\usepackage{graphicx}
+\usepackage{tikz}
+
+% table related packages
+\usepackage{array}
+\usepackage{tabu}
+\usepackage{booktabs}
+\usepackage{multirow}
+\usepackage{makecell}
+
+% equation style
+\allowdisplaybreaks[4]
+\numberwithin{equation}{chapter}
+
+% theorem style
+\usepackage[amsmath,amsthm,hyperref,thref]{ntheorem}
+\theoremnumbering{arabic}
+\theoremseparator{:}
+\theorempreskip{0.75\baselineskip plus 0.15\baselineskip minus 0.45\baselineskip} % chktex 1
+\theorempostskip{0.75\baselineskip plus 0.15\baselineskip minus 0.45\baselineskip} % chktex 1
+\theoremheaderfont{\normalfont\bfseries}
+\theoremsymbol{}
+\def\proofname{\textbf{Proof}}
+\theoremstyle{definition}
+\newtheorem{definition}{Definition}[chapter]
+\newtheorem{proposition}{Proposition}[chapter]
+\newtheorem{lemma}{Lemma}[chapter]
+\newtheorem{theorem}{Theorem}[chapter]
+\newtheorem{axiom}{Axiom}[chapter]
+\newtheorem{corollary}{Corollary}[chapter]
+\newtheorem{exercise}{Exercise}[chapter]
+\newtheorem{example}{Example}[chapter]
+
+% chapter style
+\usepackage[compact]{titlesec}
+\titleformat{\chapter}[display]{\centering\LARGE\bfseries}{\chaptertitlename~\thechapter}{0pt}{}
+
+% titlepage
+\makeatletter%
+\newcommand{\supervisor}[1]{\gdef\@supervisor{#1}}
+\renewcommand{\maketitle}{%
+  \thispdfpagelabel{Title}
+  \begin{titlepage}
+    \centering%
+    \bfseries%
+    \null%
+    \vfill%
+    {\LARGE \@title} \\
+    \vfill%
+    {\Large \@author} \\
+    \vfill%
+    {\large A thesis submitted in partial fulfillment of the requirements \\
+    for the degree of \\ Doctor of Philosophy } \\
+    \vfill%
+    {\large Principal Supervisor: \@supervisor} \\[5ex]
+    {\large Hong Kong Baptist University} \\[5ex]
+    {\large \@date}
+    \vfill%
+  \end{titlepage}
+  \thispagestyle{empty}
+}
+\makeatother%
+
+% declaration page
+\makeatletter%
+\newcommand{\declaration}{%
+  \begingroup%
+  \phantomsection%
+  \chapter*{DECLARATION}
+  \addcontentsline{toc}{chapter}{Declaration}
+
+  \setlength\parskip{2ex}
+  \noindent%
+  I hereby declare that this thesis represents my own work which has been done after registration for the degree of PhD at Hong Kong Baptist University, and has not been previously included in a thesis or dissertation submitted to this or any other institution for a degree, diploma or other qualications.
+
+  \noindent%
+  I have read the University's current research ethics guidelines, and accept responsibility for the conduct of the procedures in accordance with the University's Research Ethics Committee (REC). I have attempted to identify all the risks related to this research that may arise in conducting this research, obtained the relevant ethical and/or safety approval (where applicable), and acknowledged my obligations and the rights of the participants.
+
+  \vfill%
+  \begin{flushright}
+    \begin{minipage}{.5\linewidth}
+      Signature: \hrulefill{} \\ Date: \@date%
+    \end{minipage}
+  \end{flushright}
+  \vfill%
+  \endgroup%
+}
+\makeatother%
+
+% abstract page
+\newenvironment{abstract}{%
+  \begingroup%
+  \phantomsection%
+  \chapter*{Abstract}
+  \addcontentsline{toc}{chapter}{Abstract}
+  \newcommand{\keywords}[1]{\par\vspace{5ex}\noindent\textbf{Keywords:} ##1}
+}{%
+  \endgroup%
+}
+
+% acknowledgements page
+\newenvironment{acknowledgements}{%
+  \begingroup%
+  \phantomsection%
+  \chapter*{Acknowledgements}
+  \addcontentsline{toc}{chapter}{Acknowledgements}
+}{%
+  \endgroup%
+}
+
+% table of contents/list of figures/list of tables
+\usepackage[titles]{tocloft}
+\usepackage{tocbibind}
+\renewcommand{\contentsname}{Table of Contents}
+
+% other packages
+\usepackage{indentfirst}
+\usepackage[inline]{enumitem}
+\usepackage[perpage]{footmisc}
+
