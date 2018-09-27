@@ -197,42 +197,42 @@
   maxbibnames=10,
 ]{biblatex}
 
-\DeclareSortingScheme{ddatent}{
-    \sort{
-        \field{presort}
-    }
-    \sort[final]{
-        \field{sortkey}
-    }
-    \sort[direction=descending]{
-        \field[strside=left,strwidth=4]{sortyear}
-        \field[strside=left,strwidth=4]{year}
-        \literal{9999}
-    }
-    \sort[direction=descending]{
-        \field[padside=left,padwidth=2,padchar=0]{month}
-        \literal{00}
-    }
-    \sort[direction=descending]{
-        \field[padside=left,padwidth=2,padchar=0]{day}
-        \literal{00}
-    }
-    \sort[direction=descending]{
-        \field[padside=left,padwidth=4,padchar=0]{volume}
-        \literal{9999}
-    }
-    \sort{
-        \name{sortname}
-        \name{author}
-        \name{editor}
-        \name{translator}
-        \field{sorttitle}
-        \field{title}
-    }
-    \sort{
-        \field{sorttitle}
-        \field{title}
-    }
+\DeclareSortingTemplate{ddatent}{
+  \sort{
+    \field{presort}
+  }
+  \sort[final]{
+    \field{sortkey}
+  }
+  \sort[direction=descending]{
+    \field[strside=left,strwidth=4]{sortyear}
+    \field[strside=left,strwidth=4]{year}
+    \literal{9999}
+  }
+  \sort[direction=descending]{
+    \field[padside=left,padwidth=2,padchar=0]{month}
+    \literal{00}
+  }
+  \sort[direction=descending]{
+    \field[padside=left,padwidth=2,padchar=0]{day}
+    \literal{00}
+  }
+  \sort[direction=descending]{
+    \field[padside=left,padwidth=4,padchar=0]{volume}
+    \literal{9999}
+  }
+  \sort{
+    \field{sortname}
+    \field{author}
+    \field{editor}
+    \field{translator}
+    \field{sorttitle}
+    \field{title}
+  }
+  \sort{
+    \field{sorttitle}
+    \field{title}
+  }
 }
 
 % list of publications page
