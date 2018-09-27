@@ -187,6 +187,68 @@
 \usepackage{tocbibind}
 \renewcommand{\contentsname}{Table of Contents}
 
+% bibliography
+\usepackage[
+  style=ieee,
+  doi=false,
+  isbn=false,
+  giveninits=true,
+  dashed=false,
+  maxbibnames=10,
+]{biblatex}
+
+\DeclareSortingScheme{ddatent}{
+    \sort{
+        \field{presort}
+    }
+    \sort[final]{
+        \field{sortkey}
+    }
+    \sort[direction=descending]{
+        \field[strside=left,strwidth=4]{sortyear}
+        \field[strside=left,strwidth=4]{year}
+        \literal{9999}
+    }
+    \sort[direction=descending]{
+        \field[padside=left,padwidth=2,padchar=0]{month}
+        \literal{00}
+    }
+    \sort[direction=descending]{
+        \field[padside=left,padwidth=2,padchar=0]{day}
+        \literal{00}
+    }
+    \sort[direction=descending]{
+        \field[padside=left,padwidth=4,padchar=0]{volume}
+        \literal{9999}
+    }
+    \sort{
+        \name{sortname}
+        \name{author}
+        \name{editor}
+        \name{translator}
+        \field{sorttitle}
+        \field{title}
+    }
+    \sort{
+        \field{sorttitle}
+        \field{title}
+    }
+}
+
+% list of publications page
+\newcommand{\publications}[1]{%
+  \begingroup%
+  \renewcommand*{\mkbibnamegiven}[1]{\ifitemannotation{highlight}{\textbf{##1}}{##1}}
+  \renewcommand*{\mkbibnamefamily}[1]{\ifitemannotation{highlight}{\textbf{##1}}{##1}}
+    \defbibenvironment{publicationbib}{\itemize}{\enditemize}{\item}
+  \begin{refsection}[#1]
+    \nocite{*}
+    \newrefcontext[sorting=ddatent]
+    \printbibliography[title=List of Publications,heading=bibintoc,env=publicationbib]%
+  \end{refsection}
+  \endgroup%
+}
+
 % other packages
 \usepackage{indentfirst}
 \usepackage[inline]{enumitem}
