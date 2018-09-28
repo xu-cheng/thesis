@@ -10,6 +10,7 @@
 \usepackage{etoolbox}
 \usepackage{xifthen}
 \usepackage{xpatch}
+\usepackage{calc}
 
 % font settings
 \usepackage[utf8]{inputenc}
@@ -195,13 +196,13 @@
 \usepackage{tocvsec2}
 \renewcommand{\contentsname}{Table of Contents}
 \titlecontents{chapter}[0pt]{\addvspace{0.5ex}}%
-  {\bfseries\chaptername\space\thecontentslabel\quad}%
-  {\bfseries}%
+  {\bfseries\chaptername\space\thecontentslabel\quad\parbox[t]{\linewidth-\widthof{\chaptername\space\thecontentslabel\quad}-2.5em}}%
+  {\bfseries\parbox[t]{\linewidth-2.5em}}%
   {\bfseries\hfill\contentspage}
 \appto\appendix{%
   \titlecontents{chapter}[0pt]{\addvspace{0.5ex}}%
-    {\bfseries\appendixname\space\thecontentslabel\quad}%
-    {\bfseries}%
+    {\bfseries\appendixname\space\thecontentslabel\quad\parbox[t]{\linewidth-\widthof{\appendixname\space\thecontentslabel\quad}-2.5em}}%
+    {\bfseries\parbox[t]{\linewidth-2.5em}}%
     {\bfseries\hfill\contentspage}
     \addtocontents{toc}{\protect\setcounter{tocdepth}{0}}
     \bookmarksetup{openlevel=0}
