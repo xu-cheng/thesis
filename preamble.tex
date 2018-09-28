@@ -120,7 +120,7 @@
 \makeatletter%
 \newcommand{\supervisor}[1]{\gdef\@supervisor{#1}}
 \renewcommand{\maketitle}{%
-  \thispdfpagelabel{Title}
+  \thispdfpagelabel{Cover}
   \begin{titlepage}
     \centering%
     \bfseries%
@@ -139,6 +139,7 @@
     \vfill%
   \end{titlepage}
   \thispagestyle{empty}
+  \thispdfpagelabel{Cover}
 }
 \makeatother%
 
@@ -211,7 +212,7 @@
 
 % bibliography
 \usepackage[
-  style=ieee,
+  style=ieee-alphabetic,
   doi=false,
   isbn=false,
   giveninits=true,
