@@ -68,6 +68,7 @@
 % math related packages
 \usepackage{amsmath}
 \usepackage{amssymb}
+\let\emptyset\varnothing%
 \usepackage{amsfonts}
 \usepackage{mathrsfs}
 \usepackage{latexsym}
@@ -266,7 +267,7 @@
   \begingroup%
   \renewcommand*{\mkbibnamegiven}[1]{\ifitemannotation{highlight}{\textbf{##1}}{##1}}
   \renewcommand*{\mkbibnamefamily}[1]{\ifitemannotation{highlight}{\textbf{##1}}{##1}}
-    \defbibenvironment{publicationbib}{\itemize}{\enditemize}{\item}
+  \defbibenvironment{publicationbib}{\itemize}{\enditemize}{\item}
   \begin{refsection}[#1]
     \nocite{*}
     \newrefcontext[sorting=ddatent]
