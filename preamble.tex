@@ -47,24 +47,6 @@
 \usepackage{color}
 \usepackage[table,dvipsnames]{xcolor}
 
-% hyperref setting
-\usepackage{hyperref}
-\definecolor{linkcolor}{RGB}{128,23,31}
-\hypersetup{
-  unicode,
-  bookmarksnumbered=true,
-  bookmarksopen=true,
-  bookmarksopenlevel=3,
-  colorlinks=true,
-  allcolors=linkcolor,
-  linktoc=page,
-  plainpages=false,
-  pdfstartview={XYZ null null 1},
-  pdfpagemode={UseOutlines},
-  pdfpagelayout={OneColumn}
-}
-\usepackage{bookmark}
-
 % math related packages
 \usepackage{amsmath}
 \usepackage{amssymb}
@@ -106,6 +88,25 @@
 \declaretheorem[numberwithin=chapter]{lemma}
 \declaretheorem[numberwithin=chapter]{theorem}
 \declaretheorem[numberwithin=chapter,style=remark]{remark}
+
+% hyperref setting
+\usepackage{hyperref}
+\usepackage{cleveref}
+\definecolor{linkcolor}{RGB}{128,23,31}
+\hypersetup{
+  unicode,
+  bookmarksnumbered=true,
+  bookmarksopen=true,
+  bookmarksopenlevel=3,
+  colorlinks=true,
+  allcolors=linkcolor,
+  linktoc=page,
+  plainpages=false,
+  pdfstartview={XYZ null null 1},
+  pdfpagemode={UseOutlines},
+  pdfpagelayout={OneColumn}
+}
+\usepackage{bookmark}
 
 % chapter style
 \usepackage[compact]{titlesec}
