@@ -74,14 +74,14 @@
 \makeatletter
 % Ref: https://tex.stackexchange.com/a/62273
 \newenvironment{customlegend}[1][]{%
-    \begingroup
-    \csname pgfplots@init@cleared@structures\endcsname
-    \pgfplotsset{#1}
-    \def\addlegendimage{\csname pgfplots@addlegendimage\endcsname}
-    \def\addlegendentry{\csname pgfplots@addlegendentry\endcsname}
+  \begingroup
+  \csname pgfplots@init@cleared@structures\endcsname
+  \pgfplotsset{#1}
+  \def\addlegendimage{\csname pgfplots@addlegendimage\endcsname}
+  \def\addlegendentry{\csname pgfplots@addlegendentry\endcsname}
 }{%
-    \csname pgfplots@createlegend\endcsname
-    \endgroup
+  \csname pgfplots@createlegend\endcsname
+  \endgroup
 }%
 \makeatother
 
