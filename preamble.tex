@@ -67,6 +67,23 @@
 % figure related packages
 \usepackage{graphicx}
 \usepackage{tikz}
+\usetikzlibrary{backgrounds,calc,decorations.pathreplacing,fit,matrix,patterns,positioning,shapes,shapes.multipart}
+\usepackage{pgfplots}
+\usepackage[outline]{contour}
+\contourlength{1.8pt}
+\makeatletter
+% Ref: https://tex.stackexchange.com/a/62273
+\newenvironment{customlegend}[1][]{%
+    \begingroup
+    \csname pgfplots@init@cleared@structures\endcsname
+    \pgfplotsset{#1}
+    \def\addlegendimage{\csname pgfplots@addlegendimage\endcsname}
+    \def\addlegendentry{\csname pgfplots@addlegendentry\endcsname}
+}{%
+    \csname pgfplots@createlegend\endcsname
+    \endgroup
+}%
+\makeatother
 
 % table related packages
 \usepackage{array}
