@@ -1,3 +1,4 @@
 \setRGBcolorprofile{sRGB.icm}{sRGB}{sRGB from argyll-cms}{https://www.argyllcms.com/}
 \Title{Authenticated Query Processing in the Cloud}
 \Author{XU Cheng}
+\Keywords{Query Authentication\sep Query Processing\sep Aggregate Queries\sep Access Control\sep Distributed Systems\sep Data Integrity}
