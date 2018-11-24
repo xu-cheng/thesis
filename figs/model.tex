@@ -1,0 +1,11 @@
+\begin{tikzpicture}
+  \node [scale=1] (do) {\includegraphics{./figs/icons/database.eps}};
+  \node [scale=1,right=2cm of do](sp){\includegraphics{./figs/icons/server.eps}};
+  \node [scale=2,right=2cm of sp](client){\includegraphics{./figs/icons/user.eps}};
+  \draw[-latex] (do.east) -- (sp.west) node [midway,above,font=\scriptsize] {Data \& ADS};
+  \draw[-latex,transform canvas={yshift=0.5ex}] (client.west) -- (sp.east) node [midway,above,font=\scriptsize] {Queries};
+  \draw[-latex,transform canvas={yshift=-0.5ex}] (sp.east) -- (client.west) node [midway,below,font=\scriptsize] {Results \& VO};
+  \node [font=\footnotesize,below=0cm of sp](sp-label){\textbf{Services Provider (SP)}};
+  \node [font=\footnotesize] at (do |- sp-label) {\textbf{Data Owner (DO)}};
+  \node [font=\footnotesize] at (client |- sp-label) {\textbf{Clients}};
+\end{tikzpicture}

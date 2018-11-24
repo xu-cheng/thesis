@@ -226,7 +226,7 @@
 
 % bibliography
 \usepackage[
-  style=ieee-alphabetic,
+  style=ieee,
   doi=false,
   isbn=false,
   giveninits=true,
@@ -287,7 +287,8 @@
 }
 
 % other packages
-\usepackage{indentfirst}
 \usepackage[inline]{enumitem}
+\newlist{inlineenum}{enumerate*}{1}
+\setlist[inlineenum]{label=(\roman*),ref=(\roman*)} % chktex 36
 \usepackage[perpage]{footmisc}
 
