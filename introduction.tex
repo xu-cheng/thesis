@@ -12,7 +12,7 @@ With the recent advances in data-as-a-service (DaaS) and cloud computing, outsou
 
 In the field of query processing, query authentication has been studied by a large body of literature~\cite{10.1109/ICDE.2004.1320027,10.1145/1142473.1142488,10.1007/s00778-008-0113-2,10.1145/1880022.1880026,10.1145/2213836.2213871,10.1145/2463676.2465281,10.14778/2732219.2732224,10.1145/2664243.2664244,10.1145/2723372.2747649,10.1109/tkde.2014.2316818}. The fundamental concept is that the DO signs a well-designed \emph{authenticated data structure} (ADS) as notarization of the outsourced data. Based on the ADS, the SP then constructs a cryptographic proof, known as \emph{verification object} (VO), for each query, and returns it along with the query results for the client to verify.
 
-However, the prior works only consider to support primitive queries.
+However, the prior works only consider supporting limited query types. They fail to address a variety of needs demanded by enterprise customers. For example, aggregate queries over set-valued data used in data analytics play an important role in domains such as business decision making, scientific research, and government policy. Yet, the majority of the existing query authentication algorithms focus on relational or spatial data and their associated query types. Further, none of the existing solutions considers the data confidentiality requirement, which is often needed in order to protect business secrets, preserve user privacy, and conform regulations. Similarly, access control, another important security concern, is also largely ignored by the existing works. Finally, most of the existing studies on query authentication are confined to a centralized environment. Little research is conducted to investigate authenticated query processing in a distributed setting.
 
 To address these issues, in this dissertation, we take the first step to study three new problems, namely
 \begin{inlineenum}
@@ -23,10 +23,41 @@ To address these issues, in this dissertation, we take the first step to study t
 
 \section{Authenticating Aggregate Queries over Set-Valued Data}
 
+Aggregate query services over set-valued data are becoming widely available for business intelligence, scientific research, and government policy study. For example, personal genomics analysis (e.g., 23andMe and the Personal Genome Project (PGP) at Harvard Medical School~\cite{pgp}) is based on aggregate queries on large genome datasets, the integrity of whose results is vital. Below is one example:
+
+\begin{table}[t]
+  \centering
+  \begin{tabular}{ccl}
+    \toprule
+    \textbf{PID} & \textbf{ZIP} & \multicolumn{1}{c}{\textbf{Mut-Genes}}\\
+    \midrule
+    P1&95014&A-C130R, P-I696M\\
+    P2&20482&H-C282Y, P-P12A, R-G1886S \\
+    P3&95014&A-C130R, U-G71R, W-R611H\\
+    P4&01720&A-V2050L, H-C282Y, M-R52C, U-G71R\\
+    P5&20134&A-C130R, P-P12A, R-G1886S, S-E366K\\
+    P6&17868& C-R102G, R-G1886S\\
+    P7&55410&C-R102G, C-Q1334H, S-E288V\\
+    P8&20852&C-R102G, P-P12A, R-G1886S, K-T220M\\
+    \bottomrule
+  \end{tabular}
+  \caption{Set-Valued Genome Dataset}\label{tab:intro:sample_pgp}
+\end{table}
+
+\begin{example}[Aggregate Queries on PGP Data]~\label{example:intro:pgp}
+  \Cref{tab:intro:sample_pgp} shows a sample genome dataset, where \emph{PID} is participant ID, \emph{ZIP} is ZIP code, and \emph{Mut-Genes} is a sensitive set-valued attribute that records the mutation genes of each participant.The query clients (e.g., medical doctors) may be interested in the following aggregate queries:
+    \begin{itemize}[noitemsep]
+      \item \textbf{Q1}: Find the most common gene in the district of Cupertino, CA (ZIP\@: 95014).
+      \item \textbf{Q2}: Count the number of participants who carry the gene `R-G1886S'.
+      \item \textbf{Q3}: Find the most frequent genes with supports $\ge$ 3 in ZIPs 20***.
+    \end{itemize}
+    The corresponding query results are: \{`A-C130R'\}, 4, and \{`P-P12A', `R-G1886S'\}, respectively.
+\end{example}
+
 \section{Authenticating Relational Queries with Fine-Grained Access Control}
 
 \section{Authenticating {kNN} Queries in Distributed Environment}
 
 \section{Dissertation Outline}
 
-The rest of the dissertation is organized as follows. \Cref{chap:related-works} reviews existing studies. \Cref{chap:aggregate-queries} presents the authentication of aggregate queries over set-valued data. \Cref{chap:access-control} studies the authentication of relation queries with fine-grained access control. The authentication of kNN queries in distributed environment is investigated in \Cref{chap:knn}. Finally, the dissertation is concluded in \Cref{chap:conclusions}.
+The rest of the dissertation is organized as follows. \Cref{chap:related-works} reviews existing studies. \Cref{chap:aggregate-queries} presents the authentication of aggregate queries over set-valued data. \Cref{chap:access-control} studies the authentication of relation queries with fine-grained access control. The authentication of {kNN} queries in distributed environment is investigated in \Cref{chap:knn}. Finally, the dissertation is concluded in \Cref{chap:conclusions}.
