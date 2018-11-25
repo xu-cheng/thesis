@@ -1,0 +1,35 @@
+\begin{tikzpicture}
+    \tikzstyle{chain-node}=[
+        rectangle split,
+        rectangle split horizontal,
+        rectangle split ignore empty parts,
+        rectangle split parts=6,
+        draw
+    ]
+    \node[chain-node] (chain) {
+        \nodepart{one} $-\!\infty$
+        \nodepart{two} $o_1$
+        \nodepart{three} $o_2$
+        \nodepart{four} $o_3$
+        \nodepart{five} $o_4$
+        \nodepart{six} $+\!\infty$
+    };
+
+    \draw[decorate, decoration={brace}]
+    (chain.one north) -- coordinate (s1) (chain.three north);
+    \node[above=1pt of s1,font=\tiny] (s1-label) {$sig(-\!\infty|o_1|o_2)$};
+
+    \draw[decorate, decoration={brace,mirror}]
+    (chain.two south) -- coordinate[below=2pt] (s2) (chain.four south);
+    \node[below=6pt of s2,font=\tiny] (s2-label) {$sig(o_1|o_2|o_3)$};
+    \draw[-latex] (s2) -- (s2-label);
+
+    \draw[decorate, decoration={brace}]
+    (chain.three north) -- coordinate[above=2pt] (s3) (chain.five north);
+    \node[above=6pt of s3,font=\tiny] (s3-label) {$sig(o_2|o_3|o_4)$};
+    \draw[-latex] (s3) -- (s3-label);
+
+    \draw[decorate, decoration={brace,mirror}]
+    (chain.four south) -- coordinate (s4) (chain.six south);
+    \node[below=1pt of s4,font=\tiny] (s4-label) {$sig(o_3|o_4|+\!\infty)$};
+\end{tikzpicture}

@@ -1,0 +1,63 @@
+\begin{tikzpicture}
+    \tikzstyle{tree node}=[
+        rectangle split,
+        rectangle split horizontal,
+        rectangle split ignore empty parts,
+        draw
+    ]
+    \tikzstyle{tree}=[
+        every node/.style={tree node},
+        edge from parent path={},
+        level/.style={level distance=1cm},
+        level 2/.style={sibling distance=5cm},
+        level 3/.style={sibling distance=2.4cm},
+    ]
+
+    \path[tree] node (root) {$N_0 = H(N_1|N_2)$}
+    child {
+        node (l1) {
+            \nodepart{one} $N_1 = H(N_3|N_4)$ \nodepart{two} \contour{white}{$N_2 = H(N_5|N_6)$}
+        }
+        child {
+            node (l21) {
+                \nodepart{one} \contour{white}{$N_3 = H(o_1)$} \nodepart{two} $N_4 = H(o_2)$
+            }
+            child {node (o1) {$o_1$}}
+            child {node [fill=black!20, text=black] (o2) {$o_2$}}
+        }
+        child {
+            node (l22) {
+                \nodepart{one} $N_5 = H(o_3)$ \nodepart{two} $N_6 = H(o_4)$
+            }
+            child {node (o3) {$o_3$}}
+            child {node (o4) {$o_4$}}
+        }
+    };
+
+    \begin{pgfonlayer}{background}
+        \fill[pattern=north east lines,pattern color=blue!70]
+        (l21.north west) rectangle (l21.one split south);
+        \fill[pattern=north east lines,pattern color=blue!70]
+        (l1.one split north) rectangle (l1.south east);
+    \end{pgfonlayer}
+
+    \foreach \a/\b in {
+        root.south/l1,
+        l1.one south/l21,
+        l1.two south/l22,
+        l21.one south/o1,
+        l21.two south/o2,
+        l22.one south/o3,
+        l22.two south/o4%
+    }
+    \draw [style=edge from parent] (\a) -- (\b.north);
+
+    \node[tree node,right=0.8cm of root] (data) {$sig(N_0)$};
+    \draw[dashed,-latex] (data) -- (root);
+
+    \draw [red,rounded corners,thick]
+    let \p1 = ($(o2.south east -| l21.one split) - (0, 0.2)$),
+    \p2 = ($(o2.north west -| l21.east) + (0, 0.2)$) in
+    (\x1, \y1) rectangle (\x2, \y2)
+    node[xshift=-0.2cm, yshift=-0.2cm] {$Q$};
+\end{tikzpicture}
