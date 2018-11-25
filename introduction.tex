@@ -46,7 +46,7 @@ Aggregate query services over set-valued data are becoming widely available for 
 
 \begin{example}[Aggregate Queries on PGP Data]~\label{example:intro:pgp}
   \Cref{tab:intro:sample_pgp} shows a sample genome dataset, where \emph{PID} is participant ID, \emph{ZIP} is ZIP code, and \emph{Mut-Genes} is a sensitive set-valued attribute that records the mutation genes of each participant.The query clients (e.g., medical doctors) may be interested in the following aggregate queries:
-    \begin{itemize}[noitemsep]
+    \begin{itemize}
       \item \textbf{Q1}: Find the most common gene in the district of Cupertino, CA (ZIP\@: 95014).
       \item \textbf{Q2}: Count the number of participants who carry the gene `R-G1886S'.
       \item \textbf{Q3}: Find the most frequent genes with supports $\ge$ 3 in ZIPs 20***.
