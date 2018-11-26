@@ -93,7 +93,7 @@
 \usepackage{tabu}
 \usepackage{booktabs}
 \usepackage{multirow}
-\usepackage{makecell}
+\newcommand{\tabincell}[2]{\begin{tabular}{@{}#1@{}}#2\end{tabular}}
 
 % equation style
 \allowdisplaybreaks[4]

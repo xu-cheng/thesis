@@ -346,3 +346,196 @@ To guarantee the correctness of the selected candidate objects, the query authen
   \item The client first verifies the correctness of the returned results, that is, the grid boxes of all the result nodes are intersected with the query range while all the others are not. Then, the client verifies whether all these information is genuine by restoring the root digest. Specifically, the client recursively rebuilds the digests of leaf nodes and non-leaf nodes up to the root level. Finally, the client checks whether the restored digest matches the signature from the DO\@. If so, the client verifies that all the returned information is genuine. For example, in \Cref{fig:aggregate-queries:mg-tree:index}, the client first verifies $gb_7, gb_9, gb_{10}$ are intersected with the query range $[\alpha, \beta]$, while $gb_5, gb_6, gb_8$ are not. Next, the client rebuilds $dig_{7} = H(H(acc(X_5)) | H(acc(X_6)))$, $dig_{9} = H(H(acc(X_9)) | H(acc(X_{10})))$, $dig_{10} = H(H(acc(X_{11})) | H(acc(X_{12})))$, and then $dig_1 = H(gb_5|dig_5)$, $dig_2 = H(gb_6|dig_6|gb_7|dig_7)$, $dig_3 = H(gb_8|dig_8)$, $dig_4 = H(gb_9|dig_9|gb_{10}|dig_{10})$. And finally, the client restores $dig_0 = H(gb_1|dig_1|\cdots|gb_4|dig_4)$ and checks whether it matches $sig^{-1}(dig_0)$.
 \end{itemize}
 
+\subsection{Cost Analysis}\label{sec:aggregate-queries:cost}
+In this section, we analyze the performance of PA$^2$ framework. Specifically, we derive cost models for the privacy-preserving authentication protocols on multiset operations, the aggregate query authentication algorithms, and the MG-tree, respectively.
+
+\subsubsection{Cost Model for Authentication Protocols on Multiset Operations}
+
+\begin{table}
+  \resizebox{\linewidth}{!}{%
+    \begin{tabular}{llll}
+      \toprule
+      \textbf{Operation} & \textbf{SP Time} & \textbf{Client Time} & \textbf{VO Size} \\
+      \midrule
+      $sub(X_1, X_2)$ & $C_{sub}^{S}=(|X_2| - |X_1|) \cdot \log_2(p) \cdot C_{gp}$ & $C_{sub}^C= C_{e}$ &  $M_{sub} = 3M_{acc}$ \\
+      $sum(\{X_1, \dots, X_n\})$ & $C_{sum}^S = \sum_{i=1}^n (i \cdot |X_i|) \cdot \log_2(p) \cdot C_{gp}$ & $C_{sum}^C=n \cdot C_e$ & $M_{sum} = 2n \cdot M_{acc}$ \\
+      $empty(\{X_1, \dots, X_n\})$ & $C_{empty}^S = \max_{i=1}^n (|X_i|) \cdot \log_2(p) \cdot C_{gp}$ & $C_{empty}^C=n \cdot C_e$ & $M_{empty} = 2n \cdot M_{acc}$ \\
+      $union(\{X_1, \dots, X_n\})$  &
+      \tabincell{@{}r@{$\,$}l@{}}{
+      $C_{union}^S =$ & $((n + 1) \cdot |U| - \sum_{i=1}^n |\widehat{X}_i|$ \\
+                      & $+ \max_{i=1}^n|\widehat{X}_i|) \cdot \log_2(p) \cdot C_{gp}$
+                    }
+                      & $C_{union}^C = (2n + 1)\cdot C_e$ &  $M_{union} = (5n +1)\cdot M_{acc}$ \\
+      $times(X, t)$  & $C_{times}^S = 2t \cdot |X| \cdot \log_2(p) \cdot C_{gp}$ & $C_{times}^C =2 \log_2(t) \cdot C_e$ &  $M_{times} = 2 \log_2(t) \cdot M_{acc}$ \\
+      \bottomrule
+  \end{tabular}}
+  \caption{Cost Models for Multiset Operations}\label{tab:aggregate-queries:cost-model-set}
+\end{table}
+
+\Cref{tab:aggregate-queries:cost-model-set} summarizes the time costs for the SP and client, as well as the VO size for the five core privacy-preserving authentication protocols on multiset operations (\Cref{sec:aggregate-queries:multiset-op}). In this table, $n$ is the total number of objects, $t$ is the second operand for $times(\cdot,\cdot)$, $C_{e}$ is the time cost of a bilinear pairing operation, $C_{gp}$ is the time cost of a multiplication operation in cyclic multiplicative group $\mathbb{G}$ with order $p$, $|U|$ is the size of union set, and $M_{acc}$ is the size of an accumulative value.
+
+\subsubsection{Cost Model for Aggregate Query Authentication Algorithms}
+Based on the above analysis, we now derive the cost models for various aggregate queries. Let $m$ be the number of candidate objects, $|S|$ be the size of the sum set, $|\widehat{R}|$ be the size of set $\widehat{R}$, $|X_i|$ be the size of the feature set for the $i^{th}$ candidate object, and $\tau$ be the top-$k^{th}$ (top-1 for a \emph{max} query) multiplicity.
+
+\textbf{Count/Sum Aggregate Query.}
+The time cost for the SP is:
+\begin{align*}
+  C_{count}^S &= C_{sum}^S + C_{sub}^S + C_{empty}^S \nonumber \\
+              &= ( \sum_{i=1}^m(i \cdot |X_i|) + |S| - |R| \nonumber\\
+              &\quad + \max(|S-R|, |R|)) \cdot \log_2(p) \cdot C_{gp}.
+\end{align*}
+
+The time cost for the client is:
+\begin{align*}
+  C_{count}^C &= C_{sum}^C + C_{sub}^C + C_{empty}^C + |R| \cdot \log_2(p) \cdot C_{gp} \nonumber \\
+              &= (2m + 1) \cdot C_e  + |R| \cdot \log_2(p) \cdot C_{gp}.
+\end{align*}
+
+The VO size, i.e., the communication cost, is:
+\begin{align*}
+  M_{count} &= M_{sum} + M_{sub} + M_{empty}\nonumber  \\
+            & =  (4m + 3) \cdot M_{acc}.
+\end{align*}
+
+\textbf{Max/Min/FFQ/Top-$k$ Aggregate Query.}
+The time cost for the SP is:
+\begin{align*}
+  C_{max}^S &= C_{sum}^S + 3 C_{sub}^S + C_{empty}^S + C_{union}^S + C_{times}^S \nonumber \\ % chktex 35
+            &=(\sum_{i=1}^m ( i \cdot |X_i|) + (m+2+2\tau)|U| + max(|S-R|, |R|)\nonumber\\ % chktex 35
+            &\quad  + max_{i=1}^n|\widehat{X}_i| - (1 + \tau) |\widehat{R}|- \sum_{i=1}^n|\widehat{X}_i|) \cdot \log_2(p) \cdot C_{gp}. % chktex 35
+\end{align*}
+
+The time cost for the client is:
+\begin{align*}
+  C_{max}^C &= C_{sum}^C + 3 C_{sub}^C + C_{empty}^C + C_{union}^C + C_{times}^C \nonumber\\ % chktex 35
+            &\quad + (|R| + |\widehat{R}|) \cdot \log_2(p) \cdot C_{gp}\nonumber \\
+            &= (3m + 6 + 2\log_2(\tau)) \cdot C_e + (|R| + |\widehat{R}|) \cdot \log_2(p) \cdot C_{gp}.
+\end{align*}
+
+The VO size, i.e., the communication cost, is
+\begin{align*}
+  M_{max} &= M_{sum} + 3 M_{sub} + M_{empty} + M_{union} + M_{times}\nonumber  \\ % chktex 35
+          & =  (7m + 14 + 2 \log_2 (\tau)) \cdot M_{acc}.
+\end{align*}
+
+A key observation from the above analysis is that both the client time cost and the VO size are determined only by the result set size and are independent of the number of sensitive features.
+
+\subsubsection{Cost Model for Candidate Object Selection}
+We next analyze the cost of the candidate object selection. Our analysis starts with the MG-tree size, based on which we derive the VO construction and verification costs for a range selection. Without loss of generality, the data space is a $d$-dimensional unit space ${[0,1]}^d$, and we assume each non-sensitive attribute independently follows a uniform distribution. As such, the MG-tree partitions each dimension equally and the height of the tree can be approximated as $w=\lceil \log_{2^d}(\frac{n}{f})\rceil$, where $n$ is the total number of objects and $f$ is the minimum number of objects in a leaf node.
+
+\textbf{MG-tree size.} Each tree node stores a grid box (represented by two $d$-dimensional corner points) and a digest. As such, the size of a node, in terms of bytes, is:
+\begin{align*}
+  M_{N} = 2 \cdot d \cdot 4 + M_h,
+\end{align*}
+where $M_h$ is the size of a hash value.
+
+Besides the tree nodes, the server stores all leaf entries (i.e., objects). Let $M_{acc}$ denote the size of an accumulative value; then the total size of an MG-tree is:
+\begin{equation*}
+  M_{MG} = 2 \cdot n \cdot M_{acc} +  \sum\nolimits_{i=0}^{w-1} \min(n, 2^{i \cdot d}) \cdot M_{N}.
+\end{equation*}
+
+\textbf{Construction cost of VO.} According to~\cite{10.1145/153850.153878}, the probability that two random rectangles $R_1, R_2$ overlap is:
+\begin{equation}
+  {\Pr}_{overlap}(R_1, R_2)= \prod\nolimits_{j=1}^d(R_1.L_j + R_2.L_j),
+  \label{eqn:aggregate-queries:inter_pro}
+\end{equation}
+where $R_i.L_j$ is the length of $R_i$ in dimension $j$. Since both the MG-tree partition and object distribution are uniform, the lengths of an intermediate entry at level $i$ and a leaf entry are $2^{-i}$ and $\sqrt[d]{k/n}$, respectively. Putting them into \Cref{eqn:aggregate-queries:inter_pro}, the numbers of visited tree nodes $N_n$ and visited leaf entries $N_e$ are:
+\begin{align*}
+  N_n &= \sum_{i=0}^{w-1} 2^{i\cdot d}\prod_{j=1}^d(2^{-i}+Q.L_j), \\
+  N_e &= n\cdot\prod_{j=1}^d(\sqrt[d]{\frac{k}{n}}+Q.L_j),
+\end{align*}
+respectively. Let $C_{\otimes}$ denote the time cost of accessing a single entry or a single node. The cost of constructing the VO is modeled as:
+\begin{equation*}
+  C_{pre} = (N_n + N_e) \cdot C_{\otimes}.
+\end{equation*}
+
+\textbf{VO size (communication cost).} A VO includes three parts:
+\begin{inlineenum}
+\item the grid boxes of all intersected leaf nodes and accumulative values of leaf entries, i.e., $\frac{N_e}{k} \cdot 8 \cdot d + N_e \cdot M_{acc}$;
+\item the grid boxes and digests of all boundary nodes, i.e., $N_e \cdot w \cdot (2^d - 1)$;
+\item the signature of tree root's digest, i.e., $M_{sig}$.
+\end{inlineenum}
+As such, the communication cost of the VO is:
+\begin{equation*}
+  M_{VO} = 8d \frac{N_e}{k}  + N_e \cdot M_{acc} + N_e \cdot w (2^d-1) (8d + M_h) +  M_{sig}.
+\end{equation*}
+
+\textbf{Client verification time cost.} The client verifies the VO by first reconstructing the MG-tree, and then checks the signature:
+\begin{equation*}
+  C_{ver} = (N_n + N_e) \cdot C_{h} + C_{sig},
+\end{equation*}
+where $C_{h}, C_{sig}$ are the time costs of calculating a hash value and verifying a signature, respectively.
+
+\section{Security Analysis}\label{sec:aggregate-queries:security-analysis}
+
+In this section, we perform a security analysis on our PA$^2$ algorithms for aggregate queries.
+
+\subsection{Security of PA$^2$ Algorithms}
+
+The correctness of our PA$^2$ algorithms is defined in the natural way and is omitted. For soundness, it can be formally defined as follows:
+
+\begin{definition}[Soundness]\label{def:aggregate-queries:sound}
+  The PA$^2$ authentication algorithms for aggregate queries are sound if for all PPT adversaries, the success probability is negligible in the following experiment:
+  \begin{itemize}
+    \item The adversary picks a dataset $\mathbb{D}$.
+    \item Run the ADS generation on $\mathbb{D}$ and forward to the adversary.
+    \item The adversary outputs a query $Q$, a result $R$, and a VO\@.
+  \end{itemize}
+  We say the adversary succeeds if the VO passes the result verification and $ R \neq Q(\mathbb{D})$.
+\end{definition}
+
+We now show that the PA$^2$ authentication algorithms indeed satisfy the desired security requirements.
+
+\begin{restatable}{theorem}{thm:aggregate-queries:sec}
+  The PA$^2$ authentication algorithms for aggregate queries guarantee the correctness and soundness of the query results under the bilinear $q$-strong Diffie-Hellman assumption.
+\end{restatable}
+
+\begin{proof}
+  The theorem is proved by proving the security of each multiset operation: $sub(\cdot,\cdot)$, $empty(\cdot)$, $sum(\cdot)$, $union(\cdot)$, and $times(\cdot,\cdot)$. See \Cref{app:aggregate-queries} for more detailed proofs.
+\end{proof}
+
+\subsection{Privacy Guarantee on Sensitive Features}
+
+Next, we analyze the privacy guarantee on the sensitive features in our PA$^2$ framework. Specifically, we show that the accumulative value of a feature set does not disclose any feature information to the client. Formally, it is stated as follows:
+
+\begin{definition}[IND-CPA]\label{def:aggregate-queries:ind}
+  The augmented accumulative value $acc(X)$ for a multiset $X$ is indistinguishable if for all PPT adversaries, there exists a negligible probability $neg(q)$, s.t.
+  \begin{align*}
+    \Pr[& \textsf{Adv} \to \{X_1, X_2 ,st\}; b \to \{0, 1\}; \\
+        & acc(X_b) \to c; \textsf{Adv}(st, c) \to b'; b = b'] = \frac{1}{2} + neg(q).
+  \end{align*}
+\end{definition}
+
+Before showing the indistinguishability of accumulative values,  we start with the following lemma on the group $\mathbb{G}$.
+
+\begin{lemma}
+  For any random value $r \leftarrow \mathbb{Z}_p$, $g^r$ has an equal probability of being any element in $\mathbb{G}$ (with an order of $p$). Formally, for any $\hat g \in \mathbb{G}$,
+  \begin{align*}
+  \Pr[g^r = \hat g] = 1 / p.
+  \end{align*}
+\end{lemma}
+\begin{proof}
+  Let $\log_g(\cdot)$ denote the discrete logarithm of base $g$ in group $\mathbb{G}$. We have
+  \begin{align*}
+  \Pr[g^r = \hat g] = \Pr[r = \log_g(\hat g)].
+  \end{align*}
+  Since $r$ is random, the probability of $r$ being a fixed element $\log_g(\hat g)$ equals $1/p$.
+\end{proof}
+
+Now we show a theorem on the security of accumulative values.
+\begin{theorem}\label{thm:aggregate-queries:cpa}
+  The augmented accumulative value $acc(X)$ for a multiset $X$ is indistinguishable under chosen plaintext attack (CPA).
+\end{theorem}
+\begin{proof}
+  Since the augmented accumulative value $acc(X)=g^{P(X) \cdot r_X} = {(g ^ {P(X)})}^{r_X}$, according to the above lemma, $acc(X)$ has an equal probability of being any element in $\mathbb{G}$. As such, the verifier learns nothing about $P(X)$ and any element $x_i \in X$. Further, since $r_X$ is random for each $X$, $acc(X)$ is indistinguishable under CPA\@.
+\end{proof}
+
+It is worth noting that by achieving indistinguishability on a single accumulative value, multiple accumulative values are automatically guaranteed to be indistinguishable.
+Therefore, the above theorem effectively proves the security of the authentication algorithms developed for various primitive aggregate queries, as only (indistinguishable) accumulative values are disclosed for the sensitive features throughout the authentication process, which protects the confidentiality of source data.
+
+\subsection{Discussion on Privacy Guarantee}
+It is noteworthy that during the authentication of aggregate queries, the results of primitive aggregate queries are disclosed to the client, which might be a source of privacy leak. In an extreme case, if there is only one candidate object in the selection phase, the query result could directly reveal the features of that object. Further, the difference of two query results could reveal the features of the difference of the two candidate object sets. As more aggregate queries are issued and each may consist of multiple primitive aggregate queries, it becomes easier to find smaller difference of candidate object sets. To mitigate such privacy leak, inspired by the bucketization approach~\cite{ppdp09}, we impose a minimum granularity on the MG-tree leaf nodes for the non-sensitive attributes. Specifically, when building the MG-tree, the DO enforces each leaf node (i.e., a bucket) to contain a minimum number of objects that can satisfy a given privacy metric (e.g., $k$-anonymity or $t$-closeness~\cite{Samarati98, Li2007}). As such, the data space is partitioned into disjoint buckets, and upon query processing, a bucket is the smallest granule for range selection. With this enforcement, no query result can reveal whether it is contributed by a specific object in a bucket, and the latter becomes the smallest granule of result privacy leak, no matter how many aggregate queries are issued. Formally, the results of aggregate queries and the associated authentication process achieve the following \emph{bucket-wise indistinguishability} privacy:
+\begin{definition}[Bucket-wise Indistinguishability]\label{def:aggregate-queries:k-anony}
+  Given a bucket $\mathcal{B}$ and an object $o\in\mathcal{B}$, if an aggregate query result $R$ is from a candidate object set $\mathcal{O}\supseteq \mathcal{B}$, then any adversary can determine whether $o$ contributes to $R$ with a success rate no higher than that of a random guess.
+\end{definition}
+
