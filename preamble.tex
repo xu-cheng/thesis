@@ -98,6 +98,22 @@
 % equation style
 \allowdisplaybreaks[4]
 \numberwithin{equation}{chapter}
+\newcommand{\setdisplayskip}{%
+  \abovedisplayskip=0.25\baselineskip plus 0.05\baselineskip minus 0.125\baselineskip% chktex 1
+  \abovedisplayshortskip=0pt plus 0.075\baselineskip% chktex 1
+  \belowdisplayskip=0.25\baselineskip plus 0.05\baselineskip minus 0.125\baselineskip% chktex 1
+  \belowdisplayshortskip=0.15\baselineskip plus 0.075\baselineskip minus 0.075\baselineskip% chktex 1
+}
+\apptocmd\Huge{\setdisplayskip}{}{}
+\apptocmd\huge{\setdisplayskip}{}{}
+\apptocmd\LARGE{\setdisplayskip}{}{}
+\apptocmd\Large{\setdisplayskip}{}{}
+\apptocmd\large{\setdisplayskip}{}{}
+\apptocmd\normalsize{\setdisplayskip}{}{}
+\apptocmd\small{\setdisplayskip}{}{}
+\apptocmd\footnotesize{\setdisplayskip}{}{}
+\apptocmd\scriptsize{\setdisplayskip}{}{}
+\apptocmd\tiny{\setdisplayskip}{}{}
 
 % theorem style
 \usepackage{amsthm}
