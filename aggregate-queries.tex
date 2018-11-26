@@ -293,3 +293,56 @@ By fusing multiple primitive aggregate queries, we can further extend our algori
 
 It is noteworthy that as authenticating the above advanced aggregate queries is always reduced to authenticating a set of primitive aggregate queries, the results of those primitive queries are needed by the client to complete the verification chain and are thus not kept confidential. Nevertheless, the confidentiality of source data is still preserved by the privacy-preserving authentication algorithms. Finally, we remark that a multi-feature aggregate query can be supported by treating a multi-feature set as a unique (virtual) feature.
 
+\subsection{Privacy-Preserving Authentication on Candidate Object Selection}\label{sec:aggregate-queries:grid}
+
+\begin{figure}[t]
+  \centering
+  \begin{subfigure}[b]{.5\linewidth}
+    \centering
+    \includegraphics[width=\linewidth]{figs/aggregate-queries/pyramid.eps}
+    \caption{Structure}\label{fig:aggregate-queries:mg-tree:structure}
+  \end{subfigure}~%
+  \begin{subfigure}[b]{0.5\linewidth}
+    \centering
+    \includegraphics[width=.8\linewidth]{figs/aggregate-queries/grid_tree.eps}
+    \caption{Index}\label{fig:aggregate-queries:mg-tree:index}
+  \end{subfigure}
+  \caption{Merkle Grid Tree (MG-tree)}\label{fig:aggregate-queries:mg-tree}
+\end{figure}
+
+Now we turn back to the first phase, i.e., processing and authenticating the candidate object selection. Without loss of generality, we assume that the objects are indexed by a grid structure on their non-sensitive attributes. Thus, we propose \emph{Merkle Grid tree} (MG-tree), an ADS for the DO to construct and sign. Note that our technique can be easily adapted to other multi-dimensional index structures such as R-tree and kd-tree.
+
+\Cref{fig:aggregate-queries:mg-tree:structure} shows a multi-layer grid system, which partitions the space of non-sensitive attributes recursively into multiple levels of grid cells until each cell contains no more than two objects. The bounding box of each cell is called a grid box, and is denoted by $gb$. \Cref{fig:aggregate-queries:mg-tree:index} shows the corresponding MG-tree for the objects in \Cref{fig:aggregate-queries:mg-tree:structure}. Every node $N_i$ corresponds to a non-empty grid cell. Its grid box is denoted by $gb_i$, and has a digest (denoted by $dig_i$) that is computed from its $C$ child entries, $c_1, \dots, c_C$, as follows:
+
+\begin{definition}[Digest for Non-Leaf Node]
+  Let $H(\cdot)$ be a cryptographic hash function and `$|$' denote string concatenation. The digest of a non-leaf node is defined as:
+  \begin{align*}
+    dig_i = H(gb_{c_1} | dig_{c_1} | \cdots | gb_{c_C} | dig_{c_C} ).
+  \end{align*}
+\end{definition}
+For example, in \Cref{fig:aggregate-queries:mg-tree:index}, the digest of node $N_2$, $dig_2 = H(gb_6 | dig_6$ $| gb_7 | dig_7)$.
+
+Now we define the digest of a leaf node based on the $acc$ values of leaf entries.
+\begin{definition}[Digest for Leaf Node]
+  The digest of a leaf node is defined as:\footnote{In fact, the digest also includes $H(acc(\widehat{X}_{c_1}))|\cdots|H(acc(\widehat{X}_{c_C}))$, where $\widehat{X}_{c_i}$ is the set version of a multiset $X_{c_i}$. These $acc$ values are needed for the $union(\cdot)$ protocol in \Cref{sec:aggregate-queries:multiset-op} but omitted for clarify of presentation.}
+  \begin{align*}
+    dig_i = H(H(acc(X_{c_1})) | \cdots | H(acc(X_{c_C})) ),
+  \end{align*}
+  where $acc(X_i)$ is the accumulative value of the feature set of object $X_i$ (defined in \Cref{eqn:aggregate-queries:random-bm}).
+\end{definition}
+For example, for leaf node $N_5$, its digest ${dig}_5 = H(H(acc(X_1)) | H(acc(X_2)))$. Note that this digest does not need any information about objects' non-sensitive attributes $A_i$, because the digest of its parent node already proves that this object is in its grid box.\footnote{For simplicity, in this paper we assume that the query range aligns with the grid boxes. Otherwise, the definition can be easily extended to include $A_i$ in the digests of leaf nodes.} With these definitions, the DO can compute the $acc$ values of all feature sets and the digests of all nodes in the MG-tree recursively in a bottom-up fashion. The digest of the root entry $dig_0$ is signed by the DO as $sig(dig_0)$.
+
+On the SP side, the processing of a range query $[\alpha, \beta]$ starts from the root node. If a non-leaf node intersects the query range $[\alpha, \beta]$, it will be branched, i.e., its subtree is further explored. On the other hand, if a leaf node intersects the query range $[\alpha, \beta]$, all its entries will be returned as query results. \Cref{fig:aggregate-queries:mg-tree:structure} illustrates an example where $N_0, N_1, \dots, N_{10}$ are nodes and $o_1, o_2, \dots, o_{12}$ are objects, i.e., leaf entries. Since the root node $N_0$ intersects with the range $[\alpha, \beta]$, it will be branched and then non-leaf nodes $N_2, N_4$ are also branched. After that, leaf nodes $N_7, N_{9}, N_{10}$ intersect the query range, and all the leaf entries $\{o_5, o_6, o_{9}, o_{10}, o_{11}, o_{12}\}$ are returned as results, i.e., the selected candidate objects for the next phase of aggregate query processing.
+
+To guarantee the correctness of the selected candidate objects, the query authentication protocol on the MG-tree is as follows:
+\begin{itemize}
+  \item The SP prepares a VO and sends it to the client. The VO includes:
+    \begin{inlineenum}
+    \item the grid boxes of all intersected leaf nodes and the accumulative $acc$ values of their leaf entries;
+    \item the grid boxes and the digests of all other visited (but not intersected by the query) nodes;
+    \item the signature of the root's digest.
+    \end{inlineenum}
+    For example, in \Cref{fig:aggregate-queries:mg-tree:index}, the VO (marked as grey) includes $\{gb_5$, $dig_5$, $gb_6$, $dig_6$, $gb_7$, $acc(X_5)$, $acc(X_6)$, $gb_8$, $dig_8$, $gb_{9}$, $acc(X_9)$, $acc(X_{10})$, $gb_{10}$, $acc(X_{11})$, $acc(X_{12})$, $sig(dig_0)\}$.
+  \item The client first verifies the correctness of the returned results, that is, the grid boxes of all the result nodes are intersected with the query range while all the others are not. Then, the client verifies whether all these information is genuine by restoring the root digest. Specifically, the client recursively rebuilds the digests of leaf nodes and non-leaf nodes up to the root level. Finally, the client checks whether the restored digest matches the signature from the DO\@. If so, the client verifies that all the returned information is genuine. For example, in \Cref{fig:aggregate-queries:mg-tree:index}, the client first verifies $gb_7, gb_9, gb_{10}$ are intersected with the query range $[\alpha, \beta]$, while $gb_5, gb_6, gb_8$ are not. Next, the client rebuilds $dig_{7} = H(H(acc(X_5)) | H(acc(X_6)))$, $dig_{9} = H(H(acc(X_9)) | H(acc(X_{10})))$, $dig_{10} = H(H(acc(X_{11})) | H(acc(X_{12})))$, and then $dig_1 = H(gb_5|dig_5)$, $dig_2 = H(gb_6|dig_6|gb_7|dig_7)$, $dig_3 = H(gb_8|dig_8)$, $dig_4 = H(gb_9|dig_9|gb_{10}|dig_{10})$. And finally, the client restores $dig_0 = H(gb_1|dig_1|\cdots|gb_4|dig_4)$ and checks whether it matches $sig^{-1}(dig_0)$.
+\end{itemize}
+
