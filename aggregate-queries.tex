@@ -232,7 +232,7 @@ To verify this result $R$, we design \Cref{alg:aggregate-queries:sum} for the cl
 In the running example, the sum set of the candidate objects' features is $S= \{(a,6)$, $(b, 1)$, $(c, 4)$, $(d, 3)$, $(e, 2)\}$. So the client needs to perform:
 \begin{itemize}
   \item Inflation checking: $\{(a, 6)\} \subseteq \{(a,6)$, $(b, 1)$, $(c, 4)$, $(d, 3)$, $(e, 2)\}$;
-  \item Deflation checking: $\{(b, 1), (c, 4), (d, 3), (e, 2)\} \cap \{(a, 6)\}\allowbreak = \emptyset$.
+  \item Deflation checking: $\{(b, 1), (c, 4), (d, 3), (e, 2)\} \cap \{(a, 6)\} = \emptyset$.
 \end{itemize}
 
 Similarly, the output of a $count$ query $count(x_q)$ is the number of the candidate objects that have the query feature $x_q$. It can be processed similarly to the $sum$ query, except that the multiplicity of each feature is enforced as $1$.
@@ -254,7 +254,8 @@ The output of a $max$ query is the feature with the highest (i.e., top-$1$) mult
   \label{alg:aggregate-queries:max:2}
   Execute $sub(R, S)$ to get verified $acc(S - R)$ \tcp*{implies $R \subseteq S$}%
   \label{alg:aggregate-queries:max:3}
-  Execute $empty(S-R, R)$ to verify $(S - R) \cap R = \emptyset$\footnotemark[\getrefnumber{fn:aggregate-queries:skip-deflation}]\;%
+  Execute $empty(S-R, R)$ to verify $(S - R) \cap R = \emptyset$%
+  \hyperlink{fn:aggregate-queries:skip-deflation}{\footnotemark[\getrefnumber{fn:aggregate-queries:skip-deflation}]}\;%
   \label{alg:aggregate-queries:max:4}
   Execute $union(\{X_1, \dots, X_m\})$ to get verified $acc(U)$\;%
   \label{alg:aggregate-queries:max:5}
@@ -269,7 +270,8 @@ The output of a $max$ query is the feature with the highest (i.e., top-$1$) mult
 In the running example, the sum set is $S = \{(a, 6), (b, 1), (c, 4), (d, 3), (e, 2)\}$ and the union set is $U = \{(a, 1), (b, 1), (c, 1), (d, 1), (e, 1)\}$. So the client needs to perform:
 \begin{itemize}
   \item Inflation checking: $\{(a, 6)\}\subseteq \{(a, 6), (b, 1), (c, 4), (d, 3), (e, 2)\}$;
-  \item Deflation checking: $\{(b, 1), (c, 4), (d, 3), (e, 2)\} \cap \{(a, 6)\}\allowbreak = \emptyset$;\footnotemark[\getrefnumber{fn:aggregate-queries:skip-deflation}]
+  \item Deflation checking: $\{(b, 1), (c, 4), (d, 3), (e, 2)\} \cap \{(a, 6)\} = \emptyset$;%
+    \hyperlink{fn:aggregate-queries:skip-deflation}{\footnotemark[\getrefnumber{fn:aggregate-queries:skip-deflation}]}
   \item Completeness checking: $\{(b, 1), (c, 4), (d, 3), (e, 2)\} \subseteq \{(b, 6), (c, 6), (d, 6), (e, 6)\}$.
 \end{itemize}
 
