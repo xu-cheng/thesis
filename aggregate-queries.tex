@@ -1,1 +1,109 @@
 \chapter{Authenticating Aggregate Queries over Set-Valued Data}\label{chap:aggregate-queries}
+
+In this chapter, we investigate the problem of authenticating aggregate queries over set-valued data.
+
+\section{Problem Formulation}\label{chap:aggregate-queries:problem}
+
+A DO owns a dataset $\mathbb{D} = \{o_1, o_2, \dots, o_n\}$. Each object $o_i$ is represented by $\langle A_i, X_i \rangle$, where $A_i$ is a set of non-sensitive attributes, and $X_i$ is a sensitive multiset of \emph{features} (hereafter called \emph{feature set}). The DO outsources $\mathbb{D}$ to SP, together with an ADS signed with the DO's private key. Based on this, the SP provides aggregate query services to clients (e.g., \textbf{Q1} and \textbf{Q2}, and \textbf{Q3} in \Cref{example:intro:pgp}).
+
+\textbf{Multiset Operations.} A multiset is a generalization of a set in which elements are allowed to occur more than once~\cite{TAOCP}. The number of occurrences is called the \emph{multiplicity} of an element. For instance, in multiset $\{a, a, b\}$, $a$ has a multiplicity of $2$ and $b$ has a multiplicity of $1$. The multiset is order insensitive, so it can be represented as a set of pairs $(x, \eta)$ where $x$ is an element and $\eta$ is its multiplicity. The above multiset $\{a,a,b\}$ can thus be rewritten as $\{(a,2), (b,1)\}$.
+The most important operations in a multiset are \emph{union} and \emph{sum}, denoted as $\cup$ and $\uplus$, respectively. The \emph{union} operation on multisets is exactly the same as that on regular sets --- it simply unifies two multisets and sets the multiplicity of each element to 1. For instance, given multisets $X_1 = \{(a, 2), (b,1)\}, X_2 = \{(b,1), (c, 2)\} $, we have $X_1 \cup X_2 = \{(a,1)$, $(b,1)$, $(c,1)\}$. In contrast, the \emph{sum} operation sets the multiplicity of each element as the sum of multiplicities in the original multisets. For instance, given the same multisets as above, we have $X_1 \uplus X_2 = \{(a, 2)$, $(b, 2)$, $(c, 2)\}$.
+
+\begin{figure}[t]
+  \centering
+  \begin{subfigure}[b]{.5\linewidth}
+    \centering
+    \includegraphics[width=.7\linewidth]{figs/aggregate-queries/example-object.eps}
+    \caption{Objects}\label{fig:aggregate-queries:example:object}
+  \end{subfigure}~%
+  \begin{subfigure}[b]{.5\linewidth}
+    \centering
+    \includegraphics[width=.9\linewidth]{figs/aggregate-queries/example-feature.eps}
+    \caption{Features}\label{fig:aggregate-queries:example:feature}
+  \end{subfigure}
+  \caption{Example of Aggregate Queries}\label{fig:aggregate-queries:example}
+\end{figure}
+
+\textbf{Aggregate Queries.} Since the results of aggregate queries are derived from aggregates of data, our study mainly focuses on the following primitive aggregate queries: \emph{max/min}, \emph{count}, \emph{sum}, \emph{top-$k$}, and \emph{frequent feature query (FFQ)}.\footnote{Extension to other more advanced aggregate queries such as \emph{average} and \emph{confidence} will be discussed in \Cref{sec:aggregate-queries:extension}.}  More specifically,  an aggregate query can be expressed in the form of $Q = (q, \{x_i\}, [\alpha, \beta])$, where $q$ is the aggregate operator, $\{x_i\}$ is the queried feature (which is only needed for \emph{count} and \emph{sum}), and $[\alpha, \beta]$ specifies the selection range on the non-sensitive attributes. Consider a sample query $Q = (q, \{x_i\}, [\alpha, \beta])$ in \Cref{fig:aggregate-queries:example}. The query range $[\alpha, \beta]$ selects the objects $o_5, o_6, o_9, o_{10}, o_{11}, o_{12}$. Since $X _5 \uplus X_6 \uplus X_9 \uplus X_{10} \uplus X_{11} \uplus X_{12} = \{(a, 6), (b, 1), (c, 4), (d, 3), (e, 2)\}$, the query result is based on the aggregate operator $q$, as follows:
+\begin{itemize}
+  \item $q=sum$ or $count$: This sums or counts the multiplicities of $\{x_i\}$ in all selected objects. Supposing $\{x_i\} = \{a\}$, the $sum$ and $count$ results are $(a, 6)$ and $(a, 4)$, respectively.\footnote{The $sum$ and $count$ results will be the same if there are no duplicate elements in the feature sets.}
+  \item $q=max$ or $min$: This selects the feature with the maximum or minimum summed multiplicity in all selected objects. If $q=max$, the result is $(a, 6)$; if $q=min$, the result is $(b, 1)$. % chktex 35
+  \item $q=$ \emph{top-$k$}: This selects the top-$k$ features with the largest summed multiplicities in all selected objects. Supposing $k$ = 3, the result is $(a, 6), (c, 4), (d, 3)$.
+  \item $q=$ \emph{FFQ$_\delta$}: This selects the features whose summed multiplicities in all selected objects are no less than a threshold $\delta$. Supposing $\delta$ = 4, the result is $(a, 6), (c, 4)$.
+\end{itemize}
+
+The aggregate queries in \Cref{example:intro:pgp} can be reduced to the above aggregate queries as follows. \textbf{Q1} is simply a $max$ query, i.e., $(max, -, [95014, 95014])$. \textbf{Q2} is a \emph{count} query, i.e., $(count, \{\text{R-G1886S}\}, [00000, 99999])$. \textbf{Q3} is an FFQ query, $(FFQ_3, -, [20000, 29999])$, which finds the set of genes whose sum result is no less than 3. % chktex 35
+
+\textbf{Threat Model and Problem Statement.} We consider two potential security threats:
+\begin{inlineenum}
+\item the SP could provide unfaithful query execution, thereby returning incorrect or incomplete query results; and
+\item data privacy could be breached if sensitive source data are disclosed to the query client.
+\end{inlineenum}
+Thus, the authentication problem we are investigating is for the query client to verify that the SP executes $Q$ faithfully in terms of the following conditions:
+\begin{inlineenum}
+\item the candidate objects are correctly selected and no objects in the selection range are skipped;
+\item the returned features and multiplicities are not tampered with; and
+\item the query result satisfies the aggregation semantics.
+\end{inlineenum}
+The confidentiality requirement in this problem is to protect the objects' (sensitive) feature sets against the query client. That is, the client cannot infer the features (as well as their multiplicities) of any single object beyond what is implied from the query result.
+
+If neither efficiency nor confidentiality is a concern, authenticating an aggregate query can work as follows. The SP returns a VO to the client, along with the query result. As a naive solution, the VO may include the non-sensitive attributes and sensitive features of all objects in $\mathbb{D}$ and a signature of $\mathbb{D}$. The client uses the VO to verify the soundness and completeness of the results by testing the following conditions:
+\begin{itemize}
+  \item None of the objects in $\mathbb{D}$ is tampered with.
+  \item All candidate objects are in $[\alpha, \beta]$ and no objects in $[\alpha, \beta]$ are missing.
+  \item The features and multiplicities of the candidate objects are correct.
+  \item The result  satisfies the aggregation semantics of $q$.
+\end{itemize}
+
+However, the verification cost of this naive solution is prohibitively high because the entire dataset has to be returned. Moreover, verifying the last two conditions without disclosing sensitive feature sets requires privacy-preserving protocols. To address these issues, we propose an efficient privacy-preserving authentication framework based on verifiable multiset operations, the preliminaries of which are introduced in the next section.
+
+\section{Preliminaries}\label{chap:aggregate-queries:prelim}
+
+This section gives some preliminaries on cryptographic constructs and integrity assurance.
+
+\textbf{Cryptographic Hash Function.}
+A cryptographic hash function $H(\cdot)$ accepts an arbitrary-length string as its input and returns a fixed-length bit string. It is collision resistant, i.e., it is difficult to find two different messages $m_1$ and $m_2$ such that $H(m_1) = H(m_2)$. Classic cryptographic hash functions include SHA-1, SHA-2, and SHA-3.
+
+\textbf{Bilinear-Map (BM) Accumulator.} This maps a multiset to a single value for ease of processing. Let $\mathbb{G}$ be a cyclic multiplicative group of order $p$. A BM accumulator is a function of a multiset $X$ of $n$ elements in the cyclic group $\mathbb{Z}_p$~\cite{10.1007/978-3-540-30574-3_19}. It returns an \emph{accumulative value} of $X$:
+\begin{align}
+  acc(X) = g^{P(X)} = g^{\prod_{x\in{X}}{(x+s)}},
+\end{align}
+where $g$ is a group generator of $\mathbb{G}$, $s \in \mathbb{Z}_p^* = \mathbb{Z}_p\backslash\{0\}$ is a random secret, and $P(X) = \prod_{x\in{X}}{(x+s)}$.
+
+One useful property of $acc(X)$ is that even without knowing $s$, $acc(X)$ can still be computed by $X$ and $g, g^s, \dots, g^{s^k}$ ($k \ge |X|$) through polynomial interpolation. As for its security, it has been proved in~\cite{10.1007/s00453-014-9968-3} that the accumulative function $acc(\cdot)$ is collision resistant.
+
+\textbf{Randomized BM Accumulator.} The above accumulative value $acc(X)$ is deterministic for a fixed multiset $X$. As such, an adversary can determine with high confidence that two multisets are the same if they happen to have the same accumulative value. To enhance confidentiality, we propose  randomizing the $acc$ value of $X$ as
+\begin{align}
+  acc(X) = g^{P(X) \cdot r_X},\label{eqn:aggregate-queries:random-bm}
+\end{align}
+where $r_X$ is a random value hidden from the query client but disclosed to the SP\@. It is worth noting that this randomization does not affect the original properties of a BM accumulator. We will further prove in \Cref{sec:aggregate-queries:security-analysis} that the randomized $acc$ values are indistinguishable under chosen plaintext attack.
+
+\textbf{Bilinear Pairing.} This maps a pair of elements in two groups to a single element in a third group. Let $\mathbb{G}_{t}$ be another cyclic multiplicative group with the same order $p$. We can find a bilinear mapping $e: \mathbb{G} \times \mathbb{G} \rightarrow \mathbb{G}_t$ which has the following properties:
+\begin{enumerate}
+  \item \emph{Bilinearity}: If $u, v \in \mathbb{G}$ and $e(u,v)\in\mathbb{G}_t$, then $e(u^{a}, v^{b}) = e{(u, v)}^{ab}$ for any $u,v$.
+  \item \emph{Non-degeneracy}: $e(g, g) \neq 1$.
+  \item \emph{Computability}: Given $u,v\in \mathbb{G}$, it is easy to compute $e(u, v)$.
+\end{enumerate}
+
+\textbf{Bilinear $q$-Strong Diffie-Hellman (DH) Assumption.} This assumption shows that bilinear pairing is appropriate for multiset operation authentication as it is hard to forge. Let $(\mathbb{G}, \mathbb{G}_t, e, g)$ be a bilinear pairing. This assumption says that as long as $s\in \mathbb{Z}_p^*$ is secret, even given all elements $g, g^s, \dots, g^{s^k} \in \mathbb{G}$, no probabilistic polynomial-time (PPT) algorithm can derive ${e(g,g)}^{1/(x+s)}$ for any $x\in \mathbb{Z}_p^*$ with a probability higher than a negligible value~\cite{10.1007/978-3-540-28628-8_3}. In essence, this bilinear $q$-strong DH assumption extends the regular DH assumption on $g$ and $\mathbb{G}$ to $e(g,g)$ and $\mathbb{G}_t$. This assumption will be used as a foundation in our security analysis.
+
+\textbf{Set Operation Authentication.} Based on the above, two result verification protocols have been introduced in~\cite{10.1007/978-3-642-54631-0_7,10.1007/978-3-642-22792-9_6} to authenticate the following operations on two sets $X_1$ and $X_2$:
+\begin{inlineenum}
+\item $X_1 \subseteq X_2$ and~\label{enum:aggregate-queries:prelim:set1}
+\item $X_1 \cap X_2 = \emptyset$.~\label{enum:aggregate-queries:prelim:set2}
+\end{inlineenum}
+
+For~\ref{enum:aggregate-queries:prelim:set1}, the server computes a witness value $W = acc(X_2 - X_1)$ and returns it to the query client. The client then verifies $X_1 \subseteq X_2$ by checking:
+\begin{align*}
+  e(acc(X_1), W) \stackrel{?}{=} e(acc(X_2), g).
+\end{align*}
+
+For~\ref{enum:aggregate-queries:prelim:set2}, according to the extended Euclidean algorithm, there are two polynomials $Q_1, Q_2$ such that
+\begin{align*}
+  Q_1 \cdot P(X_1) + Q_2 \cdot P(X_2) = 1.
+\end{align*}
+As such, the server prepares $F_1 = g^{Q_1}, F_2 = g^{Q_2}$, and then the client verifies it by checking:
+\begin{align*}
+  e(F_1, acc(X_1)) \cdot e(F_2, acc(X_2)) \stackrel{?}{=} e(g,g).
+\end{align*}
+Though these two protocols are privacy-preserving in nature and can be extended to multisets, we have yet to design privacy-preserving authentication protocols for other multiset operations such as \emph{sum} and \emph{union}, which will be covered in \Cref{sec:aggregate-queries:multiset-op}.
