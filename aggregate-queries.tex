@@ -2,7 +2,7 @@
 
 In this chapter, we investigate the problem of authenticating aggregate queries over set-valued data.
 
-\section{Problem Formulation}\label{chap:aggregate-queries:problem}
+\section{Problem Formulation}\label{sec:aggregate-queries:problem}
 
 A DO owns a dataset $\mathbb{D} = \{o_1, o_2, \dots, o_n\}$. Each object $o_i$ is represented by $\langle A_i, X_i \rangle$, where $A_i$ is a set of non-sensitive attributes, and $X_i$ is a sensitive multiset of \emph{features} (hereafter called \emph{feature set}). The DO outsources $\mathbb{D}$ to SP, together with an ADS signed with the DO's private key. Based on this, the SP provides aggregate query services to clients (e.g., \textbf{Q1} and \textbf{Q2}, and \textbf{Q3} in \Cref{example:intro:pgp}).
 
@@ -57,7 +57,7 @@ If neither efficiency nor confidentiality is a concern, authenticating an aggreg
 
 However, the verification cost of this naive solution is prohibitively high because the entire dataset has to be returned. Moreover, verifying the last two conditions without disclosing sensitive feature sets requires privacy-preserving protocols. To address these issues, we propose an efficient privacy-preserving authentication framework based on verifiable multiset operations, the preliminaries of which are introduced in the next section.
 
-\section{Preliminaries}\label{chap:aggregate-queries:prelim}
+\section{Preliminaries}\label{sec:aggregate-queries:prelim}
 
 This section gives some preliminaries on cryptographic constructs and integrity assurance.
 
@@ -107,3 +107,98 @@ As such, the server prepares $F_1 = g^{Q_1}, F_2 = g^{Q_2}$, and then the client
   e(F_1, acc(X_1)) \cdot e(F_2, acc(X_2)) \stackrel{?}{=} e(g,g).
 \end{align*}
 Though these two protocols are privacy-preserving in nature and can be extended to multisets, we have yet to design privacy-preserving authentication protocols for other multiset operations such as \emph{sum} and \emph{union}, which will be covered in \Cref{sec:aggregate-queries:multiset-op}.
+
+\section{PA$^2$: Privacy-Preserving Authentication Framework for Aggregate Queries}\label{sec:aggregate-queries:pa2}
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=.8\linewidth]{figs/aggregate-queries/overview.pdf}
+  \caption{PA$^2$ Authentication Framework Overview}\label{fig:aggregate-queries:overview}
+\end{figure}
+
+In this section, we present the complete framework that can authenticate various aggregate queries while preserving data confidentiality. \Cref{fig:aggregate-queries:overview} illustrates both the query and authentication flow charts of the framework. The framework consists of two phases: candidate object selection and aggregate query processing. Recall that given an aggregate query $Q = (q, \{x_i\}, [\alpha, \beta])$, the SP first selects the candidate objects within the range $[\alpha, \beta]$, and then computes the aggregate values of these candidate objects with regard to the queried feature $x_i$. Along with query processing, the SP also constructs the VOs for both phases. Once the client receives the query results and VOs, it can authenticate the correctness of the entire query following the verification flow, which is the opposite of the SP's VO construction flow. In what follows, we present the detailed procedure of each phase in this framework, starting with the second phase for clarity reasons.
+
+\subsection{Privacy-Preserving Authentication Protocols on Multiset Operations}\label{sec:aggregate-queries:multiset-op}
+
+Before running into the detailed procedure of authenticating aggregate queries, we present five core privacy-preserving authentication protocols on multiset operations. The challenge is that the client cannot learn any sensitive feature information when authenticating the multiset operations. Inspired by~\cite{10.1145/2660267.2660373}, our key idea is to leverage the randomized bilinear-map accumulator $acc(\cdot)$ (i.e., \Cref{eqn:aggregate-queries:random-bm}) introduced in \Cref{sec:aggregate-queries:prelim} to hash a multiset into a fixed-length value with collision resistance. With the bilinear pairing function $e(\cdot,\cdot)$ (also introduced in \Cref{sec:aggregate-queries:prelim}), the client can verify the accumulated value of the output multiset without learning the content of each input multiset. This distinguishes the accumulator function from other cryptographic hash functions such as SHA-1.
+
+In the rest of this section, we introduce the five core privacy-preserving authentication protocols on multiset operations, namely, $subset$, $sum$, $empty$, $union$, and $times$. For ease of presentation, we mark below any unverified value computed by the SP with $^*$, while all other unmarked values are trusted or already verified by the candidate object selection protocol (to be explained in \Cref{sec:aggregate-queries:grid}). We also assume that the seeds $g, g^s, \dots, g^{s^k}$ are public and that the random values $r_{X_i}$'s are known to the DO and SP but hidden from the client.
+
+\textbf{Subset:} $sub(X_i, X_j)$.
+Given two multisets $X_i, X_j$, it returns the accumulative value $acc(X_j-X_i)$. Note that if $X_i \nsubseteq X_j$, the SP cannot compute a correct value of $acc(X_j - X_i)$. Hence, if $acc(X_j-X_i)$ is verified as correct, the client is assured that $X_i \subseteq X_j$. The detailed protocol is as follows:
+\begin{enumerate}
+  \item The SP computes the accumulative value ${acc(X_j-X_i)}^*$ based on $X_i$, $X_j$, the random values $r_{X_i}$, $r_{X_j}$, and the public seeds $g, g^s, \dots, g^{s^k}$ (thanks to the nice property of $acc$ as mentioned in \Cref{sec:aggregate-queries:prelim}), and sends it to the client together with $acc(X_i)$ and $acc(X_j)$.
+  \item The client verifies the correctness of ${acc(X_j-X_i)}^*$ by checking the following condition, where we exploit the property of bilinear pairing function  $e(\cdot,\cdot)$ as mentioned in \Cref{sec:aggregate-queries:prelim}.
+    \begin{align*}
+      e(acc(X_i), {acc(X_j-X_i)}^*) \stackrel{?}{=} e(acc(X_j), g).
+    \end{align*}
+\end{enumerate}
+
+\textbf{Sum:} $sum(\{X_1, \dots, X_n\})$.
+Given a set of multisets $\{X_1, \dots, X_n\}$, it returns the accumulative value $acc(S)$ of the sum set $S = \uplus \{X_i\}$. The detailed protocol is as follows:
+\begin{enumerate}
+  \item The SP computes the accumulative values ${acc(X_1 \uplus X_2)}^*$, ${acc(X_1 \uplus X_2 \uplus X_3)}^*$, $\dots$, ${acc(S)}^*$, and sends them to the client together with $acc(X_1)$, $\dots$, $acc(X_n)$.
+  \item The client verifies the correctness of ${acc(S)}^*$ by checking the following equations one by one:
+    \begin{align*}
+      \left \{
+        \begin{array}{l}
+          e(acc(X_1), acc(X_2)) \stackrel{?}{=} e({acc(X_1 \uplus X_2)}^*, g)\\
+          e({acc(X_1\uplus X_2)}^*, acc(X_3)) \stackrel{?}{=} e({acc(X_1\uplus X_2\uplus X_3)}^*, g) \\
+          \vdots\\
+          e({acc(\uplus_{i=1}^{n-1} X_i)}^*, acc(X_n)) \stackrel{?}{=} e({acc(S)}^*, g)
+        \end{array}
+      \right.
+    \end{align*}
+\end{enumerate}
+
+\textbf{Empty:} $empty(\{X_1, \dots, X_n\})$.
+Given a set of multisets $\{X_1, \dots, X_n\}$, it verifies whether $\cap \{X_i\} = \emptyset$. According to the extended Euclidean algorithm, if $\cap \{X_i\} = \emptyset$, there exist $n$ polynomials $Q_i$ such that $\sum_{i=1}^n Q_i \cdot P(X_i) = 1$. The detailed protocol is as follows:
+\begin{enumerate}
+  \item The SP computes $n$ values $F_i^* = g^{{Q_i}/{r_{X_i}}}$, and sends $F_1^*$, $\dots$, $F_n^*$, $acc(X_1)$, $\dots$, $acc(X_n)$ to the client.
+  \item The client verifies the result is empty if the following equation holds:
+    \begin{align*}
+      \prod_{i=1}^n e(acc(X_i), F_i^*) \stackrel{?}{=} e(g, g).
+    \end{align*}
+\end{enumerate}
+
+\textbf{Union:} $union(\{X_1, \dots, X_n\})$.
+Given a set of multisets $\{X_1, \dots, X_n\}$, it returns the accumulative value $acc(U)$ of the union set $U = \cup_{i=1}^n X_i$. This operation is more complicated than the \emph{sum} operation. Denote $\widehat{X}_i$ as the set version of a multiset $X_i$. The client needs to verify two conditions:
+\begin{enumerate}
+  \item Deflation checking: $\widehat{X}_1 \subseteq U \wedge \widehat{X}_2 \subseteq U \wedge \cdots \widehat{X}_n \subseteq U$. This is to prevent the SP from deliberately missing any object;
+  \item Inflation checking:$(U - \widehat{X}_1) \cap (U - \widehat{X}_2) \cap \cdots (U - \widehat{X}_n) = \emptyset$. This is to prevent the SP from deliberately adding any non-result object.
+\end{enumerate}
+We can authenticate them based on the above $sub$ and $empty$ protocols as follows:
+\begin{enumerate}
+  \item Use protocols $sub(\widehat{X}_1, U)$, $sub(\widehat{X}_2, U), \dots, sub(\widehat{X}_n, U)$ to verify the first condition. This not only authenticates $\widehat{X}_i \subseteq U$, but also provides the client the correct $acc(U-\widehat{X}_i)$.
+  \item The SP computes a special hash value ${h_e(U)}^*$ of the union set $U$, and by verifying this value the client is assured that the SP knows the pre-image $U$ besides ${acc(U)}^*$.\label{enum:aggregate-queries:multiset-op:union:step2}
+  \item Use protocol $empty(\{(U-\widehat{X}_1), (U-\widehat{X}_2), \dots, (U -\widehat{X}_n)\})$ to verify the second condition.
+\end{enumerate}
+In step~\ref{enum:aggregate-queries:multiset-op:union:step2}, $h_e(\cdot)$ is an \emph{extractable collision resistant hash} (ECRH) function that has one unique property --- extractability~\cite{10.1145/2090236.2090263}. By presenting a correct ${h_e(U)}^*$ value, the SP can prove that it knows $U$. Inspired by~\cite{10.1145/2090236.2090263}, we design $h_e(\cdot)$ for a multiset $X=\{x_1, x_2, \dots, x_t\}$ as follows:
+\begin{align*}
+  h_e(X) = (h_1, h_2) = (\prod_{i \in [t]} g^{s^i a_i}, \prod_{i \in [t]} g^{\alpha s^i a_i}),
+\end{align*}
+where $s, \alpha \in \mathbb{Z}_p^*$ are secret values only known to the DO of $X$, and $a_i$ is the $i^{th}$ coefficient for polynomial $P(X)\cdot r_X$. Before any other party can compute or verify $h_e(X)$, the DO releases $g, g^s, \dots, g^{s^k}, g^\alpha, g^{\alpha s}, \dots, g^{\alpha s^k} \in \mathbb{G}$ to the public, where $k \ge |X|$, the cardinality of $X$. Then any party, including the client, can verify whether a hash value $h_e(X)$ is correct by checking the following equations:
+\begin{align*}
+  e(h_e(X).h_1, g^\alpha) &\stackrel{?}{=} e(h_e(X).h_2, g), \\
+  h_e(X).h_1 & \stackrel{?}{=} acc(X).
+\end{align*}
+
+\textbf{Times:} $times(X, t)$.
+Given a multiset $X$ and a coefficient $t$, it returns the accumulative value $acc(t \cdot X)$ of $t \cdot X$, which raises the multiplicity of each element in $X$ by $t$. For example, if $X = \{(a, 2), (b, 3)\}$, then $3\cdot X = \{(a, 6), (b, 9)\}$. A straightforward solution is to use the $sum$ protocol directly as $sum(\{\overbrace{X, X, \dots, X}^{t}\})$. Here we give a more efficient solution using $sum$ on the binary components. Let $t = {(b_0b_1\cdots b_d)}_2$, the binary form of $t$. The client only needs to execute $sum(\{b_0 \cdot X, \dots, b_i \cdot 2^i \cdot X, \dots, b_d \cdot 2^d \cdot X\})$, where $b_i=1$. For instance, if $t = 5={(101)}_2$, then the client only executes $sum(\{X, 4\cdot X\})$. The detailed protocol is as follows:
+\begin{enumerate}
+  \item Let $d = \lfloor \log_2(t) \rfloor$, the SP computes ${acc(2\cdot X)}^*, \dots, {acc({2^d} \cdot X)}^*, {acc(t \cdot X)}^*$, and sends them to the client together with $acc(X)$.
+  \item The client first verifies the values ${acc(2\cdot X)}^*, \dots, {acc({2^d} \cdot X)}^*$ by checking the following equations:
+    \begin{align*}
+      \left \{
+        \begin{array}{l}
+          e(acc(X), acc(X)) \stackrel{?}{=} e({acc(2\cdot X)}^*, g)\\
+          e({acc(2\cdot X)}^*, {acc(2\cdot X)}^*) \stackrel{?}{=} e({acc(4 \cdot X)}^*, g) \\
+          \vdots\\
+          e({acc(2^{d-1} \cdot X)}^*, {acc(2^{d-1} \cdot X)}^*) \stackrel{?}{=} e({acc({2^d} \cdot X)}^*, g)
+        \end{array}
+      \right.
+    \end{align*}
+  \item The client then verifies ${acc(t \cdot X)}^*$ according to the binary form of $t(b_0b_1\cdots b_d)$.
+\end{enumerate}
+
+We will show in the cost analysis that this protocol significantly improves the performance over the straightforward $sum$ solution.
