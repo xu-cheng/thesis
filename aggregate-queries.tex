@@ -202,3 +202,92 @@ Given a multiset $X$ and a coefficient $t$, it returns the accumulative value $a
 \end{enumerate}
 
 We will show in the cost analysis that this protocol significantly improves the performance over the straightforward $sum$ solution.
+
+\subsection{Privacy-Preserving Authentication Algorithms on Aggregate Queries}
+
+Next, we present the detailed procedures of the second phase, i.e., authenticating aggregate queries while preserving data confidentiality. Here, we assume that the output from the first phase of candidate object selection has been verified (to be explained in \Cref{sec:aggregate-queries:pgrid}). In what follows, $\{X_1, \dots, X_m\}$ are the feature sets of $m$ candidate objects, and $S = \uplus \{X_i\}$ is the sum set. We first study the \emph{sum}/\emph{count} and \emph{max}/\emph{min}/\emph{FFQ}/\emph{top-$k$} aggregate queries and then extend them to other more advanced aggregate queries.
+
+\subsubsection{Sum/Count Query}
+
+The output of a $sum$ query $sum(x_q)$ is $\eta_q$, the sum of multiplicities of feature $x_q$ in all candidate objects. To align with other multiset queries, we define its result as $R = \{(x_q, \eta_q) \}$. For example, in \Cref{fig:aggregate-queries:example}, after selecting the candidate objects $\{o_5, o_6, o_9, $ $\cdots, o_{12}\}$, the query $Q = (sum, \{a\}, [\alpha, \beta])$ returns the sum of multiplicities of feature $a$, i.e., $R = \{(a, 6)\}$.
+
+To verify this result $R$, we design \Cref{alg:aggregate-queries:sum} for the client to check the following two conditions:
+\begin{itemize}
+  \item Inflation checking (\Crefrange{alg:aggregate-queries:sum:1}{alg:aggregate-queries:sum:3}): $R \subseteq S$. This is to prevent the SP from deliberately increasing the multiplicity of the result;
+  \item Deflation checking (\Cref{alg:aggregate-queries:sum:4}): $(S-R) \cap R = \emptyset$. This is to prevent the SP from deliberately decreasing the multiplicity of the result.
+\end{itemize}
+
+\begin{algorithm}[t]
+  \caption{PA$^2$ Sum ($\{R, X_1, \dots, X_m\}$)}\label{alg:aggregate-queries:sum}
+  Obtain $R, acc(X_1), \dots, acc(X_m)$ from the SP (these $acc$ values are authenticated by the MG-tree, to be detailed in \Cref{sec:aggregate-queries:grid}) and compute $acc(R)$ locally\;%
+  \label{alg:aggregate-queries:sum:1}
+  Execute $sum(\{X_1, \dots, X_m\})$ to get verified $acc(S)$\;%
+  \label{alg:aggregate-queries:sum:2}
+  Execute $sub(R, S)$ to get verified $acc(S - R)$\tcp*{implies $R \subseteq S$}%
+  \label{alg:aggregate-queries:sum:3}
+  Execute $empty(S-R, R)$ to verify $(S - R) \cap R = \emptyset$\;%
+  \label{alg:aggregate-queries:sum:4}
+\end{algorithm}
+
+In the running example, the sum set of the candidate objects' features is $S= \{(a,6)$, $(b, 1)$, $(c, 4)$, $(d, 3)$, $(e, 2)\}$. So the client needs to perform:
+\begin{itemize}
+  \item Inflation checking: $\{(a, 6)\} \subseteq \{(a,6)$, $(b, 1)$, $(c, 4)$, $(d, 3)$, $(e, 2)\}$;
+  \item Deflation checking: $\{(b, 1), (c, 4), (d, 3), (e, 2)\} \cap \{(a, 6)\}\allowbreak = \emptyset$.
+\end{itemize}
+
+Similarly, the output of a $count$ query $count(x_q)$ is the number of the candidate objects that have the query feature $x_q$. It can be processed similarly to the $sum$ query, except that the multiplicity of each feature is enforced as $1$.
+
+\subsubsection{Max/Min/FFQ/Top-$k$ Query}
+
+The output of a $max$ query is the feature with the highest (i.e., top-$1$) multiplicity. Let $\tau$ denote this multiplicity, and thus the query is equivalent to searching for any feature whose multiplicity is no less than $\tau$. Formally, the query result  $R = \pi(\{(x_i, \eta_i) | x_i \in S \wedge \eta_i \ge \tau\})$, where $\pi(\cdot)$ randomly selects one feature when there are ties. For example, in \Cref{fig:aggregate-queries:example}, the query $Q=(max, -, [\alpha, \beta])$ returns the result $R = \{(a, 6)\}$. To verify this result, we design \Cref{alg:aggregate-queries:max} for the client to check the following three conditions: % chktex 35
+\begin{itemize}
+  \item Inflation checking (\Crefrange{alg:aggregate-queries:max:1}{alg:aggregate-queries:max:3}): $R \subseteq S$.
+  \item Deflation checking (\Cref{alg:aggregate-queries:max:4}): $(S - R) \cap R = \emptyset$.\footnote{\label{fn:aggregate-queries:skip-deflation}In the actual implementation, the deflation check can be omitted for max, FFQ and top-$k$ queries. This is because it is implied by the following completeness check.}
+  \item Completeness checking (\Crefrange{alg:aggregate-queries:max:5}{alg:aggregate-queries:max:8}): $(S - R) \subseteq {\tau} \cdot (U - \widehat{R})$, where $\widehat{R}$ is the set version of multiset $R$, e.g., $R = \{(a, 6)\}$ and $\widehat{R} = \{(a, 1)\}$. This is to prevent the SP from deliberately missing any feature whose multiplicity is larger than $\tau$.
+\end{itemize}
+
+\begin{algorithm}[t]
+  \caption{PA$^2$ Max ($\{R, X_1, \dots, X_m\}$)}\label{alg:aggregate-queries:max}
+  Obtain $R, acc(X_1), \dots, acc(X_m)$ from the SP (these $acc$ values are authenticated by the MG-tree, to be detailed in \Cref{sec:aggregate-queries:grid}) and compute $acc(R)$ and $acc(\widehat{R})$ locally\;%
+  \label{alg:aggregate-queries:max:1}
+  Execute $sum(\{X_1, \dots, X_m\})$ to get verified $acc(S)$\;%
+  \label{alg:aggregate-queries:max:2}
+  Execute $sub(R, S)$ to get verified $acc(S - R)$ \tcp*{implies $R \subseteq S$}%
+  \label{alg:aggregate-queries:max:3}
+  Execute $empty(S-R, R)$ to verify $(S - R) \cap R = \emptyset$\footnotemark[\getrefnumber{fn:aggregate-queries:skip-deflation}]\;%
+  \label{alg:aggregate-queries:max:4}
+  Execute $union(\{X_1, \dots, X_m\})$ to get verified $acc(U)$\;%
+  \label{alg:aggregate-queries:max:5}
+  Execute $sub(\widehat{R}, U)$ to get verified $acc(U - \widehat{R})$\;%
+  \label{alg:aggregate-queries:max:6}
+  Execute $times(U-\widehat{R}, \tau)$ to get verified $acc({\tau} \cdot (U - \widehat{R}))$\;%
+  \label{alg:aggregate-queries:max:7}
+  Execute $sub(S-R, {\tau} \cdot (U - \widehat{R}))$ to verify $(S-R) \subseteq {\tau} \cdot (U-\widehat{R})$\;%
+  \label{alg:aggregate-queries:max:8}
+\end{algorithm}
+
+In the running example, the sum set is $S = \{(a, 6), (b, 1), (c, 4), (d, 3), (e, 2)\}$ and the union set is $U = \{(a, 1), (b, 1), (c, 1), (d, 1), (e, 1)\}$. So the client needs to perform:
+\begin{itemize}
+  \item Inflation checking: $\{(a, 6)\}\subseteq \{(a, 6), (b, 1), (c, 4), (d, 3), (e, 2)\}$;
+  \item Deflation checking: $\{(b, 1), (c, 4), (d, 3), (e, 2)\} \cap \{(a, 6)\}\allowbreak = \emptyset$;\footnotemark[\getrefnumber{fn:aggregate-queries:skip-deflation}]
+  \item Completeness checking: $\{(b, 1), (c, 4), (d, 3), (e, 2)\} \subseteq \{(b, 6), (c, 6), (d, 6), (e, 6)\}$.
+\end{itemize}
+
+The $min$ query is similar except that we verify $(S - R) \supseteq {\tau} \cdot (U - \widehat{R})$ in the completeness checking. % chktex 35
+
+The \emph{FFQ} query returns the features whose multiplicities are no lower than a threshold $\delta$. This query is naturally supported as it is a subroutine of the $max$ query (by replacing the threshold $\tau$ with $\delta$ in the completeness checking). % chktex 35
+
+Similarly, the top-$k$ query can be verified by exploiting the routine of $max$ query and replacing the top-$1$ multiplicity $\tau$ with the top-$k^{th}$ multiplicity. % chktex 35
+
+\subsubsection{Extension to Advanced Aggregate Queries}\label{sec:aggregate-queries:extension}
+
+By fusing multiple primitive aggregate queries, we can further extend our algorithms to support more advanced aggregate queries.
+
+\textbf{Average Query}. The \emph{avg} query returns the average multiplicity of a queried feature. Its result can be authenticated with a $sum$ query and a $count$ query.
+
+\textbf{Confidence Query.} The \emph{confidence} query takes two features as input and returns the conditional probability of witnessing the second feature given the first feature. To revisit Example 1, the confidence that gene `R-G1886S' co-exists with gene `C-R102G' is $\frac{2}{4}=50$\%. This query can be decomposed into two \emph{count} queries for authentication, i.e.,  $(count,  \{\text{R-G1886S}\}, [00000, 99999])$ and $(count, \{\text{R-G1886S}, \text{C-R102G}\}, [00000, 99999])$.
+
+\textbf{Lift Query.} The \emph{lift} query is often used to observe the independence between two features. Given two features $x_1$ and $x_2$, it is defined as the ratio of $count(\{x_1, x_2\})$ to $count({x_1}) \cdot count(x_2)$. In the above example, the lift of gene `R-G1886S' and gene `C-R102G' is $\frac{2}{4 \times 3}=\frac{1}{6}$. Similar to the \emph{confidence} query, its result can be authenticated with three \emph{count} queries, i.e., $(count$, $\{\text{R-G1886S}\}$, $[00000, 99999])$, $(count$, $\{\text{C-R102G}\}$, $[00000, 99999])$, and $(count$, $\{\text{R-G1886S}, \text{C-R102G}\}$, $[00000, 99999])$.
+
+It is noteworthy that as authenticating the above advanced aggregate queries is always reduced to authenticating a set of primitive aggregate queries, the results of those primitive queries are needed by the client to complete the verification chain and are thus not kept confidential. Nevertheless, the confidentiality of source data is still preserved by the privacy-preserving authentication algorithms. Finally, we remark that a multi-feature aggregate query can be supported by treating a multi-feature set as a unique (virtual) feature.
+

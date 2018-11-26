@@ -60,7 +60,7 @@
 \usepackage{bm}
 \usepackage{fancynum}
 \setfnumgsym{\,}
-\usepackage[ruled,vlined]{algorithm2e}
+\usepackage[ruled,vlined,linesnumbered,algochapter]{algorithm2e}
 \SetVlineSkip{0pt}
 
 % caption related packages
@@ -242,6 +242,7 @@
     \addtocontents{toc}{\protect\setcounter{tocdepth}{0}}
     \bookmarksetup{openlevel=0}
 }
+\setcounter{secnumdepth}{5}
 
 % bibliography
 \usepackage[
