@@ -511,13 +511,13 @@ Before showing the indistinguishability of accumulative values,  we start with t
 \begin{lemma}
   For any random value $r \leftarrow \mathbb{Z}_p$, $g^r$ has an equal probability of being any element in $\mathbb{G}$ (with an order of $p$). Formally, for any $\hat g \in \mathbb{G}$,
   \begin{align*}
-  \Pr[g^r = \hat g] = 1 / p.
+    \Pr[g^r = \hat g] = 1 / p.
   \end{align*}
 \end{lemma}
 \begin{proof}
   Let $\log_g(\cdot)$ denote the discrete logarithm of base $g$ in group $\mathbb{G}$. We have
   \begin{align*}
-  \Pr[g^r = \hat g] = \Pr[r = \log_g(\hat g)].
+    \Pr[g^r = \hat g] = \Pr[r = \log_g(\hat g)].
   \end{align*}
   Since $r$ is random, the probability of $r$ being a fixed element $\log_g(\hat g)$ equals $1/p$.
 \end{proof}
@@ -538,4 +538,55 @@ It is noteworthy that during the authentication of aggregate queries, the result
 \begin{definition}[Bucket-wise Indistinguishability]\label{def:aggregate-queries:k-anony}
   Given a bucket $\mathcal{B}$ and an object $o\in\mathcal{B}$, if an aggregate query result $R$ is from a candidate object set $\mathcal{O}\supseteq \mathcal{B}$, then any adversary can determine whether $o$ contributes to $R$ with a success rate no higher than that of a random guess.
 \end{definition}
+
+\section{Optimizations}\label{sec:aggregate-queries:opt}
+This section introduces three optimization techniques for our PA$^2$ authentication framework. They are orthogonal to each other, and therefore can be combined to further boost the performance.
+
+\subsection{Optimized MG-Tree}
+One performance bottleneck is that the SP has to use the costly exponentiation operation rather than modular exponentiation to compute the accumulative values because it does not know the secret value of $s$. To alleviate this, we let the DO pre-compute and store some intermediate accumulative values in the MG-tree for the SP\@. For example, in \Cref{fig:aggregate-queries:mg-tree}, to authenticate the query $Q = (max, -, [\alpha, \beta])$, the SP needs to compute the $acc(S)$ value of $S = X_5 \uplus X_6 \uplus X_9 \uplus \cdots \uplus X_{12}$. To do so, the SP has to compute five intermediate accumulative values in turn: $acc(X_5\uplus X_6), acc(X_5 \uplus X_6 \uplus X_9), \dots, acc(X_5 \uplus X_6 \uplus X_9 \uplus \cdots \uplus X_{12})$. However, if the DO has already computed $acc(S_7)$ and $acc(S_4)$ for the two intermediate nodes $N_7$ and $N_4$, the SP can simply compute $acc(S) = sum(\{S_7, S_4\})$. % chktex 35
+
+As the DO knows the value of $s$, computing such intermediate accumulative values is efficient. Nonetheless, to alleviate the SP's storage cost, we only compute and store the accumulative values of $sum$ and $union$ operations as they are the most time-consuming operations. To accommodate these intermediate values in the MG-tree, we redesign the digest for non-leaf nodes as follows:
+
+\begin{definition}[Optimized Digest for Non-Leaf Node]
+  Let $C$ be the number of child entries of node $N_i$, $S_i$ be the sum set of child entries' sum sets, and $U_i$ be the union set of child entries' union sets; the digest of node $N_i$ is defined as:
+  \begin{align*}
+    dig_i = H(gb_{c_1} | H(acc(S_{c_1})| acc(U_{c_1})) | dig_{c_1} | \cdots \\
+    |gb_{c_C} | H(acc(S_{c_C})|acc(U_{c_C})) | dig_{c_C}).
+  \end{align*}
+\end{definition}
+
+\begin{figure}
+  \centering
+  \includegraphics[width=0.6\linewidth]{figs/aggregate-queries/grid_tree_opt.eps}
+  \caption{Optimized MG-tree}\label{fig:aggregate-queries:mg-tree-opt}
+\end{figure}
+
+Based on this optimized MG-tree, the query $Q = (max, -, [\alpha, \beta])$ no longer needs to traverse down to the child nodes if the current tree node is fully contained in the query range $[\alpha, \beta]$. As such, the candidate object selection and PA$^2$ algorithms on the optimized MG-tree are revised as follows: % chktex 35
+\begin{itemize}
+  \item The SP prepares the VO, which includes
+    \begin{inlineenum}
+    \item the grid boxes, the accumulative values of sum and union sets, and the digests of those fully contained tree nodes;
+    \item the grid boxes, the hash values for the accumulative values of sum and union sets, and the digests of all boundary nodes;
+    \item the signature of the tree root's digest.
+    \end{inlineenum}
+    For example, in \Cref{fig:aggregate-queries:mg-tree-opt}, for the same query $Q=(max, -, [\alpha, \beta])$, the VO (marked as grey) includes $\{gb_5$, $H(acc(S_5)|acc(U_5))$, $dig_5$, $gb_6$, $H(acc(S_6)|acc(U_6))$, $dig_6$, $gb_7$, $acc(S_7)$, $acc(U_7)$, $dig_7$, $gb_8$, $H(acc(S_8)|acc(U_8))$, $dig_8$, $gb_4$, $acc(S_4)$, $acc(U_4)$, $dig_4$, $sig(dig_0)\}$. % chktex 35
+  \item The client still verifies the VO by reconstructing the root digest of the MG-tree recursively. First, the client verifies that the grid boxes are fully inside or outside the query range. Then, the client rebuilds the digest for each node. Finally, the client checks whether the restored root digest matches the signed one. For example, the client verifies $gb_5, gb_6, gb_8$ are fully outside the range $[\alpha, \beta]$ and $gb_4, gb_7$ are fully inside the range. Next, the client rebuilds $dig_1 = H(gb_5 | H(acc(S_5)|acc(U_5)) | dig_5)$, $dig_2 = H(gb_6 | H(acc(S_6)|acc(U_6)) | dig_6 | gb_7 | H(acc(S_7)|acc(U_7)) | dig_7)$, $dig_3 = H(gb_8 | \allowbreak H(acc(S_8)|acc(U_8)) | dig_8)$. And then, the client rebuilds $dig_0 = H(gb_1 | \allowbreak H(acc(S_1)|acc(U_1)) | dig_1 | \cdots | gb_4 | H(acc(S_4)|acc(U_4)) | dig_4)$ and finally compares it against $sig^{-1}(dig_0)$.
+  \item Next, the client proceeds to the PA$^2$ algorithms with input $\{R$, $S_1$, $U_1$, $\dots$, $S_{m'}$, $U_{m'}\}$. The difference is that the accumulative values of $sum$ and $union$ sets are computed from the intermediate $sum$ and $union$ sets. That is, for a $sum$ operation, the client computes $acc(S) = sum(\{S_1, \dots, S_{m'}\})$ instead of $sum(\{X_1, \dots, X_m\})$. Similarly, for a $union$ operation, the client computes $acc(U) = union(\{U_1, \dots, U_{m'}\})$ instead of $union(\{X_1, \dots, X_m\})$.
+\end{itemize}
+
+Regarding the performance, since the number of subsets to compute the $acc$ values from is reduced from $m$ to $\log(m)$, the SP's computation, the client's computation, and the communication complexity of computing the $sum$ set are reduced from $O(m^2)$, $O(m)$, $O(m)$ to $O(m)$, $O(\log(m))$, $O(\log(m))$, respectively. Similarly, the costs of computing the $union$ set are reduced from $O(m \cdot (|S|+ |U|)), O(m), O(m)$ to $O(\log(m) \cdot (|S| + |U|))$, $O(\log(m))$, $O(\log(m))$, respectively. As computing the $sum$ and $union$ sets dominates the total computation and communication complexity of their respective queries, we expect the overall performance gain is  significant.
+
+\subsection{Accumulating $sum(\cdot)$ by Linear Ordering}
+For the $sum(\cdot)$ operation, it has a nice additive property that $sum(\{X\}) + sum(\{Y\}) = sum(\{X\} \uplus \{Y\})$. Therefore, we can ask the DO to pre-compute $sum$ accumulative values in an \emph{accumulative} manner. Let us consider the 1D case for simplicity and sort the objects in ascending order. For each $i \in [1, n]$ ($n$ is the number of objects), the DO pre-computes, $sum_{1-i}$, the $sum$ accumulative value for the objects from $o_1$ up to $o_i$. Then, for any range query $[\alpha, \beta]$ that selects the objects from $i$ to $j$, the sum value $sum_{i-j}$ can be computed as $sum_{i-j} = sub(sum_{1-(i-1)}, sum_{1-j})$. For example, in \Cref{fig:aggregate-queries:sum_opt}, all eight objects are sorted by attribute $a_1$. The DO pre-computes the $sum$ accumulative values of $sum(\{X_1\})$, $sum(\{X_1, X_2\})$, $\dots$, $sum(\{X_1, \dots, X_n\})$. As such, the $sum$ accumulative value $sum_{3-6}$ can be computed by $sub(sum_{1-2}, sum_{1- 6})$.
+
+\begin{figure}
+  \centering
+  \includegraphics[width=0.5\linewidth]{figs/aggregate-queries/sum_opt.eps}
+  \caption{Sum Optimization}\label{fig:aggregate-queries:sum_opt}
+\end{figure}
+
+Regarding the performance, similar to the optimized MG-tree, since the DO knows the secret value of $s$, the pre-computation is efficient. As for the query cost, let $m$ denote the number of candidate objects; both the client's computation and communication complexity will be reduced to $O(1)$. While the computation complexity for the SP is still $O(m)$, the constant ratio will be greatly reduced with fewer $sum(\cdot)$ operations. Note that for multidimensional space, we can still enforce linear ordering on the objects and adopt this optimization, by using space embedding techniques such as the Hilbert Curve. Nonetheless, the performance gain is less significant because $sum_{i-j}$ might not be the exact objects selected by a range and some further $subset$ operations would be needed.
+
+\subsection{Acceleration by Parallelism}
+Both the multiset authentication protocols and PA$^2$ algorithms are highly parallelizable. As such, we can accelerate the authentication performance by embracing parallel computing architectures, such as multithreading, GPU computing, and MapReduce. For example, in the $union(\cdot)$ protocol, we can map all $sub(\cdot, \cdot)$ jobs to the available computing units, whether they are CPU cores or worker nodes in MapReduce. Similarly, in the $empty(\cdot)$ protocol, the server can compute the accumulative values of polynomials $Q_i$ in a parallel manner. Note that, however, in the $sum(\cdot)$ and $times(\cdot, \cdot)$ protocols, the order of polynomials is accumulated and therefore the time cost of each parallel job may vary significantly. As such, instead of splitting all jobs equally at the beginning of the query, we schedule a small set of jobs at a time. With this graceful scheduling technique, we can minimize the waiting time of idle computing units while still reducing the job scheduling overhead.
 
