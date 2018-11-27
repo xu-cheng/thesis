@@ -1,2 +1,97 @@
 \chapter{Proof of \texorpdfstring{\Cref*{thm:aggregate-queries:sec}}{Theorem~\ref{thm:aggregate-queries:sec}}}%
 \label{app:aggregate-queries}
+
+We start by proving the security of the privacy-preserving authentication protocols on multiset operations. Note that the proofs of $sub(\cdot, \cdot)$ and $empty(\cdot)$ are similar to those on set operations in~\cite{10.1007/978-3-642-22792-9_6} and are hence omitted.
+
+\section{Security of $sum(\cdot)$ Operation}
+
+\begin{lemma}[Security of $sum(\cdot)$ operation]\label{lem:aggregate-queries:sum}
+  Under the bilinear $q$-strong Diffie-Hellman assumption, if the accumulative value returned by $sum(\{X_1,\dots,X_n\})$ passes the client's verification, then the probability of $sum(\{X_1,\dots,X_n\}) \neq acc(\uplus_{i=1}^n X_i)$ is negligible for any PPT adversary.
+\end{lemma}
+
+\begin{proof}
+  First, we prove that this lemma holds for $n=2$ by contradiction. Support there is a PPT algorithm that computs such a multiset $S = \{y_1, \dots, y_{\ell}\}$, whereas $y_j \notin X_1 \uplus X_2$ for some $1 \le j \le \ell$. This means that
+  \begin{align*}
+    e(acc(X_1), acc(X_2)) &= e(g^{\prod_{y \in S} (y+s)}, g) \Rightarrow \\
+    {e(g, g)}^{\prod_{x \in X_1 \uplus X_2} (x+s) } &= {e(g, g)}^{\prod_{y \in S} (y+s)}
+  \end{align*}
+  Note that $(y_j + s)  \nmid \prod_{x \in X_1 \uplus X_2} (x+s)$. Therefore, there exists a polynomial $Q(s)$ (computable in polynomial time) of degree $n-1$ and constant $\lambda \neq 0$, such that $\prod_{x \in X_1 \uplus X_2} (x+s) = Q(s)(y_j + s) + \lambda$. Thus, we have
+  \begin{align*}
+& {e(g, g)}^{(y_j + s)\prod_{1 \le i \neq j \le \ell} (y_i+s)} = {e(g,g)}^{Q(s)(y_j + s) + \lambda} \Rightarrow \\
+& {e(g, g)}^{1/(y_j + s)} = {\left[ {e(g,g)}^{\prod_{1 \le i \neq j \le \ell} (y_i+s)} {e(g,g)}^{-Q(s)} \right]}^{\lambda^{-1}}.
+  \end{align*}
+  Thus, this algorithm can break the bilinear $q$-strong Diffie-Hellman assumption. This proves that our lemma holds for $n=2$.
+
+  Supposing our lemma is true for any $n=k$, where $k\ge 2$, in the following we prove it is also true for $n=k+1$. Let $\varepsilon_k$ denote the event that \textsf{Adv} returns incorrect accumulative value $sum(\uplus_{i=1}^{k} X_i)$ and passes the client's verification. By law of probability, we have:
+  \begin{align*}
+    \Pr[\varepsilon_{k+1}] &=  \Pr[\varepsilon_{k}]\Pr[\varepsilon_{k+1} | \varepsilon_{k}] +
+    \Pr[\varepsilon_{k}']\Pr[\varepsilon_{k+1} | \varepsilon_{k}']\\
+                           &\leq \Pr[\varepsilon_{k}] + \Pr[\varepsilon_{k+1}|\varepsilon_{k}'] \\
+                           &= \Pr[\varepsilon_{k}] + \Pr[\varepsilon_{2}],
+  \end{align*}
+  where $\varepsilon'$ denotes the complement of an event. Finally, we have:
+  \begin{align*}
+    \Pr[\varepsilon_n] \leq (n-1) \Pr[\varepsilon_2]
+  \end{align*}
+  Since $\Pr[\varepsilon_2]$ is negligible according to our proof for $n=2$, we can conclude that $Pr[\varepsilon_{n}]$ is negligible as $p\gg n$ in a cyclic multiplicative group $\mathbb{G}$. Hence, this lemma is proved.
+\end{proof}
+
+\section{Security of $union(\cdot)$ Operation}
+
+\begin{lemma}[Security of $union(\cdot)$ operation]\label{lem:aggregate-queries:union}
+  Under the bilinear $q$-strong Diffie-Hellman assumption, if the accumulative value returned by $union(\{X_1,\dots,X_n\})$ passes the client's verification, then the probability of $union(\{X_1,\dots,X_n\}) \neq acc(\cup_{i=1}^n X_i)$ is negligible for any PPT adversary.
+\end{lemma}
+\begin{proof}
+  Let $U = \cup_{i=1}^nX_i$. The $union(\cdot)$ protocol consists of three modules (i) $sub(\widehat{X}_1, U)$, $sub(\widehat{X}_2, U)$, $\dots$, $sub(\widehat{X}_n, U)$; (ii) $empty(\{U-\widehat{X}_1, U-\widehat{X}_2, \dots, U -\widehat{X}_n\})$; and (iii) SP sends the ECRH hash value $h_e(U)^*$ for $U$. Due to the composition property and the security of (i)(ii), we only need to prove the security of (iii), that is, $acc(U)^*$ cannot be forged if $h_e(U)^*$ passes the client's verification. Denote $acc^{-1}({acc(U)}^*)$ as the set who has accumulator value ${acc(U)}^*$.
+
+  First, we prove $acc^{-1}(acc(U)^*)\subseteq U$, i.e., the returned value $acc(U)^*=g^{P(U)^*}$=$g^{P(U) \cdot Q_U(s)}$, where $Q_U(s)$ is some polynomial. We prove this by contradiction.
+  We assume there exists an element $x_j \in \widehat{X}_i$ such that $(x_j + s) \nmid P(U)^*$, i.e., $P(U)^* = (x_i + s) \cdot Q_i(s) + \lambda_i$, where $Q_i(s)$ is some polynomial and $\lambda_i$ is a constant value. During the execution of protocol $sub(\widehat{X}_i, U)$, by expanding $e(acc(\widehat{X}_i), W_i^*) = e(acc(U)^*, g)$, the adversary can get:
+  \begin{align*}
+  e(g^{\prod_{k=1}^{|\widehat{X}_i|}(x_k+s) }, W_i^*)  = e(g, g)^{(x_j+s) \cdot Q_i(s) + \lambda_i}.
+  \end{align*}
+  By dividing $(x_j+s)$ on the exponents of both sides, the adversary can get:
+  \begin{align*}
+  e(g, W_i^*)^{\prod_{k=1}^{j-1}{(x_k+s)} \cdot \prod_{k=j+1}^{|\widehat{X}_i|}{(x_k+s)}} = e (g, g)^{Q_i(s) + \lambda_i/(x_j+s)}.
+  \end{align*}
+  Finally, the adversary can get:
+  \begin{align}
+&e(g, g)^{1/(x_j + s)}  \nonumber \\
+    = &(e(g, W_i^*)^{\prod_{k=1}^{j-1}(x_k+s) \cdot \prod_{k=j+1}^{|\widehat{X}_i|}{(x_k+s)}} \cdot e(g, g)^{-Q_i(s)})^{1/\lambda_i},\nonumber
+  \end{align}
+  which violates the bilinear $q$-strong Diffie-Hellman assumption mention in \Cref{sec:aggregate-queries:prelim}. Hence, by contradiction, $P(U)^*$ must be in the form of $P(U) \cdot Q_U(s)$.
+
+  Next, we prove $U \subseteq acc^{-1}(acc(U)^*)$, i.e., $Q_U(s)$ can only be a constant value. We prove this by contradiction. For each set $\widehat{X}_i$, $acc(U - \widehat{X}_i)^* = g^{P(U-\widehat{X}_i) \cdot Q_U(s)}$. During the execution of $empty(\cdot)$, by expanding $\prod_{i=1}^n e(acc(U-\widehat{X}_i)^*, F_i^*)=e(g, g)$, the adversary can get:
+  \begin{align*}
+    \prod_{i=1}^n e(g^{P(U-\widehat{X}_i)}, g^{Q_i(s)}) = e(g, g),
+  \end{align*}
+  and then
+  \begin{align*}
+    e(g,g)^{Q_U(s)(\prod_{i=1}^nP(U-\widehat{X}_i)\cdot Q_i(s))}=e(g,g).
+  \end{align*}
+  Finally, the adversary can get:
+  \begin{align*}
+    e(g, g)^{1/Q_U(s)} = e(g, g)^{P(U-\widehat{X}_i \cdot Q_i(s))}.
+  \end{align*}
+  Since $Q_U(s)$ is a polynomial whose order is larger than $1$, the adversary violates the bilinear $q$-strong Diffie-Hellman assumption. Thus, by contradiction, $Q_U(s)$ must be a constant value.
+
+  By the above two arguments, we prove that the accumulative value ${acc(U)}^*$ cannot be forged if it passes the client's verification.
+\end{proof}
+
+\section{Security of $times(\cdot, \cdot)$ Operation}
+
+\begin{lemma}[Security of $times(\cdot,\cdot)$ operation]\label{lem:aggregate-queries:times}
+  Under the bilinear $q$-strong Diffie-Hellman assumption, if the accumulative value returned by $times(X,t)$ passes the client's verification, then the probability of $times(X,t) \neq acc(\uplus_{i=1}^t X)$ is negligible for any PPT adversary.
+\end{lemma}
+\begin{proof}
+  The $times(\cdot, \cdot)$ operation relies only on the $sum(\cdot)$ operation, and therefore the proof is similar to that of \Cref{lem:aggregate-queries:sum}.
+\end{proof}
+
+\section{Security of PA$^2$ Algorithms}
+
+Following the above lemmas, we now show that the query results returned by the PA$^2$ algorithms cannot be forged.
+\aggregatesecuritytheorem*
+
+\begin{proof}
+  According to the lemmas on the security of operations $sub(\cdot,\cdot)$, $empty(\cdot)$, $sum(\cdot)$, $union(\cdot)$, $times(\cdot,\cdot)$, the theorem is trivially true due to the composition property.
+\end{proof}
+

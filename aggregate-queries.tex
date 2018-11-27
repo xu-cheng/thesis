@@ -1,6 +1,6 @@
 \chapter{Authenticating Aggregate Queries over Set-Valued Data}\label{chap:aggregate-queries}
 
-In this chapter, we investigate the problem of authenticating aggregate queries over set-valued data.
+In this chapter, we investigate the problem of authenticating aggregate queries over set-valued data. The studied problem is formalized in \Cref{sec:aggregate-queries:problem}, followed by cryptographic preliminaries introduced in \Cref{sec:aggregate-queries:prelim}. \Cref{sec:aggregate-queries:pa2} proposes the PA$^2$ framework for privacy-preserving authentication of aggregate queries based on a family of verifiable multiset operations. Security analysis and performance optimization techniques are given in \Cref{sec:aggregate-queries:security-analysis} and \Cref{sec:aggregate-queries:opt}. \Cref{sec:aggregate-queries:exp} presents our experimental results. Finally, we summarize this chapter in \Cref{sec:aggregate-queries:summary}.
 
 \section{Problem Formulation}\label{sec:aggregate-queries:problem}
 
@@ -330,7 +330,7 @@ Now we define the digest of a leaf node based on the $acc$ values of leaf entrie
   \end{align*}
   where $acc(X_i)$ is the accumulative value of the feature set of object $X_i$ (defined in \Cref{eqn:aggregate-queries:random-bm}).
 \end{definition}
-For example, for leaf node $N_5$, its digest ${dig}_5 = H(H(acc(X_1)) | H(acc(X_2)))$. Note that this digest does not need any information about objects' non-sensitive attributes $A_i$, because the digest of its parent node already proves that this object is in its grid box.\footnote{For simplicity, in this paper we assume that the query range aligns with the grid boxes. Otherwise, the definition can be easily extended to include $A_i$ in the digests of leaf nodes.} With these definitions, the DO can compute the $acc$ values of all feature sets and the digests of all nodes in the MG-tree recursively in a bottom-up fashion. The digest of the root entry $dig_0$ is signed by the DO as $sig(dig_0)$.
+For example, for leaf node $N_5$, its digest ${dig}_5 = H(H(acc(X_1)) | H(acc(X_2)))$. Note that this digest does not need any information about objects' non-sensitive attributes $A_i$, because the digest of its parent node already proves that this object is in its grid box.\footnote{For simplicity, we assume that the query range aligns with the grid boxes. Otherwise, the definition can be easily extended to include $A_i$ in the digests of leaf nodes.} With these definitions, the DO can compute the $acc$ values of all feature sets and the digests of all nodes in the MG-tree recursively in a bottom-up fashion. The digest of the root entry $dig_0$ is signed by the DO as $sig(dig_0)$.
 
 On the SP side, the processing of a range query $[\alpha, \beta]$ starts from the root node. If a non-leaf node intersects the query range $[\alpha, \beta]$, it will be branched, i.e., its subtree is further explored. On the other hand, if a leaf node intersects the query range $[\alpha, \beta]$, all its entries will be returned as query results. \Cref{fig:aggregate-queries:mg-tree:structure} illustrates an example where $N_0, N_1, \dots, N_{10}$ are nodes and $o_1, o_2, \dots, o_{12}$ are objects, i.e., leaf entries. Since the root node $N_0$ intersects with the range $[\alpha, \beta]$, it will be branched and then non-leaf nodes $N_2, N_4$ are also branched. After that, leaf nodes $N_7, N_{9}, N_{10}$ intersect the query range, and all the leaf entries $\{o_5, o_6, o_{9}, o_{10}, o_{11}, o_{12}\}$ are returned as results, i.e., the selected candidate objects for the next phase of aggregate query processing.
 
@@ -486,7 +486,7 @@ The correctness of our PA$^2$ algorithms is defined in the natural way and is om
 
 We now show that the PA$^2$ authentication algorithms indeed satisfy the desired security requirements.
 
-\begin{restatable}{theorem}{thmaggregate}\label{thm:aggregate-queries:sec}
+\begin{restatable}{theorem}{aggregatesecuritytheorem}\label{thm:aggregate-queries:sec}
   The PA$^2$ authentication algorithms for aggregate queries guarantee the correctness and soundness of the query results under the bilinear $q$-strong Diffie-Hellman assumption.
 \end{restatable}
 
@@ -856,3 +856,5 @@ We investigate the impact of dimensionality on the authentication performance us
 Finally, \Cref{fig:aggregate-queries:diversity} shows our scalability test with respect to the cardinality of objects.
 The results show that the SP CPU time increases monotonically for $sum$, but is U-shape for other types of queries. This is because the other queries involve not only $sum(\cdot)$ operations but also  $union(\cdot)$ operations, whose costs decrease with increasing object cardinality under a fixed number of unique features. On the other hand, the CPU time of the client is independent of total number of features, but is positively related to the multiplicity of the returned multiset result. This also causes a relative high cost in client CPU time for \emph{FFQ} queries, similar to what we have observed in query performance on TPC-H dataset. As for the VO size, it is almost constant as it only depends on the number of OMG-tree nodes that cover the selected candidate objects.
 
+\section{Chapter Summary}\label{sec:aggregate-queries:summary}
+In this chapter, we have studied the problem of privacy-preserving authentication of aggregate queries over set-valued data. We presented a family of privacy-preserving protocols on multiset operations. Based on that, we proposed PA$^2$, a framework that supports various privacy-preserving aggregate queries. We also designed the MG-tree to guarantee the correctness of the candidate objects selected by a range query and developed several advanced optimization techniques. Analytical models and empirical results validate the feasibility and robustness of our proposals. In particular, the overhead of authenticating aggregate queries at the client side is only sublinear to the number of candidate objects and is independent of the cardinality of multisets. The evaluation results also reveal that the authentication overhead incurred by the confidentiality preservation requirement is only moderate.
