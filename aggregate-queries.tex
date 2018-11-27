@@ -590,3 +590,269 @@ Regarding the performance, similar to the optimized MG-tree, since the DO knows 
 \subsection{Acceleration by Parallelism}
 Both the multiset authentication protocols and PA$^2$ algorithms are highly parallelizable. As such, we can accelerate the authentication performance by embracing parallel computing architectures, such as multithreading, GPU computing, and MapReduce. For example, in the $union(\cdot)$ protocol, we can map all $sub(\cdot, \cdot)$ jobs to the available computing units, whether they are CPU cores or worker nodes in MapReduce. Similarly, in the $empty(\cdot)$ protocol, the server can compute the accumulative values of polynomials $Q_i$ in a parallel manner. Note that, however, in the $sum(\cdot)$ and $times(\cdot, \cdot)$ protocols, the order of polynomials is accumulated and therefore the time cost of each parallel job may vary significantly. As such, instead of splitting all jobs equally at the beginning of the query, we schedule a small set of jobs at a time. With this graceful scheduling technique, we can minimize the waiting time of idle computing units while still reducing the job scheduling overhead.
 
+\section{Performance Evaluation}\label{sec:aggregate-queries:exp}
+
+In this section, we evaluate the performance of PA$^2$ framework for aggregate queries over set-valued data, including the \emph{max}, \emph{top-$k$}, \emph{sum}, and \emph{FFQ} queries. Three datasets are used in the experiments, namely \emph{Personal Genome Project at Harvard Medical School} (PGP)~\cite{pgp}, \emph{Foodmarket from Microsoft} (FoodMarket)~\cite{foodmarket}, and \emph{TPC Benchmark H} (TPC-H)~\cite{tpch}. As introduced in Section 1, the PGP dataset contains personal genome data of $600$ participants. The objects in this dataset are in the form of $\langle$\emph{latitude}, \emph{longitude}, \emph{mut-genes}$\rangle$, where \emph{mut-genes} is a feature set of mutation genes of an individual, e.g., $\{\text{`A-C130R'}, \text{`P-I696M'}\}$. There are totally $395$ unique mutation genes, and on average each individual has $35$ of them. The FoodMarket is a larger dataset that contains $\fnum{164558}$ shopping transaction records from $\fnum{8842}$ users and $\fnum{1560}$ products, in the form of $\langle$\emph{birthday}, \emph{membershipAge}, \emph{items}$\rangle$. Finally, the TPC-H dataset contains $\fnum{1020116}$ transaction records from $\fnum{255000}$ orders and $\fnum{1700}$ suppliers, in the form of $\langle$\emph{order\_priority}, \emph{date}, \emph{suppliers}$\rangle$. In all these three datasets, the first two attributes are non-sensitive, whereas the last attribute is sensitive. We use the FoodMarket as the default dataset unless otherwise stated. For the experiments requiring higher dimensionality, we also synthesize some attributes into this dataset.
+
+Both the DO and the query client are set up on a commodity laptop computer with Intel Core i5 CPU and 4GB RAM, running on macOS Sierra. The SP is set up on an x64 blade server with dual Intel Xeon 2.2GHz E5-2630 CPU and 256GB RAM, running on CentOS 6. The experiments are written in C++ and use the following libraries: Pairing-based cryptography for bilinear pairing computations, Flint for modular arithmetic operations, Crypto++ for 160-bit SHA-1 hash operations, OpenMP for parallel computation. % chktex 8
+
+To evaluate the performance of the authentication process, we mainly measure two costs:
+\begin{inlineenum}
+\item the computational cost in terms of the SP and client CPU time, and
+\item the communication cost in terms of the size of data transmitted (a) between the DO and the SP (i.e., the index size) and (b) between the SP and the client (i.e., the VO size).
+\end{inlineenum}
+The results are reported based on an average of $10$ randomly generated operations/queries.
+
+\begin{table}[t]
+  \centering
+  \footnotesize
+  \begin{tabular}{lccccc}
+    \toprule
+    \multirow{3}{*}{Algorithm} & \multicolumn{3}{c}{SP CPU Time (s)} &
+    \multirow{3}{*}{\tabincell{c}{Client\\CPU Time\\(ms)}}  &
+    \multirow{3}{*}{\tabincell{c}{VO\\Size\\(Bytes)}} \\
+                                                            & \multicolumn{3}{c} {\# Features per Multiset} &  & \\
+                                                            \cmidrule{2-4}
+                                                            &100 & 1,000 & 10,000 &  &  \\
+                                                            \midrule
+    $sub(\cdot, \cdot)$ & 0.03 & 0.5 & 16 & 2 & 384 \\
+    $sum(\cdot)$  & 0.04 & 0.4 & 3.6 & 5 & 384 \\
+    $union(\cdot)$  & 0.1 & 1.3 & 33 & 20 & 1,024 \\
+    $empty(\cdot)$  & 0.04 & 0.5 & 16  & 5 & 512\\
+    $times(\cdot, 10)$ & 0.4 & 4.1 & 43 & 20 & 640  \\
+    \bottomrule
+  \end{tabular}
+  \caption{Performance vs. \# Features}\label{tab:aggregate-queries:basic_op}
+\end{table}
+
+\begin{table}[t]
+  \centering
+  \footnotesize
+  \begin{tabular}{lcccc}
+    \toprule
+    \multirow{3}{*}{Algorithm} & \multicolumn{4}{c}{SP CPU Time (s)}  \\
+                               & \multicolumn{4}{c} {\# Multisets}  \\
+                               \cmidrule{2-5}
+                               & 5 & 10 &20  & 50 \\
+                               \midrule
+    $sum(\cdot)$   & 0.1 & 0.3 & 1.4  & 8.3\\
+    $union(\cdot)$   & 0.4 & 2.6 & 18 & 240 \\
+    $empty(\cdot)$   & 0.01 & 0.01  & 0.01  & 0.01\\
+    \bottomrule
+  \end{tabular}
+  \caption{Performance vs. \# Multisets}\label{tab:aggregate-queries:basic_op2}
+\end{table}
+
+\begin{table}[t]
+  \centering
+  \footnotesize
+  \begin{tabular}{lcccc}
+    \toprule
+    \multirow{3}{*}{Algorithm} & \multicolumn{4}{c}{SP CPU Time (s)}  \\
+                               & \multicolumn{4}{c} {\# Unique Features}  \\
+                               \cmidrule{2-5}
+                               &50 & 100 & 200 &500   \\
+                               \midrule
+    $union(\cdot)$  & 0.14 & 0.26 & 0.33 &  0.39 \\
+    \bottomrule
+  \end{tabular}
+  \caption{Performance of $union(\cdot)$ vs. \# Unique Features}\label{tab:aggregate-queries:basic_op3}
+\end{table}
+
+\subsection{Performance of Privacy-Preserving Multiset Authentication Protocols}
+
+We first use two synthetic multisets to evaluate the performance of the five privacy-preserving authentication protocols, i.e., $sub(\cdot,\cdot)$, $sum(\cdot)$, $union(\cdot)$, $empty(\cdot)$, and $times(\cdot, \cdot)$ in terms of (i) the SP CPU time, (ii) the client CPU time, and (iii) the VO size. We fix the coefficient for $times(\cdot, \cdot)$ to $10$, and vary the number of features from $100$ to $\fnum{10000}$. The SP CPU time (single-threaded) is reported in \Cref{tab:aggregate-queries:basic_op}. As coinciding with our cost model analysis, the SP CPU time is almost linear to the number of features. In contrast, the client CPU time and VO size are all constants, irrespective of the number of features.
+
+We further investigate the SP CPU time of $sum(\cdot)$, $union(\cdot)$, $empty(\cdot)$ for more than two input multisets. We fix the number of features in each multiset to $20$ and vary the number of multisets. Since the client time and VO size are both linear to the number of input multisets, \Cref{tab:aggregate-queries:basic_op2} only shows the SP CPU time. For the $sum(\cdot)$ and $union(\cdot)$ operations, the cost is almost quadratic to the number of multisets, which coincides with our analysis in \Cref{tab:aggregate-queries:cost-model-set}. For $union(\cdot)$, we also investigate whether the cardinality of feature universe affects its performance. \Cref{tab:aggregate-queries:basic_op3} shows the results as the features increase while fixing the number of multisets and the multiset size to $5$ and $20$, respectively. We observe that the increment is sublinear to the cardinality of feature universe.
+
+\subsection{Query Authentication Performance}
+
+We turn on all the optimizations and evaluate the overall performance of privacy-preserving query authentication on all three datasets. First, \Cref{tab:aggregate-queries:setup} shows the DO setup cost for generating the $acc$ values and constructing the MG-tree. As explained in the cost model analysis, since the DO knows the secret value of $s$, the setup process is relatively efficient.
+
+\begin{table}[t]
+  \centering
+  \footnotesize
+  \begin{tabular}{cccc}
+    \toprule
+    Dataset & \tabincell{c}{Dataset\\ Size (MB)} & {Setup Time (s)} & \tabincell{c}{MG-tree Index\\Size (MB)} \\
+    \midrule
+    PGP  & 0.08 & 9.7 & 0.42 \\
+    FoodMarket & 0.9 & 136 & 7.1 \\
+    TPC-H & 13 & 1,365 & 116 \\
+    \bottomrule
+  \end{tabular}
+  \caption{DO Setup Overhead}\label{tab:aggregate-queries:setup}
+\end{table}
+
+\begin{table}[t]
+  \centering
+  \footnotesize
+    \begin{tabular}{ccccccc}
+      \toprule
+      Algorithm &
+      \tabincell{c}{DO Setup\\Time (s)} & \tabincell{c}{DO Index\\Size (KB)} &
+      $\delta$ &
+      \tabincell{c}{SP CPU\\Time (s)} & \tabincell{c}{Client CPU\\Time (s)} & \tabincell{c}{VO Size\\(KB)}   \\
+      \midrule
+      \multirow{3}{*}{\emph{FFQ}} &
+      \multirow{3}{*}{8.9} &
+      \multirow{3}{*}{307} &
+      50\% &
+      24 & 6.1 & 1.1 \\
+         & & &
+      70\% &
+      25 & 1.1 & 1.1 \\
+         & & &
+      90\% &
+      45 & 0.4 & 1.1 \\
+      \midrule
+      \multirow{3}{*}{\emph{FFQ-NP}} &
+      \multirow{3}{*}{0.1} &
+      \multirow{3}{*}{13.7} &
+      50\% &
+      15.1 & 22.0 & 1,668 \\
+           & & &
+      70\% &
+      5.0 & 7.0 & 346 \\
+          & & &
+      90\% &
+      2.5 & 1.8 & 88 \\
+      \bottomrule
+  \end{tabular}
+  \caption{Proposed \emph{FFQ} Algorithm vs. \emph{FFQ-NP} Algorithm}\label{tab:aggregate-queries:baseline}
+\end{table}
+
+\begin{figure}[t]
+  \centering
+  \begin{subfigure}[b]{.31\linewidth}
+    \centering
+    \includegraphics[width=\linewidth]{exp-figs/aggregate-queries/pgp_sp.pdf}
+    \caption{SP CPU Time}
+  \end{subfigure}~%
+  \begin{subfigure}[b]{.31\linewidth}
+    \centering
+    \includegraphics[width=\linewidth]{exp-figs/aggregate-queries/pgp_client.pdf}
+    \caption{Client CPU Time}
+  \end{subfigure}~%
+  \begin{subfigure}[b]{.36\linewidth}
+    \centering
+    \includegraphics[width=\linewidth]{exp-figs/aggregate-queries/pgp_vo.pdf}
+    \caption{VO Size}
+  \end{subfigure}
+  \caption{Query Performance vs. Selectivity on PGP dataset}\label{fig:aggregate-queries:pgp}
+
+  \centering
+  \begin{subfigure}[b]{.31\linewidth}
+    \centering
+    \includegraphics[width=\linewidth]{exp-figs/aggregate-queries/foodmarket_sp.pdf}
+    \caption{SP CPU Time}
+  \end{subfigure}~%
+  \begin{subfigure}[b]{.3\linewidth}
+    \centering
+    \includegraphics[width=\linewidth]{exp-figs/aggregate-queries/foodmarket_client.pdf}
+    \caption{Client CPU Time}
+  \end{subfigure}~%
+  \begin{subfigure}[b]{.37\linewidth}
+    \centering
+    \includegraphics[width=\linewidth]{exp-figs/aggregate-queries/foodmarket_vo.pdf}
+    \caption{VO Size}
+  \end{subfigure}
+  \caption{Query Performance vs. Selectivity on FoodMarket dataset}\label{fig:aggregate-queries:foodmarket}
+
+  \centering
+  \begin{subfigure}[b]{.31\linewidth}
+    \centering
+    \includegraphics[width=\linewidth]{exp-figs/aggregate-queries/tpch_sp.pdf}
+    \caption{SP CPU Time}
+  \end{subfigure}~%
+  \begin{subfigure}[b]{.31\linewidth}
+    \centering
+    \includegraphics[width=\linewidth]{exp-figs/aggregate-queries/tpch_client.pdf}
+    \caption{Client CPU Time}
+  \end{subfigure}~%
+  \begin{subfigure}[b]{.36\linewidth}
+    \centering
+    \includegraphics[width=\linewidth]{exp-figs/aggregate-queries/tpch_vo.pdf}
+    \caption{VO Size}
+  \end{subfigure}
+  \caption{Query Performance vs. Selectivity on TPC-H dataset}\label{fig:aggregate-queries:tpch}
+\end{figure}
+
+To select the candidate objects, we choose the participants' location attributes in PGP, the customers' birthday and membership age in FoodMarket, and the order\_priority and date in TPC-H as the input attributes for 2D range queries. The aggregate queries, \emph{max}, \emph{top-$k$}, \emph{sum}, and \emph{FFQ}, are then performed on the feature sets of the selected candidate objects. For  \emph{top-$k$} queries, we set $k=5$; and for \emph{FFQ} queries, we set the threshold to be 80\% of the highest multiplicity of all features. The experiments are conducted under a multi-threaded setting (40 hyper-threads on 20 CPU cores). The results are shown in \Cref{fig:aggregate-queries:pgp}, \Cref{fig:aggregate-queries:foodmarket}, and \Cref{fig:aggregate-queries:tpch} respectively, where the query range varies from 1\% to 20\% of the data space. It is observed that all the costs are generally sublinear to the query range, thanks to the optimized MG-tree that significantly reduces the multiset operations and accumulative value computations.
+It is interesting to note that  the cost of client CPU time is relatively higher for \emph{FFQ} queries on TPC-H dataset. This is caused by the large multiplicity of the returned multiset result, which incurs more overhead when computing the result $acc$ value on the client.
+Nevertheless, the consistent results on the three different datasets suggest that our algorithms are robust against various data distributions.
+
+For \emph{FFQ} queries, we also compare our proposed privacy-preserving authentication algorithm with the state-of-the-art non-privacy-preserving counterpart proposed in~\cite{10.1109/icdm.2013.81}, denoted by \emph{FFQ-NP}. This comparison intends to show the overhead incurred by the confidentiality preservation requirement. We select 1\% of the PGP data as input and set the maximum size of frequent feature sets to 3. As shown in \Cref{tab:aggregate-queries:baseline}, the overhead is moderate in that our \emph{FFQ} is only tens of times worse than \emph{FFQ-NP} in terms of the DO index size and SP CPU time. The VO size of our \emph{FFQ} is even smaller than that of \emph{FFQ-NP}. Another interesting observation is that the SP CPU time is positively correlated to the threshold $\delta$ in our algorithm, but negatively in \emph{FFQ-NP}. The is because the $times(\cdot,\cdot)$ operation involved in \emph{FFQ}, whose input is the infrequent feature sets, becomes more costly with increasing threshold. In comparison, the SP CPU time of \emph{FFQ-NP} is mainly affected by the number of frequent feature sets, which decreases with a larger threshold.
+As \emph{FFQ} queries are often used in the early stage of the whole data analytics pipeline, their threshold is usually set to a low or medium value, which falls in the comfort zone of our algorithm.
+
+\subsection{Impact of Optimizations}
+
+To evaluate the impact of the proposed optimizations, namely, the optimized MG-tree (OMG) and parallelizing techniques, we use the FoodMarket dataset and set the selectivity of candidate objects to 5\% of the whole dataset. Their effects for different aggregate queries are shown in \Cref{fig:aggregate-queries:opt}. It can be seen that both the OMG-tree and multithreading techniques substantially reduce the SP CPU time by an order of magnitude.
+In \Cref{fig:aggregate-queries:mt}, we further vary the number of threads in parallelization. We observe that the SP can be effectively accelerated by up to 30--40 threads, only bounded by the number of logical CPUs of our server. As we show the computation of the SP is highly parallellizable, we believe its performance can be further accelerated by clusters or cloud IaaS widely available in today's data centers.
+
+We also evaluate the performance of the linear ordering technique in \Cref{fig:aggregate-queries:linear}. We compare it with the baseline $sum(\cdot)$ under one-dimensional data. The results show that it dramatically improves the performance by more than four times. In addition, as the selectivity increases, the performance gain becomes even more eminent.
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=0.5\linewidth]{exp-figs/aggregate-queries/opt.pdf}
+  \caption{Performance vs. Optimizations}\label{fig:aggregate-queries:opt}
+\end{figure}
+
+\begin{figure}[t]
+  \begin{minipage}[t]{0.5\linewidth}
+    \centering
+    \includegraphics[width=.8\linewidth]{exp-figs/aggregate-queries/threads.pdf}
+    \captionof{figure}{Multi-Threaded Acceleration}\label{fig:aggregate-queries:mt}
+  \end{minipage}~%
+  \begin{minipage}[t]{0.5\linewidth}
+    \centering
+    \includegraphics[width=.75\linewidth]{exp-figs/aggregate-queries/linear.pdf}
+    \captionof{figure}{Basic $sum(\cdot)$ vs. Linear Ordering}\label{fig:aggregate-queries:linear}
+  \end{minipage}
+\end{figure}
+
+\subsection{Scalability Test on Dimensionality and Object Cardinality}
+
+\begin{figure}[t]
+  \centering
+  \begin{subfigure}[b]{.33\linewidth}
+    \centering
+    \includegraphics[width=\linewidth]{exp-figs/aggregate-queries/dimension_sp.pdf}
+    \caption{SP CPU Time}
+  \end{subfigure}~%
+  \begin{subfigure}[b]{.33\linewidth}
+    \centering
+    \includegraphics[width=\linewidth]{exp-figs/aggregate-queries/dimension_client.pdf}
+    \caption{Client CPU Time}
+  \end{subfigure}~%
+  \begin{subfigure}[b]{.33\linewidth}
+    \centering
+    \includegraphics[width=\linewidth]{exp-figs/aggregate-queries/dimension_vo.pdf}
+    \caption{VO Size}
+  \end{subfigure}
+  \caption{Query Performance vs. Dimensionality}\label{fig:aggregate-queries:md}
+
+  \centering
+  \begin{subfigure}[b]{.33\linewidth}
+    \centering
+    \includegraphics[width=\linewidth]{exp-figs/aggregate-queries/cardinality_sp.pdf}
+    \caption{SP CPU Time}
+  \end{subfigure}~%
+  \begin{subfigure}[b]{.33\linewidth}
+    \centering
+    \includegraphics[width=\linewidth]{exp-figs/aggregate-queries/cardinality_client.pdf}
+    \caption{Client CPU Time}
+  \end{subfigure}~%
+  \begin{subfigure}[b]{.33\linewidth}
+    \centering
+    \includegraphics[width=\linewidth]{exp-figs/aggregate-queries/cardinality_vo.pdf}
+    \caption{VO Size}
+  \end{subfigure}
+  \caption{Query Performance vs. Object Cardinality}\label{fig:aggregate-queries:diversity}
+\end{figure}
+
+We investigate the impact of dimensionality on the authentication performance using the FoodMarket dataset. We fix the selectivity of candidate objects to 5\% of the whole dataset and vary the dimensionality as 1, 3, and 5. For the latter two dimensionalities, we synthesize the non-sensitive attributes based on a uniform distribution and therefore the size of the range query changes accordingly. \Cref{fig:aggregate-queries:md} plots the costs of various aggregate queries. We observe that the performance of \emph{max}, \emph{top-$k$}, and \emph{FFQ} queries deteriorates severely due to the curse of dimensionality, while the performance of \emph{sum} queries does less. This is because $union(\cdot)$, the most affected operation by dimensionality, is not needed in $sum$ queries.
+
+Finally, \Cref{fig:aggregate-queries:diversity} shows our scalability test with respect to the cardinality of objects.
+The results show that the SP CPU time increases monotonically for $sum$, but is U-shape for other types of queries. This is because the other queries involve not only $sum(\cdot)$ operations but also  $union(\cdot)$ operations, whose costs decrease with increasing object cardinality under a fixed number of unique features. On the other hand, the CPU time of the client is independent of total number of features, but is positively related to the multiplicity of the returned multiset result. This also causes a relative high cost in client CPU time for \emph{FFQ} queries, similar to what we have observed in query performance on TPC-H dataset. As for the VO size, it is almost constant as it only depends on the number of OMG-tree nodes that cover the selected candidate objects.
+
