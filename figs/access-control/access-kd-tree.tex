@@ -69,7 +69,7 @@
 
             \foreach \y [count=\yi] in {1.5,0.5,...,-1.5}{%
                 \foreach \x [count=\xi] in {-1.5,-0.5,...,1.5}{%
-                    \pgfmathtruncatemacro{\i}{\yi*4 + \xi - 4};
+                    \pgfmathtruncatemacro{\i}{\yi*4 + \xi - 4}
                     \node [circle,fill,inner sep=1.2pt] at (\x,\y) {};
                     \ifthenelse{\i=10 \OR \i=11 \OR \i=12 \OR \i=14 \OR \i=15 \OR \i=16}{
                         \node[scale=1.2] at (\x+0.25,\y-0.25) {\contour{white}{$o_{\i}$}};

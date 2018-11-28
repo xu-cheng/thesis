@@ -5,7 +5,7 @@
             \node at (-1.8, 1.5, 0.2) {level 1};
             \foreach \x [count=\xi] in {-0.5, 0.5}{
                 \foreach \z [count=\zi] in {-0.5, 0.5}{
-                    \pgfmathtruncatemacro{\i}{\zi*2 + \xi - 2};
+                    \pgfmathtruncatemacro{\i}{\zi*2 + \xi - 2}
                     \node[scale=0.8] at(\x, 1.5, \z) {$N_{\i}$};
                 }
             }
@@ -15,7 +15,7 @@
             \node at (-2.8, 0, 1.2) {level 2};
             \foreach \x [count=\xi] in {-1.5,-0.5,...,1.5}{
                 \foreach \z [count=\zi] in {-1.5,-0.5,...,1.5}{
-                    \pgfmathtruncatemacro{\i}{\zi*4 + \xi};
+                    \pgfmathtruncatemacro{\i}{\zi*4 + \xi}
                     \node[scale=0.8] at(\x, 0, \z) {$N_{\i}$};
                 }
             }
@@ -37,7 +37,7 @@
             \foreach \y in {-2,...,2}{\draw (-2,\y) -- (2,\y);}
             \foreach \y [count=\yi] in {1.5,0.5,...,-1.5}{%
                 \foreach \x [count=\xi] in {-1.5,-0.5,...,1.5}{%
-                    \pgfmathtruncatemacro{\i}{\yi*4 + \xi - 4};
+                    \pgfmathtruncatemacro{\i}{\yi*4 + \xi - 4}
                     \node [circle,fill,inner sep=1.2pt] at (\x,\y) {};
                     \ifthenelse{\i=10 \OR \i=11 \OR \i=12 \OR \i=14 \OR \i=15 \OR \i=16}{
                         \node[scale=1.2] at (\x+0.25,\y-0.25) {\contour{white}{$o_{\i}$}};
