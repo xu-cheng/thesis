@@ -1,0 +1,128 @@
+\begin{tikzpicture}
+    \tikzstyle{tree node}=[
+        rectangle split,
+        rectangle split horizontal,
+        rectangle split ignore empty parts,
+        draw
+    ]
+    \tikzstyle{tree}=[
+        every node/.style={tree node},
+        edge from parent path={},
+        level/.style={level distance=0.8cm},
+        level 2/.style={sibling distance=3cm},
+        level 3/.style={sibling distance=2cm},
+    ]
+    \tikzstyle{diagonal fill}=[
+            path picture={
+                \fill[#1] (path picture bounding box.north west) |-
+                          (path picture bounding box.south east) -- cycle;
+            }
+    ]
+
+    \path[tree] node (r_root) {$R_0$}
+    child {
+        node (r_l1) {
+            \nodepart{one} $R_1$ \nodepart{two} \contour{white}{$R_2$}
+        }
+        child {
+            node (r_l21) {
+                \nodepart{one} $R_{3}$ \nodepart{two} $R_{4}$
+            }
+            child {node (r1) [fill=black!20, text=black] {$r_1$}}
+            child {node (r2) [diagonal fill=black!30, text=black] {$r_2$}}
+        }
+        child {
+            node (r_l22) {
+                \nodepart{one} $R_{5}$ \nodepart{two} $R_{6}$
+            }
+            child {node (r3) {$r_3$}}
+            child {node (r4) {$r_4$}}
+        }
+    };
+
+    \path[tree, grow=up] node[below=5.1cm of r_root] (s_root) {$S_0$}
+    child {
+        node (s_l1) {
+        \nodepart{one} $S_1$ \nodepart{two} $S_2$
+        }
+        child {
+            node (s_l22) {
+                \nodepart{one} $S_{5}$ \nodepart{two} $S_{6}$
+            }
+            child {node (s4) {$s_4$}}
+            child {node (s3) [diagonal fill=black!30, text=black] {$s_3$}}
+        }
+        child {
+            node (s_l21) {
+                \nodepart{one} $S_{3}$ \nodepart{two} \contour{white}{$S_{4}$}
+            }
+            child {node (s2) {$s_2$}}
+            child {node (s1) [fill=black!20, text=black] {$s_1$}}
+        }
+    };
+
+    \begin{pgfonlayer}{background}
+        \fill[pattern=north east lines,pattern color=blue!70] (r_l1.one split north) rectangle (r_l1.south east);
+        \fill[pattern=north east lines,pattern color=blue!70] (s_l21.one split north) rectangle (s_l21.south east);
+    \end{pgfonlayer}
+
+    \foreach \a/\b in {
+        r_root.south/r_l1,
+        r_l1.one south/r_l21,
+        r_l1.two south/r_l22,
+        r_l21.one south/r1,
+        r_l21.two south/r2,
+        r_l22.one south/r3,
+        r_l22.two south/r4%
+    }
+    \draw [style=edge from parent] (\a) -- (\b.north);
+    \foreach \a/\b in {
+        s_root.north/s_l1,
+        s_l1.one north/s_l21,
+        s_l1.two north/s_l22,
+        s_l21.one north/s1,
+        s_l21.two north/s2,
+        s_l22.one north/s3,
+        s_l22.two north/s4%
+    }
+    \draw [style=edge from parent] (\a) -- (\b.south);
+
+    \coordinate (mid) at ($(r_root)!.5!(s_root)$);
+
+    \draw[thick] ($(mid) + (-3.3cm,0.1cm)$) rectangle
+                 ($(mid) + (3.3cm,3.3cm)$) node[anchor=north east,scale=1] {Table $R$};
+
+    \draw[thick] ($(mid) + (-3.3cm,-0.1cm)$) rectangle
+                 ($(mid) + (3.3cm,-3.3cm)$) node[anchor=south east,scale=1] {Table $S$};
+
+    \draw[red, rounded corners, thick]
+        ($(mid) - (2.9cm,0.85cm)$) rectangle ($(mid) + (2.9cm,0.85cm)$);
+    \node[red,scale=1.2] at ($(mid) + (-3.1cm,0.25cm)$) {$\alpha$};
+    \node[red,scale=1.2] at ($(mid) + ( 3.1cm,0.25cm)$) {$\beta$};
+
+    \begin{customlegend}[
+        legend cell align=left,
+        rectangle legend/.style={
+            legend image code/.code={%
+                \draw[black,#1] (0cm,-0.15cm) rectangle (0.3cm,0.15cm);
+            }
+        },
+        rectangle legend multiline/.style={
+            legend image code/.code={%
+                \draw[black,#1] (0cm,-0.15cm) rectangle (0.3cm,0.15cm);
+            }
+        },
+        legend style={
+            draw=none,
+            cells={align=left},
+            above left=1.5cm and 3.5cm of mid
+        }
+    ]
+        \addlegendimage{rectangle legend={fill=black!20}}
+        \addlegendentry{APP signature}
+        \addlegendimage{rectangle legend={pattern=north east lines,pattern color=blue!70}}
+        \addlegendentry{APS signature}
+        \addlegendimage{rectangle legend multiline={diagonal fill=black!30}}
+        \addlegendentry{Non-result accessible record}
+    \end{customlegend}
+\end{tikzpicture}

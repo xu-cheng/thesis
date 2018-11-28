@@ -1,0 +1,62 @@
+\begin{tikzpicture}[remember picture]
+    \node (sp) {
+        \begin{threeparttable}
+            \begin{tabular}{|C|C|C|}
+                \hline
+                \multicolumn{3}{|c|}{\textbf{Database}} \\ \hline
+                q\ attr. & content^{*} & \multicolumn{1}{c|}{access policy} \\ \hline
+                o_1      & v_1              & Role_A \land Role_C           \\
+                o_2      & v_2              & Role_A \land Role_B           \\
+                o_3      & v_3              & Role_B \lor  Role_C           \\
+                o_4      & v_4              & Role_C                        \\
+                o_5      & v_5              & Role_A                        \\ \hline
+            \end{tabular}
+            \begin{tablenotes} \footnotesize
+                \item[] \hspace{-0.2in} *Content is encrypted by CP-ABE
+            \end{tablenotes}
+        \end{threeparttable}
+    };
+    \node[below=0cm of sp] (sp-label) {\textbf{Service Provider (SP)}};
+
+    \draw [red,rounded corners,thick]
+    let \p1 = (sp.west),
+    \p2 = ($(sp.south)!.26!(sp.north)$),
+    \p3 = ($(sp.west)!.55!(sp.east)$),
+    \p4 = ($(sp.south)!.59!(sp.north)$) in
+    (\x1, \y2) rectangle (\x3, \y4)
+    node[xshift=-0.32cm, yshift=-0.3cm] {$Q$};
+
+    \node[matrix, left=-0.25cm of sp] {
+        \node[scale=0.5] at (0,0) (do)
+        {\includegraphics{figs/icons/database.eps}};
+        \draw[-latex] (0,0) -- (1.8,0)
+        node [above,midway,font=\footnotesize]
+        {$\{(o_i, v_i, \Upsilon_i)\}$}
+        node [below,midway,font=\footnotesize]
+        {$ADS$};
+        \\
+    };
+    \node[xshift=0.5cm] at (sp-label -| do) {\textbf{Data Owner (DO)}};
+
+    \node[matrix, right=-0.25cm of sp] (users) {
+        \node[scale=0.9] at (0,0) (user1) {\includegraphics{figs/icons/user.eps}};
+        \node[below=0.1cm of user1,font=\footnotesize]{$Role_A, Role_B$};
+        \node[right=0cm of user1]{$u_1$};
+
+        \node[scale=0.9] at (0,-2) (user2) {\includegraphics{figs/icons/user.eps}};
+        \node[below=0.1cm of user2,font=\footnotesize]{$Role_C$};
+        \node[right=0cm of user2]{$u_2$};
+
+        \draw[-latex,transform canvas={yshift=0.5ex}] (0, 0) -- (-2.8, 0)
+        node [above,midway,font=\small] {\textcolor{red}{$Q$}};
+        \draw[-latex,transform canvas={yshift=-0.5ex}] (-2.8, 0) -- (0, 0)
+        node [below,midway,font=\footnotesize,align=center] {$\{\langle o_2, v_2\rangle , \langle o_3, v_3\rangle\}$ \\ $VO$};
+
+        \draw[-latex,transform canvas={yshift=0.5ex}] (0, -2) -- (-2.8, -2)
+        node [above,midway,font=\footnotesize] {\textcolor{red}{$Q$}};
+        \draw[-latex,transform canvas={yshift=-0.5ex}] (-2.8, -2) -- (0, -2)
+        node [below,midway,font=\footnotesize,align=center] {$\{\langle o_3, v_3\rangle , \langle o_4, v_4\rangle\}$ \\ $VO$};
+        \\
+    };
+    \node at (sp-label -| user1) (user-label) {\textbf{Clients}};
+\end{tikzpicture}

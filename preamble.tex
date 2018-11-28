@@ -60,6 +60,7 @@
 \usepackage{bm}
 \usepackage{fancynum}
 \usepackage[ruled,vlined,linesnumbered,algochapter]{algorithm2e}
+\SetKwProg{Fn}{Function}{}{}
 \SetVlineSkip{0pt}
 
 % caption related packages
@@ -67,6 +68,7 @@
 \usepackage{subcaption}
 
 % figure related packages
+\usepackage{placeins}
 \usepackage{graphicx}
 \usepackage{tikz}
 \usetikzlibrary{backgrounds,calc,decorations.pathreplacing,fit,matrix,patterns,positioning,shapes,shapes.multipart}
@@ -312,7 +314,7 @@
 
 % other packages
 \usepackage[inline]{enumitem}
-\setlist{noitemsep}
+\setlist{noitemsep,partopsep=0pt,topsep=0pt}
 \newlist{inlineenum}{enumerate*}{1}
 \setlist[inlineenum]{label=(\roman*),ref=(\roman*)} % chktex 36
 

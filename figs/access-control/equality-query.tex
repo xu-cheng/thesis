@@ -1,0 +1,50 @@
+\begin{tikzpicture}
+    \node[matrix] (users) {
+        \node[scale=0.9] at (0,0) (user1) {\includegraphics{figs/icons/user.eps}};
+        \node[below=0cm of user1]{$Role_A, Role_B$};
+        \node[right=0cm of user1]{$u_1$};
+
+        \node[scale=0.9] at (0,-2) (user2) {\includegraphics{figs/icons/user.eps}};
+        \node[below=-0.1cm of user2]{$Role_C$};
+        \node[right=-0.1cm of user2]{$u_2$};
+        \\
+    };
+
+    \coordinate (user_mid) at ($(user1)!.5!(user2)$);
+
+    \node (aps) [left=3.5cm of user2,align=center] {APS signature\\$\hat{\sigma}_{2, \mathcal{A}_{u_2}}$};
+    \node [draw,thick,fit=(aps),rounded corners] (aps_round) {};
+
+    \node (app) [left=6cm of user1,align=center] {APP signature\\$\sigma_2$};
+    \node [draw,thick,fit=(app),rounded corners] (app_round) {};
+
+    \node (data) [left=10cm of user2,align=center]
+    {$\langle o_2, v_2, \Upsilon_2\rangle$\\$\Upsilon_2 = Role_A \land Role_B$};
+    \node [draw,thick,fit=(data),rounded corners] (data_round) {};
+
+    \draw[-latex, thick] (app_round.east) -- ($(user1) - (0.5cm, 0)$)
+    node [above,midway] (vo1) {};
+    \draw[-latex, thick] (aps_round.east) -- ($(user2) - (0.5cm, 0)$)
+    node [above,midway] (vo2) {$\langle H(v_2), \hat{\sigma}_{2, \mathcal{A}_{u_2}}\rangle$};
+    \draw (vo2 |- vo1) node [above] {$\langle v_2, \sigma_2, \Upsilon_2\rangle$};
+
+    \draw[-latex, thick] (app_round.south) .. controls (app_round.south |- aps_round.west)
+                          .. (aps_round.west)
+    node[below,midway,pos=0.55,xshift=-0.2cm,yshift=-0.1cm] {\textsf{ABS.Relax}};
+
+    \draw[-latex, thick] (data_round.north) .. controls (data_round.north |- app_round.west)
+                          .. (app_round.west)
+    node[above,midway,pos=0.75] {\textsf{ABS.Sign}};
+
+    \coordinate (do_sp_mid) at ($(data_round.east)!.5!(app_round.west)$);
+    \draw[dashed, color=black!30] ($(do_sp_mid) - (0,1.8cm)$) -- ($(do_sp_mid) + (0,1.5cm)$);
+
+    \coordinate (sp_user_mid_x) at ($(aps_round.east) + (0.2cm, 0)$);
+    \coordinate (sp_user_mid) at (do_sp_mid -| sp_user_mid_x);
+    \draw[dashed, color=black!30] ($(sp_user_mid) - (0,1.8cm)$) -- ($(sp_user_mid) + (0,1.5cm)$);
+
+    \node[below=0.15cm of data_round.south] (do-label) {\textbf{Data Owner (DO)}};
+    \draw let \p1 = ($(sp_user_mid)!0.5!(do_sp_mid)$), \p2 = (do-label) in (\x1, \y2)
+    node {\textbf{Service Provider (SP)}};
+    \node at (do-label -| user1) (user-label) {\textbf{Clients}};
+\end{tikzpicture}

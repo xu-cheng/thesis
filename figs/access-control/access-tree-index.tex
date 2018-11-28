@@ -1,0 +1,112 @@
+\begin{tikzpicture}
+    \tikzstyle{tree node}=[
+        rectangle split,
+        rectangle split horizontal,
+        rectangle split ignore empty parts,
+        draw
+    ]
+    \tikzstyle{tree}=[
+        every node/.style={tree node},
+        edge from parent path={},
+        level/.style={level distance=1cm},
+        level 2/.style={sibling distance=4cm},
+        level 3/.style={sibling distance=1cm},
+    ]
+
+    \path[tree] node (root) {$N_0$}
+    child {
+        node (l1) {
+            \nodepart{one} $N_1$ \nodepart{two} $N_2$
+            \nodepart{three} $N_3$ \nodepart{four} \contour{white}{$N_4$}
+        }
+        child {
+            node (l21) {
+                \nodepart{one} $N_{5}$ \nodepart{two} $N_{6}$
+                \nodepart{three} $N_{9}$ \nodepart{four} $N_{10}$
+            }
+            child {node (o1) {$o_1$}}
+            child {node (o2) {$o_2$}}
+            child {node (o5) {$o_5$}}
+            child {node [fill=black!20, text=black] (o6) {$o_6$}}
+        }
+        child {
+            node (l22) {
+                \nodepart{one} $N_{7}$ \nodepart{two} $N_{8}$
+                \nodepart{three} $N_{11}$ \nodepart{four} $N_{12}$
+            }
+            child {node (o3) {$o_3$}}
+            child {node (o4) {$o_4$}}
+            child {node (o7) [fill=black!20, text=black] {$o_7$}}
+            child {node (o8) [fill=black!20, text=black] {$o_8$}}
+        }
+        child {
+            node (l23) {
+                \nodepart{one} $N_{13}$ \nodepart{two} \contour{white}{$N_{14}$}
+                \nodepart{three} $N_{17}$ \nodepart{four} \contour{white}{$N_{18}$}
+            }
+            child {node (o9) {$o_9$}}
+            child {node (o10) {$o_{10}$}}
+            child {node (o13) {$o_{13}$}}
+            child {node (o14) {$o_{14}$}}
+        }
+        child {
+            node (l24) {
+                \nodepart{one} $N_{15}$ \nodepart{two} $N_{16}$
+                \nodepart{three} $N_{19}$ \nodepart{four} $N_{20}$
+            }
+            child {node (o11) {$o_{11}$}}
+            child {node (o12) {$o_{12}$}}
+            child {node (o15) {$o_{15}$}}
+            child {node (o16) {$o_{16}$}}
+        }
+    };
+
+    \begin{pgfonlayer}{background}
+        \fill[pattern=north east lines,pattern color=blue!70] (l1.three split north) rectangle (l1.south east);
+        \fill[pattern=north east lines,pattern color=blue!70] (l23.one split north) rectangle (l23.two split south);
+        \fill[pattern=north east lines,pattern color=blue!70] (l23.three split north) rectangle (l23.south east);
+    \end{pgfonlayer}
+
+    \foreach \a/\b in {
+        root.south/l1,
+        l1.one south/l21,
+        l1.two south/l22,
+        l1.three south/l23,
+        l1.four south/l24,
+        l21.one south/o1,
+        l21.two south/o2,
+        l21.three south/o5,
+        l21.four south/o6,
+        l22.one south/o3,
+        l22.two south/o4,
+        l22.three south/o7,
+        l22.four south/o8,
+        l23.one south/o9,
+        l23.two south/o10,
+        l23.three south/o13,
+        l23.four south/o14,
+        l24.one south/o11,
+        l24.two south/o12,
+        l24.three south/o15,
+        l24.four south/o16%
+    }
+    \draw [style=edge from parent] (\a) -- (\b.north);
+
+    \node[tree node,right=0.8cm of root] (data)
+    {$gb_0$ \nodepart{two} $\Upsilon_0$ \nodepart{three} $sig_0$};
+
+    \draw[dashed,-latex] (data) -- (root);
+
+    \begin{customlegend}[
+        legend cell align=left,
+        legend image code/.code={%
+            \draw[#1] (0cm,-0.15cm) rectangle (0.3cm,0.15cm);
+        },
+        legend style={draw=none,left=2cm of root,yshift=-0.3cm,font={\Large}}
+    ]
+        \addlegendimage{black,fill=black!20}
+        \addlegendentry{APP signature}
+        \addlegendimage{black,pattern=north east lines,pattern color=blue!70}
+        \addlegendentry{APS signature}
+    \end{customlegend}
+\end{tikzpicture}

@@ -1,0 +1,166 @@
+\chapter{Proof of \texorpdfstring{\Cref*{thm:access-control:abs-sec}}{Theorem~\ref{thm:access-control:abs-sec}}}%
+\label{app:access-control-abs-sec}
+
+\abssecuritytheorem*
+
+The theorem is proved by showing our ABS scheme satisfies each security property.
+
+\subsection{Proof of Perfect Privacy}
+
+\begin{lemma}\label{lemma:access-control:abs-privacy}
+  Our scheme has perfect privacy according to \Cref{def:access-control:abs-privacy}.
+\end{lemma}
+
+\begin{proof}
+  The first requirement of \Cref{def:access-control:abs-privacy} is trivial considering the scheme is derived from~\cite{10.1007/978-3-642-19074-2_24}. It is also easy to verify that the distributions of the output signatures from \textsf{ABS.Sign} and \textsf{ABS.Relax} are identical owing to the re-randomization step in \textsf{ABS.Relax}, which proves the second requirement.
+\end{proof}
+
+\subsection{Proof of Unforgeability}
+
+\begin{lemma}\label{lemma:access-control:abs-unf}
+  Our scheme is unforgeable according to \Cref{def:access-control:abs-unf} in the generic group model.
+\end{lemma}
+
+\newcommand{\Lin}{\textsf{Lin}}
+\newcommand{\Hom}{\textsf{Hom}}
+
+\begin{proof}
+  The generic group model is designed to model the behavior of any algorithm that does not exploit the algebraic structure of the underlying groups. In other words, the lemma guarantees that our proposed scheme is unforgeable against any generic attacker, i.e., the attacker that does not exploit the underlying group structures. We remark that the scheme in~\cite{10.1007/978-3-642-19074-2_24} is also analyzed in this setting.
+
+  The idea of the generic group model is briefly reviewed here. Let $p$ be a prime which represents the group order. A generic group $\mathbb{G}_i$ can be represented as the set $\{\xi_i(x)| x\in\mathbb{Z}_p\}$. The group operations are modeled by two oracles, namely, $\mathcal{O}_1, \mathcal{O}_2$. Specifically, on input two group elements $\xi_i(a), \xi_i(b)$, oracle $\mathcal{O}_i$ returns $\xi_i(a+b)$ and $\xi_i(a-b)$ respectively for multiplication and division. To model the bilinear pairing, another oracle $\mathcal{O}_E$ is defined. On input elements $\xi_1(a)$, $\xi_1(b)$, $\mathcal{O}_E$ returns $\xi_2(ab)$.  Given $\xi_i(x)$ and scalar $s$, it is possible to obtain $\xi_i(sx)$ (via $O(\log s)$ calls to oracle $\mathcal{O}_i$).
+
+  Since it only benefits the attacker, we assume the groups $\mathbb{G}$ and $\mathbb{H}$ are the same. The groups $\mathbb{G}$, $\mathbb{G}_T$ of the scheme are modeled as generic groups $\mathbb{G}_1$ and $\mathbb{G}_2$, respectively. The attacker works with the group elements and can only compute group operations by interacting with oracles $\mathcal{O}_i$ and $\mathcal{O}_E$. As the encoding functions $\xi_i$ are modeled as random functions, nothing about the element except equality can be inferred. The security proof is completed by showing that given the encodings of the public key and the signatures from the signing oracle, it is infeasible to output the encodings needed to satisfy the verification equation for the forgery with a bounded number of queries to oracles $\mathcal{O}_i$ and $\mathcal{O}_E$.
+
+  We first define how signature queries are answered. For span program $\mathbf{M}\in \mathbb{Z}_p^{\ell \times t}$ with row labeling function $u$, pick random $\tau, y, s_1, \cdots, s_\ell$, compute $p_j$ for $j=1$ to $t$, as follows:
+  $$
+  p_j = \frac{1}{c + \hash}\big(\sum_{i=1}^\ell s_i (a+u(i)b)\mathbf{M}_{ij} - yz_j\big),
+  $$ where $(z_1$, $\cdots$, $z_\ell)$ $= (1$, $0$, $\cdots$, $0)$ and $\hash = hash(\tau$, $m)$.
+
+  The signature is parsed as $\sigma=(\tau, g^y$, $g^{y/a_0}$, $g^{s_1}$, $\cdots$, $g^{s_\ell}$, $h^{p_1}$, $\cdots$, $h^{p_t})$. It is easy to show that the signature generated is of the same distribution as that of a signature created using the sign algorithm.
+
+  The adversary is given $\xi_1(1), \xi_1(\Delta_0), \xi(a_0), \xi_1(\Delta)$, $\xi_1(a\Delta)$, $\xi_1(b\Delta)$, $\xi_1(c)$ as the public parameters. They represent group elements $(g$, $h_0$, $A_0$, $h$, $A$, $B$, $C)$, i.e., $mvk$, of the scheme.
+
+
+  Let $Q$ be the number of signature queries made by the adversary, and $\ell_q, t_q$ be the length and width of the associated span program for the $q$-th query. In the $q$-th query, the adversary is given $\tau^{(q)}$ and the encodings of the following values: ${\{s_i^{(q)}\}}_{i=1}^{\ell_q}, {\{p_j^{(q)}\}}_{j=1}^{t_q}$, $w^{(q)}$, $y^{(q)}$, satisfying the conditions that $y^{(q)} \neq 1$, $w^{(q)} = y^{(q)}/a_0$ and for $j=1$ to $t_q$:
+  $$
+  y^{(q)} z_j \Delta + (c + \hash^{(q)}) p^{(q)}_j = \sum_{i=1}^{\ell_q} s^{(q)}_i \mathbf{M}^{(q)}_{ij}(a+u^{(q)}(i)b)\Delta,
+  $$ where $\hash^{(q)}=hash(\tau^{(q)}, m^{(q)})$ and $(z_1$, $\cdots$, $z_{t_q}) =$ $(1$, $0$, $\cdots$, $0)$.
+
+
+  Finally, the adversary outputs a forgery $\sigma^{\ast}:=(\tau^\ast$, $\xi_1(y^*)$, $\xi_1(w^\ast)$, ${\{\xi_1(s^{\ast}_i)\}}_{i=1}^{\ell^{\ast}}$, ${\{\xi_1(p^{\ast}_j)\}}_{j=1}^{t^\ast})$ on message $m^{\ast}$ with span program $\mathbf{M}\in\mathbb{Z}_p^{\ell^\ast \times t^\ast}$ and labeling function $u^\ast$.
+
+  Denote by $\hash^\ast$ the value $hash(\xi_1(y^*)$, $\xi_1(w^\ast)$, $\tau^\ast$, $m^\ast)$. To be a valid forgery, $y^\ast \neq 0$, $w^\ast = y^\ast/a_0$ and for $j=1$ to $t^\ast$, the following equation holds:
+  $$
+  y^\ast z_j \Delta + (c + \hash^\ast)p^\ast_j = \sum_{i=1}^{\ell^\ast} s^\ast_i \mathbf{M}^\ast_{ij}(a+u^\ast(i)b)\Delta.
+  $$
+
+  For notational convenience, let $\Lin(S)$ denote the sets of functions that are linear in the terms in set $S$. Let $\Hom(S)$ be the subset of $\Lin(S)$ of homogeneous functions whose constant coefficient is zero. In the generic group model, a valid encoding can only be received from the oracles. Specifically, all encodings presented by the adversary in the generic group $\mathbb{G}_1$ must be linear combinations of the previously obtained element in $\mathbb{G}_1$. That is, $\sigma^\ast \setminus \{\tau^\ast\}  \subset \Lin(\Gamma)$, where $\Gamma$ is:
+  $$
+\{1, a_0, \Delta_0, \Delta, a\Delta, b\Delta\} \cup {\{{\{s_i^{(q)}\}}_{i=1}^{\ell_q}, {\{p_j^{(q)}\}}_{j=1}^{t_q}, w^{(q)}, y^{(q)}\}\}}_{q=1}^Q.
+$$
+
+The remaining part of the proof is to show that $\sigma^\ast\setminus\{\tau^\ast\}$ is not a subset of $\Lin(\Gamma)$ when we view the terms as functions in the random variables used in the security game. To complete the proof, we consider two cases.
+
+\noindent\underline{Case 1: $(\tau^\ast, m^\ast) \neq (\tau^{(q)}, m^{(q)})$ for all $q$}. Firstly, $y^\ast =w^\ast a_0$. Thus,
+$$
+y^\ast \in \Hom(\{\Delta_0a_0, y^{(1)}, \cdots, y^{(Q)}\}).
+$$ Next, it can be seen that $\Delta ~|~ p_j^\ast$. Thus,
+$$
+p_j^\ast \in \Hom( \{\Delta, \Delta a, \Delta b\} \cup \{ {\{p_1^{(q)}, \cdots, p_{t_q}^{(q)}  \}}_{q=1}^Q\} ).
+$$
+
+Since $\exists j$ s.t. $z_j \neq 0$, and given the form of $p_j^\ast$,  it can be seen that $y^\ast$ cannot contain a term from $\Delta_0 a_0$. Thus,
+$$
+y^\ast \in \Hom(\{y^{(1)}, \cdots, y^{(Q)}\}).
+$$
+
+Next, we argue that $p_j^\ast$ cannot contain a single term $\Delta$. For if it is the case, the left-hand side contributes monomials $\hash^\ast\Delta$ (since $y^\ast$ is homogeneous and has no constant term). On the other hand, the right-hand side cannot contribute monomials in $\Delta$ (everything in the right-hand side has either $a$ or $b$).  Thus,
+$$
+p_j^\ast \in \Hom( \{\Delta a, \Delta b\} \cup \{ {\{p_1^{(q)}, \cdots, p_{t_q}^{(q)}  \}}_{q=1}^Q\} ).
+$$
+
+Now, $p_j^\ast$ cannot contain a $p_n^{(q)}$ term for any $n, q$. Otherwise, it will produce a term with $\frac{c+\hash^\ast}{c+\hash^{(q)}}$ on the left and no setting of $y^\ast$, $s_i^\ast$ can come up with this rational term.  In other words,
+$$
+p_j^\ast \in \Hom( \{\Delta a, \Delta b\}).
+$$
+
+Finally, we arrive at a contradiction since no combination of $(c+\hash^\ast)p_j^\ast$ and $\sum_{i=1}^{\ell^\ast} s^\ast_i \mathbf{M}^\ast_{ij}(a+u^\ast(i)b)\Delta$ could contribute to a term of the form $\Delta y^\ast$ for some $y\in \Hom(\{y^{(1)}, \cdots, y^{(Q)}\})$.
+
+\noindent\underline{Case 2: $(\tau^\ast, m^\ast) = (\tau^{(k)}, m^{(k)})$ for some $k$}. Following the analysis above, the following constraints can be reached:
+$$
+y^\ast \in \Hom(\{y^{(1)}, \cdots, y^{(Q)}\}),
+$$
+$$
+p_j^\ast \in \Hom( \{\Delta a, \Delta b\} \cup \{ {\{p_1^{(q)}, \cdots, p_{t_q}^{(q)}  \}}_{q=1}^Q\} ).
+$$
+
+Since $\tau^{(q)}$ is randomly chosen for each signature query, $\tau^{(k)} \neq \tau^{(q)}$ when $k\neq q$. Since $hash$ is collision-resistant, it means $\hash^\ast \neq \hash^{(q)}$ for all $q\neq k$. Thus, $p_j^\ast$ cannot contain a term from $p_n^{(q)}$ when $q\neq k$. Otherwise, there will be a term $\frac{c+\hash^\ast}{c+\hash^{(q)}}$ on the left and no setting of $y^\ast$, $s_i^\ast$ can come up with this rational term. Thus,
+$$
+p_j^\ast \in \Hom( \{\Delta a, \Delta b, p_1^{(k)}, \cdots, p_{t_k}^{(k)}\} ).
+$$
+
+Next, $y^\ast$ cannot contain a term from $y^{(q)}$ for $q\neq k$ since all terms on the right-hand side contain either $a$ or $b$ and that $(c+\hash^\ast)p_j^\ast$ can only provide a term to cancel $y^{(k)}$. Thus,
+$$
+y^\ast \in \Hom(y^{(k)}).
+$$
+
+In this case, $m^\ast = m^{(k)}$ and thus the adversary wins if and only if $\Upsilon^\ast$ represents a more restricted policy compared with $\Upsilon^{(k)}$. Assume the DNF representation of policy $\Upsilon^{(k)}$ is $\mathcal{P}:=\vee_{x=1}^{n}(\mathcal{P}_x)$, where each $P_x$ is of the form $(\wedge_{y=1}^{n_x} (a_{xy}))$. In general, a more restricted policy can be formed by removing one clause from $\mathcal{P}$ or adding more attributes in one of $\mathcal{P}_x$.
+
+In our threat model, the forgery must be of the form $(\lor_{a \in \mathcal{A}'} a)$ for some $\mathcal{A'} \subset \mathbb{A}$, where $\mathbb{A}$ represents the attribute universe. A successful forgery means that at least one clause, $\mathcal{P}_x$, is removed and that all attributes in $\mathcal{P}_x$ does not appear in $\mathcal{A}'$. The corresponding span program is $\mathbf{M} \in \mathbb{Z}_p^{|\mathcal{A}'| \times 1}$ and the labeling function maps each row to one attribute in $\mathcal{A}'$.
+
+It means that the forgery in this case satisfies $t^\ast =1$, and that
+$$
+y^\ast z  \Delta + (c + \hash^\ast)p^\ast = \sum_{i=1}^{\ell^\ast} s^\ast_i (a+u^\ast(i)b)\Delta.
+$$
+Assume $\mathcal{P}_x$ is the clause that has been removed. We use $\bar{\mathcal{A}}$ to denote the attributes of $\mathcal{P}_x$. Thus, $u^\ast(i) \notin \bar{\mathcal{A}}$. However, each $p_{j}^{(k)}$ has at least one term with $a + u^{(k)}(i)b$ with $u^{(k)}(i) \in \bar{\mathcal{A}}$. WLOG, assume $\bar{\mathcal{A}}:=\{1,2, \cdots, x\}$ and $\mathcal{P}_x$ is the first clause. Since $\mathcal{P}_x$ is a conjunctive clause, $p^{(k)}_1$ contains the term $(a+b)$, $p^{(k)}_2$ contains $(a+b)$ and $(a+2b)$, $p^{(k)}_3$ contains $(a+b)$ and $(a+3b)$, etc. If $p^\ast$ contains any of these $p^{(k)}_{j}$, there will be a term $(a+ub)$, $u\in\bar{\mathcal{A}}$, which appears on the left-hand side but not the right-hand side (note that $y^{\ast} = y^{(k)}$ and thus $y^\ast z \Delta$ cannot be used to cancel this $(a+ub)$ term. Further, note that linear combinations of $p^{(k)}_j$ cannot cancel all terms in the form of $(a+bu)$ for some $u \in \bar{\mathcal{A}}$). Thus,
+$$
+p^\ast \in \Hom( \{\Delta a, \Delta b\} ).
+$$
+Again, we arrive at a contradiction since no combination of $(c+\hash^\ast)p^\ast$ and $\sum_{i=1}^{\ell^\ast} s^\ast_i (a+u^\ast(i)b)\Delta$ could contribute to a term of the form $\Delta y^\ast$ for some $y\in \Hom(\{y^{(k)}\})$.
+\end{proof}
+
+\chapter{Proof of \texorpdfstring{\Cref*{thm:access-control:sec}}{Theorem~\ref{thm:access-control:sec}}}%
+\label{app:access-control-sec}
+
+\querysecuritytheorem*
+
+This theorem is proved by showing that our proposed query authentication algorithms satisfy each security property.
+
+\subsection{Proof of Unforgeability}
+
+\begin{lemma}\label{lemma:access-control:query-secure}
+    Our proposed query authentication algorithms are unforgeable according to \Cref{def:access-control:query-secure}.
+\end{lemma}
+
+\begin{proof}
+    We prove this lemma by contradiction.
+
+    \noindent\underline{Case 1:} The result set $RS$ contains a data record $\langle o^*, v^*, \Upsilon^*\rangle$, such that $\langle o^*, v^*, \Upsilon^*\rangle$ $\neq$ $\langle o_i, v_i, \Upsilon_i\rangle$, $\forall i$.
+
+    Recall that in the result verification procedure, the verifier will run \textsf{ABS.Verify}$($$mvk$, $ hash(o^*))|hash(v^*)$, $\Upsilon^*$, $\sigma^*)$. Since it passes the verification and $\sigma^*$ can only be generated by the adversary, this means that the adversary is able to forge an ABS signature $\sigma^*$, which contradicts to \Cref{thm:access-control:abs-sec}.
+
+    \noindent\underline{Case 2:} The result set $RS$ contains a data record $\langle o^*, v^*, \Upsilon^*\rangle$, such that $o^*$ does not satisfy the query $q$ or $\Upsilon^*(\mathcal{A}) = 0$.
+
+    It is trivial to see that such a case is impossible, as the verifier will check whether or not $o^*$ satisfies the query $q$ and $\Upsilon^*(\mathcal{A}) = 1$ during the result verification procedure.
+
+    \noindent\underline{Case 3:} There exists a data record $\langle o_j, v_j, \Upsilon_j\rangle$ not in $RS$, such that $j \in \{i\}$, $o_j$ satisfies the query $q$, and $\Upsilon_j(\mathcal{A})= 1$.
+
+    There are two possible subcases. The first subcase is that the index key of the missing record $j$ is not returned as part of the VO. This is impossible as the verifier will check whether or not the union of the indexing space for each entry in the VO covers the query range of $q$. The second subcase is that the index key of the missing record $j$ is returned as part of the VO. In this case, the record $j$ must fall in the space of an APS signature in the VO. Note that this APS signature can only be generated by the adversary, given its corresponding APP signature whose predicate is a more restricted policy compared with $\lor_{a \in \mathbb{A}\backslash\mathcal{A}} a$.
+   This means that the adversary is able to forge an ABS signature,
+   which contradicts to \Cref{thm:access-control:abs-sec}.
+\end{proof}
+
+\subsection{Proof of Zero-Knowledge}
+
+\begin{lemma}\label{lemma:access-control:query-zero-knowledge}
+    Our proposed query authentication algorithms are zero-knowledge according to \Cref{def:access-control:query-zero-knowledge}.
+\end{lemma}
+
+\begin{proof}
+    It is easy to see that the messages output to the adversary from the ideal game will have the same distribution as those from the real game due to the following reasons:
+    \begin{inlineenum}
+    \item all the messages generated by the simulator are generated using the same algorithms as those by the real challenger;
+    \item all ABS signatures achieve the prefect privacy (according to \Cref{thm:access-control:abs-sec}); and
+    \item the AP$^2$G-tree structure generated by the simulator is identical to the one by the real challenger.
+    \end{inlineenum}
+\end{proof}

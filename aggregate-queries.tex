@@ -62,7 +62,7 @@ However, the verification cost of this naive solution is prohibitively high beca
 This section gives some preliminaries on cryptographic constructs and integrity assurance.
 
 \textbf{Cryptographic Hash Function.}
-A cryptographic hash function $H(\cdot)$ accepts an arbitrary-length string as its input and returns a fixed-length bit string. It is collision resistant, i.e., it is difficult to find two different messages $m_1$ and $m_2$ such that $H(m_1) = H(m_2)$. Classic cryptographic hash functions include SHA-1, SHA-2, and SHA-3.
+A cryptographic hash function $H(\cdot)$ accepts an arbitrary-length string as its input and returns a fixed-length bit string. It is collision resistant, i.e., it is difficult to find two different messages $m_1$ and $m_2$ such that $H(m_1) = H(m_2)$. Classic cryptographic hash functions include SHA-1, SHA-2, and SHA-3 family.
 
 \textbf{Bilinear-Map (BM) Accumulator.} This maps a multiset to a single value for ease of processing. Let $\mathbb{G}$ be a cyclic multiplicative group of order $p$. A BM accumulator is a function of a multiset $X$ of $n$ elements in the cyclic group $\mathbb{Z}_p$~\cite{10.1007/978-3-540-30574-3_19}. It returns an \emph{accumulative value} of $X$:
 \begin{align}
