@@ -1,10 +1,10 @@
 \chapter{Authenticating Relational Queries with Fine-Grained Access Control}\label{chap:access-control}
 
-In this chapter, we investigate the problem of authenticating relational queries with fine-grained access control. \Cref{sec:access-control:problem} introduces the formal problem definition, followed by cryptographic primitives in \Cref{sec:access-control:prelim}. \Cref{sec:access-control:equality-query} presents our solution for equality queries, which is then generalized to range queries and join queries in \Cref{sec:access-control:range-query} with the design of AP$^2$G-tree. A security analysis is presented in \Cref{sec:access-control:security-analysis}, and Sections~\ref{sec:access-control:opt} and \Cref{sec:access-control:relaxing-zero-knowledge} present optimization techniques for the zero-knowledge model and a relaxed model, respectively. How to handle duplicate records and data updates are discussed in \Cref{sec:access-control:dup} and \Cref{sec:access-control:update} respectively. \Cref{sec:access-control:evluation} presents the experimental results, followed by a summary in \Cref{sec:access-control:summary}.
+In this chapter, we investigate the problem of authenticating relational queries with fine-grained access control. \Cref{sec:access-control:problem} introduces the formal problem definition, followed by cryptographic primitives in \Cref{sec:access-control:prelim}. \Cref{sec:access-control:equality-query} presents our solution for equality queries, which is then generalized to range queries and join queries in \Cref{sec:access-control:range-query} with the design of AP$^2$G-tree. A security analysis is presented in \Cref{sec:access-control:security-analysis}, and \Cref{sec:access-control:opt} and \Cref{sec:access-control:relaxing-zero-knowledge} present optimization techniques for the zero-knowledge model and a relaxed model, respectively. How to handle duplicate records and data updates are discussed in \Cref{sec:access-control:dup} and \Cref{sec:access-control:update} respectively. \Cref{sec:access-control:evluation} presents the experimental results, followed by a summary in \Cref{sec:access-control:summary}.
 
 \section{Problem Formulation}\label{sec:access-control:problem}
 
-\begin{figure}[h]
+\begin{figure}[t]
   \centering
   \resizebox{\linewidth}{!}{\input{figs/access-control/model.tex}}
   \caption{Query Authentication with Access Control}\label{fig:access-control:model}
@@ -1077,11 +1077,11 @@ Finally, to study the join query performance, we evaluate the join operator of $
     \caption{Range Query Performance vs. Index}\label{exp-fig:access-control:index}
 \end{figure}
 
-We now investigate the impact of different optimization techniques proposed in \Cref{sec:access-control:opt}. The results of using hierarchical role assignment are shown in \Cref{exp-fig:access-control-appendix.tex:hierarchical}. In our experiment, we simulate a two-level role hierarchy. Two global hierarchical roles are created and attached randomly to each AND gate in all the access policies. As a result, the average size of a client's inaccessible predicate is decreased from 9 to 6. It can be observed that the hierarchical role assignment reduces the cost in all metrics, due to much less overhead in processing inaccessible records.
+We now investigate the impact of different optimization techniques proposed in \Cref{sec:access-control:opt}. The results of using hierarchical role assignment are shown in \Cref{exp-fig:access-control:hierarchical}. In our experiment, we simulate a two-level role hierarchy. Two global hierarchical roles are created and attached randomly to each AND gate in all the access policies. As a result, the average size of a client's inaccessible predicate is decreased from 9 to 6. It can be observed that the hierarchical role assignment reduces the cost in all metrics, due to much less overhead in processing inaccessible records.
 
 To study the acceleration acquired by parallelism, we vary the number of threads for both the SP processing and client verification running on the blade server. As shown in \Cref{exp-fig:access-control:thread}, more acceleration can be observed with the first 16 threads, but it becomes less effective with more threads. The reason is that the non-parallel part of the algorithm and I/O operations becomes more pronounced after sufficient multi-thread acceleration.
 
-Next, we study the performance gain if we relax the zero-knowledge confidentiality requirement. As shown in \Cref{exp-fig:access-control:index}, owing to a careful splitting strategy introduced in \Cref{sec:access-control:kd-tree}, AP$^2kd$-tree substantially outperforms AP$^2$G-tree in all evaluation metrics.
+Finally, we study the performance gain if we relax the zero-knowledge confidentiality requirement. As shown in \Cref{exp-fig:access-control:index}, owing to a careful splitting strategy introduced in \Cref{sec:access-control:kd-tree}, AP$^2kd$-tree substantially outperforms AP$^2$G-tree in all evaluation metrics.
 
 \subsection{Performance with Duplicate Records and Updates}
 
@@ -1102,13 +1102,13 @@ Next, we study the performance gain if we relax the zero-knowledge confidentiali
     \caption{Range Query Performance with Duplicate Records}\label{exp-fig:access-control:dup}
 \end{figure}
 
-\Cref{exp-fig:access-control:dup} reports the results of performance evaluation over the default TPC-H database, where the access policies are randomly assigned to all data records.
+To investigate the performance with duplicate records using methods proposed in \Cref{sec:access-control:dup}, we conduct performance evaluation over the default TPC-H database, where the access policies are randomly assigned to all data records.
 We compare two solutions of handling duplicate records:
 \begin{inlineenum}
     \item the zero-knowledge approach by adding the virtual dimension (denoted as AP$^2$G-Tree);
     \item the non-zero-knowledge approach by embedding the duplicate information in the APP signatures (denoted as AP$^2$G-Tree (non-ZK)).
 \end{inlineenum}
-The index size for the zero-knowledge approach is 12.17 GB (2.91 GB tree structure + 9.26 GB signatures), whereas in the non-zero-knowledge setting the index is 4.35 GB (1.02 GB tree structure + 3.33 GB signatures). The additional index overhead incurred for the zero-knowledge approach, as the cost of achieving the zero-knowledge requirement, is believed to be reasonable. Regarding the query performance, AP$^2$G-Tree (non-ZK) is approximate to the case without duplicate records since the duplicate information is seamlessly embedded in the APP signatures. As shown in \Cref{exp-figs:access-control:dup}, the query cost in the zero-knowledge AP$^2$G-tree approach is only no more than 3 times worse than that in AP$^2$G-Tree (non-ZK). Moreover, the performance of AP$^2$G-tree is only about half that of the basic approach, which again demonstrates its pruning effectiveness for inaccessible records.
+The index size for the zero-knowledge approach is 12.17 GB (2.91 GB tree structure + 9.26 GB signatures), whereas in the non-zero-knowledge setting the index is 4.35 GB (1.02 GB tree structure + 3.33 GB signatures). The additional index overhead incurred for the zero-knowledge approach, as the cost of achieving the zero-knowledge requirement, is believed to be reasonable. Regarding the query performance, AP$^2$G-Tree (non-ZK) is approximate to the case without duplicate records since the duplicate information is seamlessly embedded in the APP signatures. As shown in \Cref{exp-fig:access-control:dup}, the query cost in the zero-knowledge AP$^2$G-tree approach is only no more than 3 times worse than that in AP$^2$G-Tree (non-ZK). Moreover, the performance of AP$^2$G-tree is only about half that of the basic approach, which again demonstrates its pruning effectiveness for inaccessible records.
 
 \begin{figure}[t]
     \centering
@@ -1139,7 +1139,7 @@ The index size for the zero-knowledge approach is 12.17 GB (2.91 GB tree structu
     \caption{Range Query Performance vs. Update}\label{exp-fig:access-control:update}
 \end{figure}
 
-Finally, we conduct an empirical study over the default TPC-H database to evaluate the performance of our proposed update strategy. We compare two update methods:
+Finally, we conduct an empirical study over the default TPC-H database to evaluate the performance of our update strategy proposed in \Cref{sec:access-control:update}. We compare two update methods:
 \begin{inlineenum}
     \item the basic approach in which the DO resigns all of the APP signatures; and
     \item our proposed solution described above.
