@@ -1,6 +1,6 @@
 \chapter{Authenticating Relational Queries with Fine-Grained Access Control}\label{chap:access-control}
 
-In this chapter, we investigate the problem of authenticating relational queries with fine-grained access control.
+In this chapter, we investigate the problem of authenticating relational queries with fine-grained access control. \Cref{sec:access-control:problem} introduces the formal problem definition, followed by cryptographic primitives in \Cref{sec:access-control:prelim}. \Cref{sec:access-control:equality-query} presents our solution for equality queries, which is then generalized to range queries and join queries in \Cref{sec:access-control:range-query} with the design of AP$^2$G-tree. A security analysis is presented in \Cref{sec:access-control:security-analysis}, and Sections~\ref{sec:access-control:opt} and \Cref{sec:access-control:relaxing-zero-knowledge} present optimization techniques for the zero-knowledge model and a relaxed model, respectively. How to handle duplicate records and data updates are discussed in \Cref{sec:access-control:dup} and \Cref{sec:access-control:update} respectively. \Cref{sec:access-control:evluation} presents the experimental results, followed by a summary in \Cref{sec:access-control:summary}.
 
 \section{Problem Formulation}\label{sec:access-control:problem}
 
@@ -508,9 +508,6 @@ To establish the soundness and completeness of the query results, the client che
   \item \textbf{Completeness check}. The union of the indexing spaces for each entry of the VO covers the whole query range $[\alpha, \beta]$. Note that this check is sufficient because one and only one entry is expected for each indexing space.
 \end{itemize}
 
-We summarize the algorithm for authenticating range queries with the zero-knowledge confidentiality in \Cref{alg:access-control:range-query}.
-\Cref{fig:access-control:access-tree} illustrates an example in which the client can only access $o_6, o_7, o_8$ (highlighted with a gray color) in the range query $[\alpha,\beta]$ (highlighted as the red rectangle in \Cref{fig:access-control:access-tree-struct}). As a result, the SP will return the records $o_6$, $o_7$ and $o_8$, as well as their APP signatures, to the client. Moreover, the SP will run the \textsf{ABS.Relax} algorithm with the APP signatures of $N_4$, $N_{14}$ and $N_{18}$ as inputs. The derived APS signatures will be sent to the client as part of the VO, to prove their inaccessibility. During result verification, the client will check whether or not all of the signatures in the VO are valid (to verify the soundness) and whether or not the query range $[\alpha, \beta]$ is indeed covered by the union of the indexing spaces for $N_4$, $N_{14}$, $N_{18}$, $o_6$, $o_7$, and $o_8$ (to verify the completeness).
-
 \begin{algorithm}[thp]
   \caption{Authentication of Range Queries}\label{alg:access-control:range-query}
   \SetKwBlock{DO}{ADS Generation (by the DO)}{}
@@ -577,6 +574,9 @@ We summarize the algorithm for authenticating range queries with the zero-knowle
   }
 \end{algorithm}
 
+We summarize the algorithm for authenticating range queries with the zero-knowledge confidentiality in \Cref{alg:access-control:range-query}.
+\Cref{fig:access-control:access-tree} illustrates an example in which the client can only access $o_6, o_7, o_8$ (highlighted with a gray color) in the range query $[\alpha,\beta]$ (highlighted as the red rectangle in \Cref{fig:access-control:access-tree-struct}). As a result, the SP will return the records $o_6$, $o_7$ and $o_8$, as well as their APP signatures, to the client. Moreover, the SP will run the \textsf{ABS.Relax} algorithm with the APP signatures of $N_4$, $N_{14}$ and $N_{18}$ as inputs. The derived APS signatures will be sent to the client as part of the VO, to prove their inaccessibility. During result verification, the client will check whether or not all of the signatures in the VO are valid (to verify the soundness) and whether or not the query range $[\alpha, \beta]$ is indeed covered by the union of the indexing spaces for $N_4$, $N_{14}$, $N_{18}$, $o_6$, $o_7$, and $o_8$ (to verify the completeness).
+
 \subsection{Join Query Authentication}
 
 \begin{figure}[t]
@@ -584,16 +584,6 @@ We summarize the algorithm for authenticating range queries with the zero-knowle
   \resizebox{.75\linewidth}{!}{\input{figs/access-control/join.tex}}
   \caption{Join Query Authentication}\label{fig:access-control:join}
 \end{figure}
-
-Next, we discuss how to extend the range query authentication algorithm to support join queries. Consider an equi-join query over two tables $R$ and $S$, $R \Join_{R.o = S.o} S \land R.o \in [\alpha, \beta]$, with client's access role set $\mathcal{A}$. The SP should return all record pairs in the query range that are accessible to the query client and satisfy the join condition.
-For example, in \Cref{fig:access-control:join}, the client can access $r_1$, $r_2$ from $R$ and $s_1$, $s_3$ from $S$ (highlighted with a gray color); the join result will be the pair of records $\langle r_1, s_1\rangle$.
-
-To process the join query, the SP starts by executing a breadth-first search from the root node of the AP$^2$G-tree for the table $R$. The tree search algorithm is almost identical to the one in the range query processing, except for two aspects. First, if a node for $R$, denoted as $N_R$, is accessible to the client, the SP will first check whether or not there exists an inaccessible node in the AP$^2$G-tree for the table $S$ that covers $N_R$. If such a node, denoted as $N_S$, is found, $N_R$ cannot be part of the join result. Hence, the corresponding APS signature for $N_S$ is computed and appended to the VO\@. Otherwise, the subtree of $N_R$ is further explored. Second, an accessible record in $R$ is part of the result only if the matching record in $S$ is also accessible. In this case, the APP signatures for this pair of records will be appended to the VO\@. The rest of the algorithm is the same as the one in the range query processing.
-
-We summarize the VO construction procedure in \Cref{alg:access-control:join-query}, while the ADS generation and result verification procedures are the same as the ones in \Cref{alg:access-control:range-query}.
-In the example of \Cref{fig:access-control:join}, the SP will return the records $r_1$ and $s_1$, as well as their APP signatures, to the client. Moreover, for the inaccessible nodes $R_2$ and $S_4$, their derived APS signatures will be returned as part of the VO\@. On the client side, to verify the soundness, the client will authenticate all the signatures in the VO and check whether or not $r_1$ and $s_1$ share the same value on the join attribute; to verify the completeness, the client will check whether or not the union of the indexing spaces for $R_2$, $S_4$, and $r_1$/$r_2$ covers the whole query range $[\alpha,\beta]$.
-
-This solution can be easily extended to support more general join queries, such as multi-way join and inequality join. The general idea is similar, i.e., using the APS signature of an inaccessible record/node to prove that a certain space does not contribute to the join result. The client verifies the soundness by the given results and their associated APP signatures, and verifies the completeness by checking whether or not the result set and the space represented by the APS signatures together cover the whole query range.
 
 \begin{algorithm}[t]
   \caption{Authentication of Joins (VO Construction)}\label{alg:access-control:join-query}
@@ -634,6 +624,17 @@ This solution can be easily extended to support more general join queries, such 
   }
   send $\textsf{CP-ABE.Encrypt}(pp, VO, \land_{a \in \mathcal{A}} a)$ to the client\;
 \end{algorithm}
+
+
+Next, we discuss how to extend the range query authentication algorithm to support join queries. Consider an equi-join query over two tables $R$ and $S$, $R \Join_{R.o = S.o} S \land R.o \in [\alpha, \beta]$, with client's access role set $\mathcal{A}$. The SP should return all record pairs in the query range that are accessible to the query client and satisfy the join condition.
+For example, in \Cref{fig:access-control:join}, the client can access $r_1$, $r_2$ from $R$ and $s_1$, $s_3$ from $S$ (highlighted with a gray color); the join result will be the pair of records $\langle r_1, s_1\rangle$.
+
+To process the join query, the SP starts by executing a breadth-first search from the root node of the AP$^2$G-tree for the table $R$. The tree search algorithm is almost identical to the one in the range query processing, except for two aspects. First, if a node for $R$, denoted as $N_R$, is accessible to the client, the SP will first check whether or not there exists an inaccessible node in the AP$^2$G-tree for the table $S$ that covers $N_R$. If such a node, denoted as $N_S$, is found, $N_R$ cannot be part of the join result. Hence, the corresponding APS signature for $N_S$ is computed and appended to the VO\@. Otherwise, the subtree of $N_R$ is further explored. Second, an accessible record in $R$ is part of the result only if the matching record in $S$ is also accessible. In this case, the APP signatures for this pair of records will be appended to the VO\@. The rest of the algorithm is the same as the one in the range query processing.
+
+We summarize the VO construction procedure in \Cref{alg:access-control:join-query}, while the ADS generation and result verification procedures are the same as the ones in \Cref{alg:access-control:range-query}.
+In the example of \Cref{fig:access-control:join}, the SP will return the records $r_1$ and $s_1$, as well as their APP signatures, to the client. Moreover, for the inaccessible nodes $R_2$ and $S_4$, their derived APS signatures will be returned as part of the VO\@. On the client side, to verify the soundness, the client will authenticate all the signatures in the VO and check whether or not $r_1$ and $s_1$ share the same value on the join attribute; to verify the completeness, the client will check whether or not the union of the indexing spaces for $R_2$, $S_4$, and $r_1$/$r_2$ covers the whole query range $[\alpha,\beta]$.
+
+This solution can be easily extended to support more general join queries, such as multi-way join and inequality join. The general idea is similar, i.e., using the APS signature of an inaccessible record/node to prove that a certain space does not contribute to the join result. The client verifies the soundness by the given results and their associated APP signatures, and verifies the completeness by checking whether or not the result set and the space represented by the APS signatures together cover the whole query range.
 
 \section{Security Analysis}\label{sec:access-control:security-analysis}
 
@@ -848,3 +849,302 @@ A naive approach is to embed a timestamp in each APP signature during ADS genera
 To support efficient data record updates, we propose the following solution. First, we embed, in each APP signature, a \emph{universally unique identifier} (UUID), which is used to identify the APP signature and its corresponding APS signature. The $\tau$ in the underlying ABS signature can be used for such purposes. Next, the Merkle hash tree~\cite{10.1007/0-387-34805-0_21} can be used to enforce the freshness of the APP signatures, as well as their corresponding APS signatures, for all nodes in the AP$^2$G-tree. When building the AP$^2$G-tree, the DO also constructs a Merkle hash tree over the UUIDs for all the APP signatures, in which the Merkle root is signed and published by the DO with a timestamp. Finally, the client can establish the freshness of the query results by recomputing and verifying the Merkle root given the UUIDs of the APP/APS signatures in the VO and other necessary hashes.
 
 With the above idea, when there is a data record update, the DO regenerates a new APP signature with a new UUID for the updated record, as well as other tree nodes in the AP$^2$G-tree if necessary. Then, a new Merkle root is computed and signed. This solution yields a near minimal update cost, but with a slight increase in the VO size and client verification overhead.
+
+\section{Performance Evaluation}\label{sec:access-control:evluation}
+
+In this section, we report our empirical study. Since no prior methods can support zero-knowledge query authentication under fine-grained access control, we mainly evaluate the impact of various system settings on our proposed solutions. We use \emph{TPC Benchmark H} (TPC-H)~\cite{tpch} to generate the databases for testing. Specifically, we choose the \verb+Lineitem+ table as the data source and $Q$6 from TPC-H\footnote{\texttt{SELECT * FROM lineitem WHERE shipdate between `?' AND `?' AND discount between `?' AND `?' AND quantity between `?' AND `?'.}} as a basic query. The records in the database contain 12 attributes, among them the first three are set as query attributes. They are in the form of $\langle shipdate$, $discount$, $quantity\rangle$. Our experiments test four different scales:
+0.1 ($\fnum{600000}$ records), 0.3 ($\fnum{1800000}$ records), 1 ($\fnum{6000000}$ records), and 3 ($\fnum{18000000}$ records).
+The default scale is 0.3. For access policies, we randomly generate them as DNF boolean functions with three parameters:
+\begin{inlineenum}
+    \item  total number of distinct policies,
+    \item  total number of distinct roles, and
+    \item  maximum policy length.
+\end{inlineenum}
+By default, the total number of roles is set at 10. We generate 10 distinct policies whose root gate is an OR gate with at most three inputs, while each input is an AND gate with at most two roles. This yields a maximum policy length of 6.
+We assign these policies such that the records under the same query key share the same access policy and are accessed together.
+
+In the experiments, both the DO and SP are set up on an x64 blade server with dual Intel Xeon 2.67GHz X5650 CPU and 32GB RAM running on CentOS 6. The client, on the other hand, is set up on a commodity laptop computer with Intel Core i5 CPU and 4GB RAM, running on macOS Sierra. This enables both the DO and SP to run experiments with 24 hyper-threads and the client to run with 4 hyper-threads. The experiments are written in C++ and use the following libraries: Pairing-based cryptographic for bilinear pairing computation, Crypto++ for secure hash operations, and OpenMP for parallel computation.
+
+\Cref{tab:access-control:do-setup} shows the DO setup overhead for generating the AP$^2$G-tree under the different database scales. For the DO CPU time, we break down the cost into two parts:
+\begin{inlineenum}
+    \item the time to sign all the APP signatures, and
+    \item the time to build the index structure.
+\end{inlineenum}
+It can be observed that both the DO CPU time and space cost increase only sublinearly with respect to the growth of database scale.
+
+\begin{table}[t]
+    \centering
+    \resizebox{.9\linewidth}{!}{%
+    \begin{tabular}{cccc}
+        \toprule
+        \multirow{2}{*}{\tabincell{c}{Database\\Scale}} &
+        \multicolumn{2}{c}{DO CPU Time} &
+        \multirow{2}{*}{\tabincell{c}{Index Size (Tree Structure~+~Signatures) \\(GB)}} \\
+        \cmidrule(lr){2-3}
+        &
+        Sign APPs (h) & Build Index (h) &
+        \\
+        \midrule
+        0.1  & 0.63 & 0.74 & 2.47 (0.49 + 1.98) \\
+        0.3  & 0.77 & 0.95 & 2.93 (0.56 + 2.37) \\
+        1    & 0.86 & 1.00 & 3.14 (0.58 + 2.56) \\
+        3    & 0.87 & 1.01 & 3.16  (0.59 + 2.57) \\
+        \bottomrule
+    \end{tabular}}
+    \caption{DO Setup Overhead}\label{tab:access-control:do-setup}
+\end{table}
+
+To evaluate the query performance, we measure two kinds of costs:
+\begin{inlineenum}
+    \item the computational cost in terms of the SP CPU time and client CPU time, and
+    \item the communication cost in terms of the VO size.
+\end{inlineenum}
+The results are reported based on an average of 10 randomly generated queries. Note that when measuring the computational cost, we ignore the cost of CP-ABE/AES encryption and decryption, since it is not a critical part of our proposed algorithms and has the performance largely subject to the size of a record.
+
+\subsection{Equality Query Performance}
+
+\begin{table}[t]
+    \centering
+    \resizebox{\linewidth}{!}{
+        \begin{tabular}{ccccccc}
+            \toprule
+            \multirow{3}{*}{\tabincell{c}{Max\\Policy\\Length}} &
+            \multicolumn{2}{c}{Accessible Record} &
+            \multirow{3}{*}{\tabincell{c}{Inaccessible\\Predicate\\Length}} &
+            \multicolumn{3}{c}{Inaccessible Record} \\
+            \cmidrule(lr){2-3} \cmidrule(lr){5-7}
+            &
+            \multirow{2}{*}{\tabincell{c}{Client CPU\\Time (ms)}} &
+            \multirow{2}{*}{\tabincell{c}{VO Size\\ (KB)}} & &
+            \multirow{2}{*}{\tabincell{c}{SP CPU\\Time (ms)}} &
+            \multirow{2}{*}{\tabincell{c}{Client CPU\\Time (ms)}} &
+            \multirow{2}{*}{\tabincell{c}{VO Size\\ (KB)}} \\
+            \\
+            \midrule
+            6   &  33.6 & 0.9  & 10 & 95.8 & 46.5 & 1.8  \\
+            24  & 143  & 1.8 & 20 & 163  & 72.7 & 3.1  \\
+            96  & 664  & 6.6 & 40 & 301  & 128  & 5.6  \\
+            384 & 2,384 & 23.5 &  80 & 575  & 238  & 10.8 \\
+            \bottomrule
+        \end{tabular}
+    }
+    \caption{Equality Query Performance}\label{tab:access-control:equality-query}
+\end{table}
+
+In the first set of experiments, we test equality queries, whose performance is essentially the same as the underlying single ABS operation. We vary the max policy length (which affects the costs when the record is accessible) and the inaccessible predicate length (which affects the costs when the record is inaccessible). The results are summarized in \Cref{tab:access-control:equality-query}. Note that we omit the SP CPU time for accessible records since in this case the SP simply returns the APP signature signed by the DO and has little computational cost. For all other reported measures, as expected, the costs in CPU time and VO size are proportional to the policy/predicate length.
+
+\subsection{Range and Join Query Performance}
+
+\begin{figure}[t]
+    \centering
+    \begin{subfigure}{.33\linewidth}
+        \includegraphics[width=\linewidth]{exp-figs/access-control/range_sp.pdf}
+        \caption{SP CPU Time}
+    \end{subfigure}~%
+    \begin{subfigure}{.33\linewidth}
+        \includegraphics[width=\linewidth]{exp-figs/access-control/range_user.pdf}
+        \caption{Client CPU Time}
+    \end{subfigure}~%
+    \begin{subfigure}{.33\linewidth}
+        \includegraphics[width=\linewidth]{exp-figs/access-control/range_vo.pdf}
+        \caption{VO Size}
+    \end{subfigure}
+    \caption{Range Query Performance vs. Range}\label{exp-fig:access-control:range}
+\end{figure}
+\begin{figure}[t]
+    \centering
+    \begin{subfigure}{.33\linewidth}
+        \includegraphics[width=\linewidth]{exp-figs/access-control/scale_sp.pdf}
+        \caption{SP CPU Time}
+    \end{subfigure}~%
+    \begin{subfigure}{.33\linewidth}
+        \includegraphics[width=\linewidth]{exp-figs/access-control/scale_user.pdf}
+        \caption{Client CPU Time}
+    \end{subfigure}~%
+    \begin{subfigure}{.33\linewidth}
+        \includegraphics[width=\linewidth]{exp-figs/access-control/scale_vo.pdf}
+        \caption{VO Size}\label{exp-fig:scale_vo}
+    \end{subfigure}
+    \caption{Range Query Performance vs. Database Scale}\label{exp-fig:access-control:scale}
+\end{figure}
+\begin{figure}[t]
+    \centering
+    \begin{subfigure}{.33\linewidth}
+        \includegraphics[width=\linewidth]{exp-figs/access-control/policy_1_sp.pdf}
+        \caption{SP CPU Time}
+    \end{subfigure}~%
+    \begin{subfigure}{.33\linewidth}
+        \includegraphics[width=\linewidth]{exp-figs/access-control/policy_1_user.pdf}
+        \caption{Client CPU Time}
+    \end{subfigure}~%
+    \begin{subfigure}{.33\linewidth}
+        \includegraphics[width=\linewidth]{exp-figs/access-control/policy_1_vo.pdf}
+        \caption{VO Size}
+    \end{subfigure}
+    \caption{Range Query Performance vs. Policy Diversity}\label{exp-fig:access-control:policy_1}
+\end{figure}
+\begin{figure}[t]
+    \centering
+    \begin{subfigure}{.33\linewidth}
+        \includegraphics[width=\linewidth]{exp-figs/access-control/policy_2_sp.pdf}
+        \caption{SP CPU Time}
+    \end{subfigure}~%
+    \begin{subfigure}{.33\linewidth}
+        \includegraphics[width=\linewidth]{exp-figs/access-control/policy_2_user.pdf}
+        \caption{Client CPU Time}
+    \end{subfigure}~%
+    \begin{subfigure}{.33\linewidth}
+        \includegraphics[width=\linewidth]{exp-figs/access-control/policy_2_vo.pdf}
+        \caption{VO Size}
+    \end{subfigure}
+    \caption{Range Query Performance vs. Total Roles}\label{exp-fig:access-control:policy_2}
+\end{figure}
+\begin{figure}[t]
+    \centering
+    \begin{subfigure}{.33\linewidth}
+        \includegraphics[width=\linewidth]{exp-figs/access-control/join_sp.pdf}
+        \caption{SP CPU Time}
+    \end{subfigure}~%
+    \begin{subfigure}{.33\linewidth}
+        \includegraphics[width=\linewidth]{exp-figs/access-control/join_user.pdf}
+        \caption{Client CPU Time}
+    \end{subfigure}~%
+    \begin{subfigure}{.33\linewidth}
+        \includegraphics[width=\linewidth]{exp-figs/access-control/join_vo.pdf}
+        \caption{VO Size}
+    \end{subfigure}
+    \caption{Join Query Performance vs. Range}\label{exp-fig:access-control:join}
+\end{figure}
+
+To evaluate the range query authentication performance, we compare two methods:
+\begin{inlineenum}
+    \item the basic approach in which equality query authentication is executed repeatedly for every discrete value lying in the query range, and
+    \item the AP$^2$G-tree approach developed in \Cref{sec:access-control:range-query}.
+\end{inlineenum}
+In each query, the client is assigned with the roles that can access 20\% of the data records.
+
+We first vary the query range from 0.03\% to 1\% of the data space under the default settings. As shown in \Cref{exp-fig:access-control:range}, the AP$^2$G-tree outperforms the basic approach in all metrics. This indicates that the APS signatures generated for AP$^2$G-tree nodes can effectively summarize the inaccessible records in their subtrees. This leads to the reduction in both computation and communication overheads.
+
+To investigate the impact of the database scale and access policies, we fix the query range at 0.1\%. \Cref{exp-fig:access-control:scale} shows the results when the database scale is varied from 0.1 to 3. All metrics increase monotonically under AP$^2$G-tree, but those of the basic approach fluctuate a bit. This can be explained as follows. With more records, the access policies become more complex. This affects the costs in two ways:
+\begin{inlineenum}
+    \item it takes the SP more time to process the \textsf{ABS.Relax} operations, and
+    \item it takes the client more time to verify the APP signatures.
+\end{inlineenum}
+On the other hand, with the increase of database scale, more records can be accessed by the client and, hence, the inaccessible records become fewer. This decreases the costs on both the SP and the client.
+For AP$^2$G-tree, owing to its high pruning power, the decreased number of inaccessible records has less impact on the costs. Therefore, its costs increase steadily.
+
+\Cref{exp-fig:access-control:policy_1} and~\Cref{exp-fig:access-control:policy_2} show the performance trends with the respect to the number of distinct policies and the total number of roles/max policy length, respectively. It can be seen that the performance  remains almost the same under different policy diversities. However, the  larger the role space and the longer access policy length, the higher the overhead incurred for both the computation and communication costs.
+
+Finally, to study the join query performance, we evaluate the join operator of $Q$12 in TPC-H,\footnote{\texttt{SELECT * FROM orders, lineitem WHERE o.orderkey = l.orderkey AND l.orderkey between `?' AND `?'.}} which joins the tables \texttt{Lineitem} and \texttt{Orders} on the attribute $orderkey$. \Cref{exp-fig:access-control:join} reports the results while varying the query range. It is shown that the costs in all metrics under AP$^2$G-tree are substantially lower than those in the basic approach.
+
+\subsection{Impact of the Optimizations}
+
+\begin{figure}[t]
+    \centering
+    \begin{subfigure}{.33\linewidth}
+        \includegraphics[width=\linewidth]{exp-figs/access-control/hierarchical_sp.pdf}
+        \caption{SP CPU Time}
+    \end{subfigure}~%
+    \begin{subfigure}{.33\linewidth}
+        \includegraphics[width=\linewidth]{exp-figs/access-control/hierarchical_user.pdf}
+        \caption{Client CPU Time}
+    \end{subfigure}~%
+    \begin{subfigure}{.33\linewidth}
+        \includegraphics[width=\linewidth]{exp-figs/access-control/hierarchical_vo.pdf}
+        \caption{VO Size}
+    \end{subfigure}
+    \caption{Hierarchical Role Assignment Acceleration}\label{exp-fig:access-control:hierarchical}
+\end{figure}
+\begin{figure}[t]
+    \centering
+    \includegraphics[width=0.33\linewidth]{exp-figs/access-control/thread.pdf}
+    \caption{Multi-Threaded Acceleration}\label{exp-fig:access-control:thread}
+\end{figure}
+\begin{figure}[t]
+    \centering
+    \begin{subfigure}{.33\linewidth}
+        \includegraphics[width=\linewidth]{exp-figs/access-control/index_1_sp.pdf}
+        \caption{SP CPU Time}
+    \end{subfigure}~%
+    \begin{subfigure}{.33\linewidth}
+        \includegraphics[width=\linewidth]{exp-figs/access-control/index_1_user.pdf}
+        \caption{Client CPU Time}
+    \end{subfigure}~%
+    \begin{subfigure}{.33\linewidth}
+        \includegraphics[width=\linewidth]{exp-figs/access-control/index_1_vo.pdf}
+        \caption{VO Size}
+    \end{subfigure}
+    \caption{Range Query Performance vs. Index}\label{exp-fig:access-control:index}
+\end{figure}
+
+We now investigate the impact of different optimization techniques proposed in \Cref{sec:access-control:opt}. The results of using hierarchical role assignment are shown in \Cref{exp-fig:access-control-appendix.tex:hierarchical}. In our experiment, we simulate a two-level role hierarchy. Two global hierarchical roles are created and attached randomly to each AND gate in all the access policies. As a result, the average size of a client's inaccessible predicate is decreased from 9 to 6. It can be observed that the hierarchical role assignment reduces the cost in all metrics, due to much less overhead in processing inaccessible records.
+
+To study the acceleration acquired by parallelism, we vary the number of threads for both the SP processing and client verification running on the blade server. As shown in \Cref{exp-fig:access-control:thread}, more acceleration can be observed with the first 16 threads, but it becomes less effective with more threads. The reason is that the non-parallel part of the algorithm and I/O operations becomes more pronounced after sufficient multi-thread acceleration.
+
+Next, we study the performance gain if we relax the zero-knowledge confidentiality requirement. As shown in \Cref{exp-fig:access-control:index}, owing to a careful splitting strategy introduced in \Cref{sec:access-control:kd-tree}, AP$^2kd$-tree substantially outperforms AP$^2$G-tree in all evaluation metrics.
+
+\subsection{Performance with Duplicate Records and Updates}
+
+\begin{figure}[t]
+    \centering
+    \begin{subfigure}{.33\linewidth}
+        \includegraphics[width=\linewidth]{exp-figs/access-control/dup_sp.pdf}
+        \caption{SP CPU Time}
+    \end{subfigure}~%
+    \begin{subfigure}{.33\linewidth}
+        \includegraphics[width=\linewidth]{exp-figs/access-control/dup_user.pdf}
+        \caption{Client CPU Time}
+    \end{subfigure}~%
+    \begin{subfigure}{.33\linewidth}
+        \includegraphics[width=\linewidth]{exp-figs/access-control/dup_vo.pdf}
+        \caption{VO Size}
+    \end{subfigure}
+    \caption{Range Query Performance with Duplicate Records}\label{exp-fig:access-control:dup}
+\end{figure}
+
+\Cref{exp-fig:access-control:dup} reports the results of performance evaluation over the default TPC-H database, where the access policies are randomly assigned to all data records.
+We compare two solutions of handling duplicate records:
+\begin{inlineenum}
+    \item the zero-knowledge approach by adding the virtual dimension (denoted as AP$^2$G-Tree);
+    \item the non-zero-knowledge approach by embedding the duplicate information in the APP signatures (denoted as AP$^2$G-Tree (non-ZK)).
+\end{inlineenum}
+The index size for the zero-knowledge approach is 12.17 GB (2.91 GB tree structure + 9.26 GB signatures), whereas in the non-zero-knowledge setting the index is 4.35 GB (1.02 GB tree structure + 3.33 GB signatures). The additional index overhead incurred for the zero-knowledge approach, as the cost of achieving the zero-knowledge requirement, is believed to be reasonable. Regarding the query performance, AP$^2$G-Tree (non-ZK) is approximate to the case without duplicate records since the duplicate information is seamlessly embedded in the APP signatures. As shown in \Cref{exp-figs:access-control:dup}, the query cost in the zero-knowledge AP$^2$G-tree approach is only no more than 3 times worse than that in AP$^2$G-Tree (non-ZK). Moreover, the performance of AP$^2$G-tree is only about half that of the basic approach, which again demonstrates its pruning effectiveness for inaccessible records.
+
+\begin{figure}[t]
+    \centering
+    \begin{subfigure}[b]{.4\linewidth}
+        \includegraphics[width=\linewidth]{exp-figs/access-control/update_do_time.pdf}
+        \caption{DO CPU Time}\label{exp-fig:access-control:update_do_time}
+    \end{subfigure}~%
+    \begin{subfigure}[b]{.4\linewidth}
+        \includegraphics[width=\linewidth]{exp-figs/access-control/update_do_size.pdf}
+        \caption{Communication Cost}\label{exp-fig:access-control:update_do_size}
+    \end{subfigure}~%
+    \caption{Update Performance vs. Update Rate}\label{exp-fig:access-control:update_do}
+\end{figure}
+\begin{figure}[t]
+    \centering
+    \begin{subfigure}{.33\linewidth}
+        \includegraphics[width=\linewidth]{exp-figs/access-control/update_sp.pdf}
+        \caption{SP CPU Time}
+    \end{subfigure}~%
+    \begin{subfigure}{.33\linewidth}
+        \includegraphics[width=\linewidth]{exp-figs/access-control/update_user.pdf}
+        \caption{Client CPU Time}
+    \end{subfigure}~%
+    \begin{subfigure}{.33\linewidth}
+        \includegraphics[width=\linewidth]{exp-figs/access-control/update_vo.pdf}
+        \caption{VO Size}
+    \end{subfigure}
+    \caption{Range Query Performance vs. Update}\label{exp-fig:access-control:update}
+\end{figure}
+
+Finally, we conduct an empirical study over the default TPC-H database to evaluate the performance of our proposed update strategy. We compare two update methods:
+\begin{inlineenum}
+    \item the basic approach in which the DO resigns all of the APP signatures; and
+    \item our proposed solution described above.
+\end{inlineenum}
+\Cref{exp-fig:access-control:update_do} reports the DO CPU time and the communication cost while varying the update rate from $0.03\%$ to $1\%$ of all the records. It can be observed that our solution is significantly better than the basic approach. Further, we study the performance differences of authenticating range queries with and without data record updates. As shown in \Cref{exp-fig:access-control:update}, the differences in all metrics are insignificant.
+
+\section{Chapter Summary}\label{sec:access-control:summary}
+In this chpater, we have studied the problem of authenticating relational queries with fine-grained access control. We developed a new variant of the attribute-based signature scheme, which supports predicate relaxation on super access policies. Based on that, we proposed a novel access-policy-preserving (APP) signature as the primitive ADS to authenticate various types of queries under fine-grained access control. Our approach is zero-knowledge and reveals nothing beyond the accessible records. We also designed a grid-index-based AP$^2$G-tree to improve the performance of processing range queries and join queries. Optimization techniques for both the zero-knowledge model and the access policy confidentiality model were developed. Analytical models and empirical results substantiated the robustness and efficiency of our proposed solutions.
