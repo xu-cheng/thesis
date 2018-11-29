@@ -31,7 +31,7 @@ In our solution, two cryptographic primitives are used, namely hash function and
 
 \textbf{Hash Function}: A one-way hash function $H(\cdot)$ transforms an arbitrary message $m$ to a fixed-length digest $H(m)$. One-way indicates that given a message $m$, the computation of $H(m)$ is easy. However, to get $m$ from $H(m)$ is computationally infeasible. In this chapter, we use SHA-1 as the hash function, which maps a given message to a 160-bit digest.
 
-\textbf{Digital Signature}: The asymmetric signature is used to verify the integrity of the data. The DO keeps a secret key and publishes the corresponding public key to the verifier. The DO signs the data using the secret key and the verifier can decrypt the signature using the public key and verify the integrity of the data. RSA is one of the popular asymmetric signature algorithms.
+\textbf{Digital Signature}: The asymmetric signature is used to verify the integrity of the data. The DO keeps a private key and publishes the corresponding public key to the verifier. The DO signs the data using the private key and the verifier can verify the signature using the public key to ensure the integrity of the data. RSA is one of the popular asymmetric signature algorithms.
 
 \subsection{Spatial Authenticated Data Structure}
 
@@ -144,9 +144,9 @@ Our query authentication framework consists of three main procedures:
 \end{inlineenum}
 \Cref{fig:knn:frame} depicts the overview of the basic distributed kNN query processing.
 
-The main objective is to use a small amount of partitions to compute the correct kNN results as well as the VO\@. The non-overlapping characteristic of the partition method prunes some local indexes, which saves the computation resources. The $HSlave$ first finds the local kNN results in the \emph{home index} which contains the correct results in a high probability. However, if there are some other points which are closer than the ones in $\{rs_{h}\}$, $CSlaves$ need to process extra range queries to find the correct results. The $rcircle$ is used  to check whether $CSlaves$ should process the extra queries. \Cref{alg:knn:master} summarizes the procedure of the $Master$ node and the $Reducer$ node. The procedure of the $HSlave$ and the $CSlave$ is omitted because they simply compute the local queries and send the partial VO and results to the $Reducer$.
+The main objective is to use a small amount of partitions to compute the correct kNN results as well as the VO\@. The non-overlapping characteristic of the partition method prunes some local indexes, which saves the computation resources. The $HSlave$ first finds the local kNN results in the \emph{home index} which contains the correct results in a high probability. However, if there are some other points which are closer than the ones in $\{rs_{h}\}$, $CSlaves$ need to process extra range queries to find the correct results. The $rcircle$ is used to check whether $CSlaves$ should process the extra queries. \Cref{alg:knn:master} summarizes the procedure of the $Master$ node and the $Reducer$ node. The procedure of the $HSlave$ and the $CSlave$ is omitted because they simply compute the local queries and send the partial VO and results to the $Reducer$.
 
-\begin{algorithm}[htbp]
+\begin{algorithm}[t]
   \caption{Distributed Authenticated kNN Procedure}\label{alg:knn:master}
   \SetKwBlock{MProc}{Master Procedure}{}
   \SetKwBlock{RProc}{Reducer Procedure}{}
@@ -167,7 +167,7 @@ The main objective is to use a small amount of partitions to compute the correct
     \eIf{$CT = \emptyset$}{%
       Add $hVO$ and $nVO$ to $VO$\;
       Send $rs_{h}$ and $VO$ to the $Client$\;
-    }{%
+      }{%
       Receive \{$rs_{c}$\} and $cVO$ from $CSlaves$\;
       Add $k$ nearest results in $rs_{c}\cup rs_{h}$ to $RS$\;
       Add $hVO$, $cVO$, $nVO$ to $VO$\;
@@ -204,3 +204,93 @@ In case 2, we assume that $k$ equals $4$. The query point $Q$ locates in $N_{2}$
 
 There is a special case of the distributed kNN processing when the number of data points in a partition is less than $k$. A skewed distribution of data points may lead to this case. The previous algorithm cannot compute the correct kNN results. In this case, we double the radius of the $rcircle$ and process the range query iteratively. The $Reducer$ checks the result number and sends the message to the $Master$ if the result number is less than $k$. The $Master$ doubles the $rcircle$'s radius and the new $rcircle$ is sent to the updated $CSlaves$. This process runs iteratively until the result number exceeds $k$. \Cref{fig:knn:cases:specialcase} illustrates the special case. Assume that $k$ is $4$ and $Q$ is the query point. $N_{3}$ is the \emph{home index}. During the third iteration, we find $8$ points and the iteration terminates. Finally, the $Reducer$ selects $4$ nearest points and returns the final $RS$ and $VO$ to the client. In this special case, the VO size is rather large since the radius of $rcircle$ grows exponentially. To avoid this case, in our experiments we use the Sort-Tile-Recursive (STR)~\cite{10.1109/ICDE.1997.582015} partition method to split the dataset. The STR partition splits the near data points in the same partition and each partition has nearly the same number of data points.
 
+\subsection{Client Verification}\label{sec:knn:client-verification}
+
+\begin{algorithm}[t]
+  \caption{Client Verification}\label{alg:knn:client-verification}
+  \KwIn{$k$, Point $q$, result set $RS$, verification object $VO$}
+  \KwOut{Whether the result passes the verification}
+  Receive ${root}_{DO}$ and check its signature with respect to DO's public key\;
+  Reconstruct MB-tree ${root}$ using $VO$\;
+  \lIf{${root}_{DO} \neq {root}$}{\Return{False}}
+  Extract data points and MBRs from $VO$ and put them into $rs$, $mbr$ list\;
+  Sort $rs$ by distance to $q$\;
+  \For{$i=[1:k]$}{%
+    \lIf{$RS[i] \neq rs[i]$}{\Return{False}}
+  }
+  \For{$obj$~\textnormal{\textbf{in}}~$mbr$}{%
+    \lIf{$dist(q,RS[k])>dist(q,obj)$}{\Return{False}}
+  }
+  \Return{True}\;
+\end{algorithm}
+
+The client uses the VO to verify the results' soundness and completeness. The soundness is verified first by reconstructing the root hash value of the distributed MR-tree. The root hash value is the hash value of the concatenation of each local tree's MBR and hash value. If the reconstructed hash value matches the root hash signed by the public key of the DO, the soundness is satisfied. The completeness can be verified in the following method. All of the data points and MBRs are extracted from the VO set and the client selects the first $k$ nearest data points and compares them with the $RS$. If they match, it means that no other points are closer than the RS data points. Also, all of the $MBRs$ must be farther than the $k^{th}$ result point. \Cref{alg:knn:client-verification} summarizes the procedure of client's verification.
+
+Take \Cref{fig:knn:cases:case2} as an example. The overall VO consists of $hVO=\{$[[$a, b, c$], [$d, e, f$]]$\}$, $cVO=\{$[[$N_{5}, H(N_{5})$], [$g, h, i$]], [$p, q, r$]$\}$ and $nVO=\{$[$N_{3}, H(N_{3})$]$\}$. The client can recompute $N_{2}$ using $hVO$. $N_{7}$, $N_{8}$ as well as their corresponding hash values are derived by $\{a, b, c\}$ and $\{d, e, f\}$, respectively. $H(N_{7})$ is the hash value of the concatenation of points $a$, $b$, and $c$. Similarly, $H(N_{8})$ can be computed. $N_{2}$ and $H(N_{2})$ are generated by $N_{7}$, $N_{8}$, and their hash values. Points $g$, $h$, and $i$ are used to compute $N_{6}$ and $H(N_{6})$. $N_{1}$ with its hash value can be derived by $N_{5}$, $N_{6}$, and their hash values. $N_{4}$ and $H(N_{4})$ are computed using points $p$, $q$, and $r$ in $cVO$. The $N_{3}$ and $H(N_{3})$ are given in $nVO$. Therefore, the root hash value is computed using four local MR-trees' root hash values and MBRs. After that, the data points and MBRs are extracted from the union of VO\@. The correct results are $\{b, c, a, i\}$ and all of the non-result points will be checked whether they are closer than point $i$. Meanwhile, the MBR of $N_{5}$ and $N_{3}$ are checked whether they are farther from point $i$.
+
+\subsection{Robustness Analysis}
+
+\begin{lemma}\label{lem:knn:l1}
+  If there is no need to invoke the range queries ($CT=\emptyset$), the local kNN result $rs_{h}$ will be the final correct results.
+\end{lemma}
+
+\begin{proof}
+  This can be proved by contradiction. If there is a point $p$ which is one of the correct kNN results but not included in the local kNN result, it is either inside or outside the partition. If it is inside the partition, it should be outside the $rcircle$ since all of the points in the $rcirlce$ are added into $rs_{h}$. There are $k$ points inside the $rcircle$, so $p$ must be at least ${(k+1)}^{th}$ nearest point. This contradicts the assumption that it is one of the correct results. If it is outside the partition, as there is no intersection among the partitions, it must be farther than the current $k^{th}$ result and this contradicts the correct result assumption.
+\end{proof}
+
+\begin{lemma}\label{lem:knn:l2}
+  All of the correct kNN results must reside in the $rcircle$.
+\end{lemma}
+
+\begin{proof}
+  This can be proved by contradiction. Suppose there is a correct kNN result $p$ which resides outside the $rcircle$. The radius of $rcircle$ is computed by the distance between the $k^{th}$ current nearest point and the query point. There are at least $k$ data points inside the $rcircle$ because apart from the $k$ local results, there are probably some points in other partitions that are closer than the current $k^{th}$ point. Since $p$ is outside the $rcircle$, it is at least the ${(k+1)}^{th}$ nearest point, which contradicts the assumption.
+\end{proof}
+
+\begin{theorem}
+  \Cref{alg:knn:master} can produce the correct result set.
+\end{theorem}
+
+\begin{proof}
+  This can be proved using \Cref{lem:knn:l1} and \Cref{lem:knn:l2}.
+\end{proof}
+
+\Cref{alg:knn:client-verification} summarizes the procedure of client verification. The root hash reconstruction guarantees the \emph{soundness} of the results and the distance comparison protects the \emph{completeness}. We now give the following theorem of its correctness of verification.
+
+\begin{theorem}\label{thm:knn:verify}
+  \Cref{alg:knn:client-verification} verifies the soundness and completeness of the results and can detect the threats mentioned in \Cref{sec:knn:problem}.
+\end{theorem}
+
+\begin{proof}
+  If the adversary returns a fictitious point, which is not included in the dataset, the reconstructed root hash must be different from the signed hash value received from the DO because of the collision-resistance characteristic of the hash function. If one data point changes, its corresponding hash value will be different, resulting in the change of the root hash value of MR-tree. Without knowing the secret key, the SP cannot generate a valid signature of the wrong root hash value, which means that the signature is unforgeable. Therefore, the violation of soundness can be detected. If the reconstructed hash value matches the signed one, the incorrect result point must reside in the VO set but farther than the correct results. After the client sorts all the data points in the VO set by distance and gets the first $k$ nearest points, the client can notice the difference between $k$ points extracted from the VO and the points in RS\@. Then the results cannot pass the verification of the completeness.
+\end{proof}
+
+\section{Optimization of VO size}\label{sec:knn:opt}
+
+The VO size determines the communication cost and also the client verification time. In this section, we focus on the optimization of the VO size. Intuitively, the $rcircle$ decides the VO size. A larger $rcircle$ makes more nodes to be visited and hence and more data points to be added to the VO\@. Therefore, the objective is to reduce the radius of the $rcircle$. As we can see in \Cref{fig:knn:cases:case2}, the $rcircle$ is much bigger than the circle with the radius of the distance between $Q$ and point $i$. This is because the distance between $Q$ and $e$ is larger than the distance between $Q$ and $i$. In \Cref{alg:knn:master}, the $rcircle$ is decided by the local results in \emph{home index} and will not change during the whole procedure. To compute the minimum $rcircle$, the optimized algorithm adds the sequential computation of the $rcircle$ before the parallel authenticated range query in \Cref{alg:knn:master}.
+
+\begin{algorithm}[t]
+  \caption{VO Optimization Algorithm}\label{alg:knn:opt}
+  \SetKwBlock{MProc}{Master Procedure}{}
+  \MProc{%
+    \KwIn{$k$, Point $q$}
+    \KwOut{kNN request, range query requests}
+    Send $kNN$ request to $HSlave$\;
+    Receive $rcircle$\;
+    Compute $CT$ list and decide $CSlaves$\;
+    \If{$CT \neq \emptyset$}{%
+      Sort $CT$ list with minimum distance\;
+      \For{$i = [1:|CT|]$}{%
+        \If{$rcicle$ not intersects $CT[i].MBR$}{%
+          break\;
+        }
+        Send $rcircle$ to $CSlave[i]$\;
+        Receive $rs_{c}$\;
+        $rs_{h} \gets rs_{h} + rs_{c}$\;
+        Select $k^{th}$ nearest point $obj$ in $rs_{h}$\;
+        Update $rcircle$'s radius with $dist(obj, q)$\;
+      }
+      Recompute $CSlaves$ using final $rcircle_{f}$\;
+      Send $rcircle_{f}$ to $HSlave$ and $CSlaves$\;
+    }
+  }
+\end{algorithm}
