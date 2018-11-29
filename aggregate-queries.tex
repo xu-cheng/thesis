@@ -659,7 +659,13 @@ The results are reported based on an average of $10$ randomly generated operatio
 
 \subsection{Performance of Privacy-Preserving Multiset Authentication Protocols}
 
-We first use two synthetic multisets to evaluate the performance of the five privacy-preserving authentication protocols, i.e., $sub(\cdot,\cdot)$, $sum(\cdot)$, $union(\cdot)$, $empty(\cdot)$, and $times(\cdot, \cdot)$ in terms of (i) the SP CPU time, (ii) the client CPU time, and (iii) the VO size. We fix the coefficient for $times(\cdot, \cdot)$ to $10$, and vary the number of features from $100$ to $\fnum{10000}$. The SP CPU time (single-threaded) is reported in \Cref{tab:aggregate-queries:basic_op}. As coinciding with our cost model analysis, the SP CPU time is almost linear to the number of features. In contrast, the client CPU time and VO size are all constants, irrespective of the number of features.
+We first use two synthetic multisets to evaluate the performance of the five privacy-preserving authentication protocols, i.e., $sub(\cdot,\cdot)$, $sum(\cdot)$, $union(\cdot)$, $empty(\cdot)$, and $times(\cdot, \cdot)$ in terms of
+\begin{inlineenum}
+\item the SP CPU time,
+\item the client CPU time, and
+\item the VO size.
+\end{inlineenum}
+We fix the coefficient for $times(\cdot, \cdot)$ to $10$, and vary the number of features from $100$ to $\fnum{10000}$. The SP CPU time (single-threaded) is reported in \Cref{tab:aggregate-queries:basic_op}. As coinciding with our cost model analysis, the SP CPU time is almost linear to the number of features. In contrast, the client CPU time and VO size are all constants, irrespective of the number of features.
 
 We further investigate the SP CPU time of $sum(\cdot)$, $union(\cdot)$, $empty(\cdot)$ for more than two input multisets. We fix the number of features in each multiset to $20$ and vary the number of multisets. Since the client time and VO size are both linear to the number of input multisets, \Cref{tab:aggregate-queries:basic_op2} only shows the SP CPU time. For the $sum(\cdot)$ and $union(\cdot)$ operations, the cost is almost quadratic to the number of multisets, which coincides with our analysis in \Cref{tab:aggregate-queries:cost-model-set}. For $union(\cdot)$, we also investigate whether the cardinality of feature universe affects its performance. \Cref{tab:aggregate-queries:basic_op3} shows the results as the features increase while fixing the number of multisets and the multiset size to $5$ and $20$, respectively. We observe that the increment is sublinear to the cardinality of feature universe.
 

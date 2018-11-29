@@ -33,7 +33,7 @@ We start by proving the security of the privacy-preserving authentication protoc
   \begin{align*}
     \Pr[\varepsilon_n] \leq (n-1) \Pr[\varepsilon_2]
   \end{align*}
-  Since $\Pr[\varepsilon_2]$ is negligible according to our proof for $n=2$, we can conclude that $Pr[\varepsilon_{n}]$ is negligible as $p\gg n$ in a cyclic multiplicative group $\mathbb{G}$. Hence, this lemma is proved.
+  Since $\Pr[\varepsilon_2]$ is negligible according to our proof for $n=2$, we can conclude that $\Pr[\varepsilon_{n}]$ is negligible as $p\gg n$ in a cyclic multiplicative group $\mathbb{G}$. Hence, this lemma is proved.
 \end{proof}
 
 \section{Security of $union(\cdot)$ Operation}
@@ -42,35 +42,44 @@ We start by proving the security of the privacy-preserving authentication protoc
   Under the bilinear $q$-strong Diffie-Hellman assumption, if the accumulative value returned by $union(\{X_1,\dots,X_n\})$ passes the client's verification, then the probability of $union(\{X_1,\dots,X_n\}) \neq acc(\cup_{i=1}^n X_i)$ is negligible for any PPT adversary.
 \end{lemma}
 \begin{proof}
-  Let $U = \cup_{i=1}^nX_i$. The $union(\cdot)$ protocol consists of three modules (i) $sub(\widehat{X}_1, U)$, $sub(\widehat{X}_2, U)$, $\dots$, $sub(\widehat{X}_n, U)$; (ii) $empty(\{U-\widehat{X}_1, U-\widehat{X}_2, \dots, U -\widehat{X}_n\})$; and (iii) SP sends the ECRH hash value $h_e(U)^*$ for $U$. Due to the composition property and the security of (i)(ii), we only need to prove the security of (iii), that is, $acc(U)^*$ cannot be forged if $h_e(U)^*$ passes the client's verification. Denote $acc^{-1}({acc(U)}^*)$ as the set who has accumulator value ${acc(U)}^*$.
+  Let $U = \cup_{i=1}^n X_i$. The $union(\cdot)$ protocol consists of three modules
+  \begin{inlineenum}
+  \item $sub(\widehat{X}_1, U)$, $sub(\widehat{X}_2, U)$, $\dots$, $sub(\widehat{X}_n, U)$;%
+    \label{enum:aggregate-queries:union-proof:mod1}
+  \item $empty(\{U-\widehat{X}_1, U-\widehat{X}_2, \dots, U -\widehat{X}_n\})$; and%
+    \label{enum:aggregate-queries:union-proof:mod2}
+  \item SP sends the ECRH hash value ${h_e(U)}^*$ for $U$.%
+    \label{enum:aggregate-queries:union-proof:mod3}
+  \end{inlineenum}
+  Due to the composition property and the security of~\ref{enum:aggregate-queries:union-proof:mod1} and~\ref{enum:aggregate-queries:union-proof:mod2}, we only need to prove the security of~\ref{enum:aggregate-queries:union-proof:mod3}, that is, ${acc(U)}^*$ cannot be forged if ${h_e(U)}^*$ passes the client's verification. Denote $acc^{-1}({acc(U)}^*)$ as the set who has accumulator value ${acc(U)}^*$.
 
-  First, we prove $acc^{-1}(acc(U)^*)\subseteq U$, i.e., the returned value $acc(U)^*=g^{P(U)^*}$=$g^{P(U) \cdot Q_U(s)}$, where $Q_U(s)$ is some polynomial. We prove this by contradiction.
-  We assume there exists an element $x_j \in \widehat{X}_i$ such that $(x_j + s) \nmid P(U)^*$, i.e., $P(U)^* = (x_i + s) \cdot Q_i(s) + \lambda_i$, where $Q_i(s)$ is some polynomial and $\lambda_i$ is a constant value. During the execution of protocol $sub(\widehat{X}_i, U)$, by expanding $e(acc(\widehat{X}_i), W_i^*) = e(acc(U)^*, g)$, the adversary can get:
+  First, we prove $acc^{-1}({acc(U)}^*)\subseteq U$, i.e., the returned value ${acc(U)}^*=g^{{P(U)}^*}$=$g^{P(U) \cdot Q_U(s)}$, where $Q_U(s)$ is some polynomial. We prove this by contradiction.
+  We assume there exists an element $x_j \in \widehat{X}_i$ such that $(x_j + s) \nmid {P(U)}^*$, i.e., ${P(U)}^* = (x_i + s) \cdot Q_i(s) + \lambda_i$, where $Q_i(s)$ is some polynomial and $\lambda_i$ is a constant value. During the execution of protocol $sub(\widehat{X}_i, U)$, by expanding $e(acc(\widehat{X}_i), W_i^*) = e({acc(U)}^*, g)$, the adversary can get:
   \begin{align*}
-  e(g^{\prod_{k=1}^{|\widehat{X}_i|}(x_k+s) }, W_i^*)  = e(g, g)^{(x_j+s) \cdot Q_i(s) + \lambda_i}.
+    e(g^{\prod_{k=1}^{|\widehat{X}_i|}(x_k+s) }, W_i^*)  = {e(g, g)}^{(x_j+s) \cdot Q_i(s) + \lambda_i}.
   \end{align*}
   By dividing $(x_j+s)$ on the exponents of both sides, the adversary can get:
   \begin{align*}
-  e(g, W_i^*)^{\prod_{k=1}^{j-1}{(x_k+s)} \cdot \prod_{k=j+1}^{|\widehat{X}_i|}{(x_k+s)}} = e (g, g)^{Q_i(s) + \lambda_i/(x_j+s)}.
+    {e(g, W_i^*)}^{\prod_{k=1}^{j-1}{(x_k+s)} \cdot \prod_{k=j+1}^{|\widehat{X}_i|}{(x_k+s)}} = {e (g, g)}^{Q_i(s) + \lambda_i/(x_j+s)}.
   \end{align*}
   Finally, the adversary can get:
   \begin{align}
-&e(g, g)^{1/(x_j + s)}  \nonumber \\
-    = &(e(g, W_i^*)^{\prod_{k=1}^{j-1}(x_k+s) \cdot \prod_{k=j+1}^{|\widehat{X}_i|}{(x_k+s)}} \cdot e(g, g)^{-Q_i(s)})^{1/\lambda_i},\nonumber
+&{e(g, g)}^{1/(x_j + s)}  \nonumber \\
+    = &{({e(g, W_i^*)}^{\prod_{k=1}^{j-1}(x_k+s) \cdot \prod_{k=j+1}^{|\widehat{X}_i|}{(x_k+s)}} \cdot {e(g, g)}^{-Q_i(s)})}^{1/\lambda_i},\nonumber
   \end{align}
-  which violates the bilinear $q$-strong Diffie-Hellman assumption mention in \Cref{sec:aggregate-queries:prelim}. Hence, by contradiction, $P(U)^*$ must be in the form of $P(U) \cdot Q_U(s)$.
+  which violates the bilinear $q$-strong Diffie-Hellman assumption mention in \Cref{sec:aggregate-queries:prelim}. Hence, by contradiction, ${P(U)}^*$ must be in the form of $P(U) \cdot Q_U(s)$.
 
-  Next, we prove $U \subseteq acc^{-1}(acc(U)^*)$, i.e., $Q_U(s)$ can only be a constant value. We prove this by contradiction. For each set $\widehat{X}_i$, $acc(U - \widehat{X}_i)^* = g^{P(U-\widehat{X}_i) \cdot Q_U(s)}$. During the execution of $empty(\cdot)$, by expanding $\prod_{i=1}^n e(acc(U-\widehat{X}_i)^*, F_i^*)=e(g, g)$, the adversary can get:
+  Next, we prove $U \subseteq acc^{-1}({acc(U)}^*)$, i.e., $Q_U(s)$ can only be a constant value. We prove this by contradiction. For each set $\widehat{X}_i$, ${acc(U - \widehat{X}_i)}^* = g^{P(U-\widehat{X}_i) \cdot Q_U(s)}$. During the execution of $empty(\cdot)$, by expanding $\prod_{i=1}^n e({acc(U-\widehat{X}_i)}^*, F_i^*)=e(g, g)$, the adversary can get:
   \begin{align*}
     \prod_{i=1}^n e(g^{P(U-\widehat{X}_i)}, g^{Q_i(s)}) = e(g, g),
   \end{align*}
   and then
   \begin{align*}
-    e(g,g)^{Q_U(s)(\prod_{i=1}^nP(U-\widehat{X}_i)\cdot Q_i(s))}=e(g,g).
+    {e(g,g)}^{Q_U(s)(\prod_{i=1}^n P(U-\widehat{X}_i)\cdot Q_i(s))}=e(g,g).
   \end{align*}
   Finally, the adversary can get:
   \begin{align*}
-    e(g, g)^{1/Q_U(s)} = e(g, g)^{P(U-\widehat{X}_i \cdot Q_i(s))}.
+    {e(g, g)}^{1/Q_U(s)} = {e(g, g)}^{P(U-\widehat{X}_i \cdot Q_i(s))}.
   \end{align*}
   Since $Q_U(s)$ is a polynomial whose order is larger than $1$, the adversary violates the bilinear $q$-strong Diffie-Hellman assumption. Thus, by contradiction, $Q_U(s)$ must be a constant value.
 
