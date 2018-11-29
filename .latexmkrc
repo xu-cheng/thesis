@@ -7,7 +7,7 @@ $pdf_mode = 1;
 # Try 5 times at maximum then give up
 $max_repeat = 5;
 # File extensions to remove when cleaning
-$clean_ext = 'bbl fdb_latexmk fls nav pdfsync pyg pytxcode run.xml snm synctex.gz thm upa vrb ' .
+$clean_ext = 'bbl fdb_latexmk fls loa nav pdfsync pyg run.xml snm synctex.gz thm upa vrb ' .
              '*-eps-converted-to.pdf */*-eps-converted-to.pdf */*/*-eps-converted-to.pdf';
 
 no warnings 'redefine';
