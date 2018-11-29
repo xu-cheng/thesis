@@ -280,9 +280,7 @@ The VO size determines the communication cost and also the client verification t
     \If{$CT \neq \emptyset$}{%
       Sort $CT$ list with minimum distance\;
       \For{$i = [1:|CT|]$}{%
-        \If{$rcicle$ not intersects $CT[i].MBR$}{%
-          break\;
-        }
+        \lIf{$rcircle$ not intersects $CT[i].MBR$}{\textbf{break}}
         Send $rcircle$ to $CSlave[i]$\;
         Receive $rs_{c}$\;
         $rs_{h} \gets rs_{h} + rs_{c}$\;
