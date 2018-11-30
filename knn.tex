@@ -307,3 +307,111 @@ In \Cref{alg:knn:opt}, the $rcircle$ is updated iteratively in the \emph{for} lo
 
 Obviously, \Cref{alg:knn:opt} spends more time than \Cref{alg:knn:master} in query processing because of the sequential update of $rcircle$. If the $|CT|$ is large, the sequential update consumes too much time. Therefore, we design a hybrid algorithm, in which the $rcircle$ is updated only for $l$ times, where $1\le l \le |CT|$. Here the value $l$ denotes the level of sequential processing. After $l$ sequential queries, we resort to \Cref{alg:knn:master} for parallel processing of distributed authentication. The hybrid algorithm uses less range queries to find the optimized $rcircle$ and it balances the trade-off between the VO size and the query time. Note that if the $|CT|$ equals one, the hybrid algorithm and the optimized algorithm are the same because there is only one update of the $rcircle$.
 
+\section{Performance evaluation}\label{sec:knn:exp}
+
+This section evaluates the proposed distributed query authentication algorithm and optimization techniques. We perform the query evaluation on a computer with Dual 6-core Intel Xeon E5-2620 2.4GHz CPU with 128G RAM\@. % chktex 8
+The SP runs on Apache Spark platform locally and we set the slaves (workers) to be $8$ in the system. The DO side is set up on a desktop computer with Intel Core i7 CPU and 4GB RAM, running Linux. The dataset of all of the experiments is a New York map file from OpenStreetMap containing 11.56 million data points. We assume that there is no update of the dataset since the bulk loading of ADS construction is quite efficient. Therefore, we employ bulk-loaded STR-tree as our R-tree, which is implemented in Java. Moreover, we select the STR as the partition method. The fan-out of the MR-tree is set to 100. The hash function is 160-bit SHA-1 and we use 1024-bit RSA algorithm to sign the root hash value. Both SHA-1 and RSA are imported from the \texttt{java.security} package. The index construction, query processing time, result verification time, and VO size are measured.
+
+\subsection{Cost of Index Construction}
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=0.35\linewidth]{exp-figs/knn/indexconstructtime.eps}
+  \caption{DO's Construction Time}\label{fig:knn:do-time}
+\end{figure}
+
+\begin{table}[t]
+  \centering
+  \begin{tabular}{cccccc}
+    \toprule
+    Cardinality (Million) & 1.28 & 3.84  & 6.4  & 8.96  & 11.52\\
+    \midrule
+    MR-tree (MB)              & 69.8 & 209.4 & 349 & 488.6 & 628.2\\
+    R-tree (MB)               & 69.4 & 208.2 & 347 & 485.8  & 624.6\\
+    \bottomrule
+  \end{tabular}
+  \caption{The Size of Index with Different Cardinalities}\label{tab:knn:index-size}
+\end{table}
+
+\Cref{fig:knn:do-time} shows the DO's construction time of the MR-tree as well as the R-tree for comparison. The construction time grows linearly with the increasing cardinality. It takes less than half a minute to construct index with 11.52 million records, which is acceptable. The construction of ADS is a one-time process and further queries can amortize its cost. The construction time of MR-tree is around $20\%$ longer than that of R-tree. This is because building the MR-tree involves the computation of hash values and binary concatenation. \Cref{tab:knn:index-size} shows the index size with different dataset cardinalities. When the cardinality is 11.52 million, the size of MR-tree is only 4 MB larger than the R-tree. The reason is that one SHA-1 hash value is only 160 bits, which is rather small. As a result, it takes the DO and the SP only a few MB to store the extra authenticated data structure.
+
+\subsection{Distributed Authenticated kNN Query Cost}
+
+In this section, we evaluate the query cost of distributed authenticated kNN queries. The selection of the query point influences the query cost in our distributed setting. We call a kNN query as an $ERQ$ if the $CT\neq\emptyset$ during its processing. If the query point is near the center of the partition's MBR and also the $k$ is rather smaller, the probability of the query being an $ERQ$ is small. However, if the query point is near the edge of the partition's MBR, even with a small $k$, the query could be an $ERQ$ in a higher probability. It takes more time to process the range queries in an $ERQ$. To test the average performance of the query cost with different $k$ settings, we randomly select $\fnum{1000}$ data points and measure the average query time. We denote \Cref{alg:knn:master} and \Cref{alg:knn:opt} as the basic and optimized algorithm, respectively. We compare the query cost performance of the basic, optimized, and hybrid algorithm, where $l$ is set to be one.
+
+\begin{figure}[t]
+  \centering
+  \begin{subfigure}[t]{.33\linewidth}
+    \centering
+    \includegraphics[width=\linewidth]{exp-figs/knn/querycost.eps}
+    \caption{Query Cost}\label{fig:knn:query:query}
+  \end{subfigure}~%
+  \begin{subfigure}[t]{.33\linewidth}
+    \centering
+    \includegraphics[width=\linewidth]{exp-figs/knn/vosize.eps}
+    \caption{VO Size}\label{fig:knn:query:vo}
+  \end{subfigure}~%
+  \begin{subfigure}[t]{.33\linewidth}
+    \centering
+    \includegraphics[width=\linewidth]{exp-figs/knn/verify.eps}
+    \caption{Verification Cost}\label{fig:knn:query:verify}
+  \end{subfigure}
+  \caption{Query Authentication Performance}\label{fig:knn:query}
+\end{figure}
+
+\begin{table}[t]
+  \centering
+  \begin{tabular}{ccccccc}
+    \toprule
+    $k$         & 32 & 64 & 128 & 256 & 512 & 1024 \\
+    \midrule
+    $|CT|=1$    & 38 & 44 & 51  & 59  & 77  & 88   \\
+    $|CT|=2$    & 0  & 0  & 1   & 1   & 2   & 3    \\
+    $|CT|=3$   & 0  & 0  & 0   & 0   & 1   & 2    \\
+    Total $\# ERQs$ & 38 & 44 & 52  & 60  & 80  & 93   \\
+    \bottomrule
+  \end{tabular}
+  \caption{$\# ERQs$ in the 1000 Query Points}\label{tab:knn:num-erq}
+\end{table}
+
+\Cref{fig:knn:query:query} shows that the query cost increases with the $k$'s growth. Intuitively, searching more points in a local MR-tree takes longer time. Also, the number of $ERQs$ increases with the larger $k$ and each $ERQ$ takes more time. \Cref{tab:knn:num-erq} shows the number of $ERQs$ in the $\fnum{1000}$ query points with increasing $k$. Furthermore, the basic algorithm runs faster than the other two optimized algorithms. The optimized algorithm and hybrid algorithm run more range queries to reduce the $rcircle$ and this leads to more local query time. The hybrid algorithm and optimized algorithm are the same when $|CT|=1$, since both of them run one range query to reduce the $rcircle$. The efficiency of the hybrid algorithm is not obvious on average because the number of cases of $|CT|>1$ is much less than the case of $|CT|=1$ (see \Cref{tab:knn:num-erq}).
+
+\Cref{fig:knn:query:vo} shows the average VO size with the three algorithms. Both of the optimized and hybrid algorithm reduce the VO size. In most cases, the query is not an $ERQ$ (see \Cref{tab:knn:num-erq}, there are only $93$ $ERQ$ queries out of the $\fnum{1000}$ queries when $k=\fnum{1024}$), which leads to the same VO size using the basic and two optimized algorithms. When $k$ reaches $\fnum{1024}$, the basic algorithm outputs VO with the size of 174.32 KB on average and the two optimized algorithms output 147.82 KB and 147.72 KB on average, respectively. The curve of the hybrid and optimized algorithm overlap heavily because of the limited number of cases that $|CT|>1$.
+
+\begin{table}[t]
+  \centering
+  \begin{tabular}{cccccc}
+    \toprule
+    Type   & $r_{hyb}$ & $r_{opt}$ & $t_{bas}$ (ms) & $t_{hyb}$ (ms) & $t_{opt}$ (ms) \\
+    \midrule
+    $|CT|=1$ & 14.1\%              & 14.1\%                 & 14.19      & 18.78       & 18.8           \\
+    $|CT|=2$ & 30\%                & 40.2\%                 & 16.62      & 19.38       & 23             \\
+    $|CT|=3$ & 32.5\%              & 43.3\%                 & 16.7       & 21.08       & 25.9           \\
+    \bottomrule
+  \end{tabular}
+  \caption{Comparison of $ERQ$ with different $|CT|$}\label{tab:knn:erq-ct}
+\end{table}
+
+In order to compare the hybrid and optimized algorithm, we set $k=\fnum{1024}$ and choose three types of query points with different $|CT|$ from the previous selected 1000 queries and evaluate the VO size and query cost. The $r_{hyb}$ is defined as ${(VO_{basic}-VO_{hybrid})}/{VO_{basic}}$ and $r_{opt}$ is similar. The $t_{bas}$, $t_{hyb}$, and $t_{opt}$ represent the query cost of the three algorithms, respectively. In \Cref{tab:knn:erq-ct}, both the optimized and hybrid algorithm output smaller VO ($r_{hyb}>0$, $r_{opt}>0$) and take more query time ($t_{hyb}>t_{bas}$, $t_{opt}>t_{bas}$), compared with the basic algorithm. Moreover, the hybrid algorithm takes less query time ($t_{hyb}\le t_{opt}$) and outputs larger VO ($r_{hyb}\le r_{opt}$), compared to the optimized algorithm.
+
+\Cref{fig:knn:query:verify} shows the average client verification time. Since the hybrid algorithm and the optimized algorithm output nearly the same size of VO on average, the two curves overlap. Obviously, the verification time is proportional to the VO size. The reduction of verification time becomes more obvious when $k$ is larger and this corresponds to the reduction of VO size. When $k$ is larger, the number of points in the VO increases. Also, each extra range query leads to visit of the corresponding index and contributes to a larger VO\@. Therefore, the client takes more time to reconstruct the root hash value of each local index. To verify the completeness of the results, the client should sort the results and also the points inside the VO\@. Therefore, the total verification time increases with larger $k$.
+
+Finally, we evaluate how the three algorithms scale out with the slave node size varying from $2$ to $8$. The node size influences the performance of parallel computing and also the throughput of the system. If the number of slave nodes is small, there will be more partitions (local indexes) distributed into the same node, which leads to slower processing of the range query due to the limited cores. We test the throughput when $k=32$ and $k=\fnum{1024}$. The throughput is calculated as the number of jobs completed per minute.
+
+\begin{figure}[t]
+  \centering
+  \begin{subfigure}[t]{.4\linewidth}
+    \centering
+    \includegraphics[width=\linewidth]{exp-figs/knn/throughput32.eps}
+    \caption{$k=32$}\label{fig:knn:throughput:32}
+  \end{subfigure}\quad%
+  \begin{subfigure}[t]{.4\linewidth}
+    \centering
+    \includegraphics[width=\linewidth]{exp-figs/knn/throughput1024.eps}
+    \caption{$k=\fnum{1024}$}\label{fig:knn:throughput:1024}
+  \end{subfigure}
+  \caption{Throughput with Different Nodes}\label{fig:knn:throughput}
+\end{figure}
+
+\Cref{fig:knn:throughput} shows the throughput of the three algorithms under different node numbers. We can infer that the three algorithms scale well with the node number. The throughput of the hybrid and optimized algorithm is less than the throughput of the basic algorithm since the two optimized algorithms need more range queries to reduce the $rcircle$. The throughput of the three algorithms has similar performance when $k=32$, because the ratio of $ERQ$ is small. However, the throughput of the basic algorithm is obviously higher than the throughput of two optimized algorithms when $k=\fnum{1024}$ since the ratio of $ERQ$ is higher and there are more cases of $|CT|>1$.
+
