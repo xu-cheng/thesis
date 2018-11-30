@@ -1,6 +1,6 @@
 \chapter{Authenticating {kNN} Queries in Distributed Environment}\label{chap:knn}
 
-In this chapter, we investigate the problem of authenticating {kNN} queries in distributed environment.
+In this chapter, we investigate the problem of authenticating {kNN} queries in distributed environment. The problem is formalized in \Cref{sec:knn:problem}. \Cref{sec:knn:prelim} introduces the cryptographic primitives, spatial ADS, and local authenticated kNN processing as the preliminaries. The design of the distributed MR-tree, the basic algorithm to process the authenticated kNN queries, and the client verification algorithm are present in \Cref{sec:knn:distributed-knn}. Two optimized algorithms are introduced in \Cref{sec:knn:opt}. \Cref{sec:knn:exp} presents the experiment results. Finally, \Cref{sec:knn:summary} summaries this chapter.
 
 \section{Problem Formulation}\label{sec:knn:problem}
 
@@ -415,3 +415,5 @@ Finally, we evaluate how the three algorithms scale out with the slave node size
 
 \Cref{fig:knn:throughput} shows the throughput of the three algorithms under different node numbers. We can infer that the three algorithms scale well with the node number. The throughput of the hybrid and optimized algorithm is less than the throughput of the basic algorithm since the two optimized algorithms need more range queries to reduce the $rcircle$. The throughput of the three algorithms has similar performance when $k=32$, because the ratio of $ERQ$ is small. However, the throughput of the basic algorithm is obviously higher than the throughput of two optimized algorithms when $k=\fnum{1024}$ since the ratio of $ERQ$ is higher and there are more cases of $|CT|>1$.
 
+\section{Chapter Summary}\label{sec:knn:summary}
+In this chapter, we investigate the authenticated kNN processing in distributed environments. The distributed MR-tree has been designed to speed up the processing of kNN queries. We propose a basic algorithm to authenticate kNN queries in a distributed fashion, as well as two optimization techniques to reduce the VO size. Our experiments demonstrate that the query costs of the three algorithms are all efficient. The two optimization techniques reduce the VO size and the client's verification time. The hybrid algorithm balances the trade-off between the query cost and the VO size. Furthermore, the throughput of all the algorithms is investigated and the result reveals that the system scales well with increasing the number of nodes.
