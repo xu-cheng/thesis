@@ -726,57 +726,62 @@ We turn on all the optimizations and evaluate the overall performance of privacy
   \caption{Proposed \emph{FFQ} Algorithm vs. \emph{FFQ-NP} Algorithm}\label{tab:aggregate-queries:baseline}
 \end{table}
 
+\newsavebox{\figbox}
+\savebox{\figbox}{%
+  \includegraphics[width=.33\linewidth]{exp-figs/aggregate-queries/pgp_vo.eps}%
+}
+
 \begin{figure}[t]
   \centering
-  \begin{subfigure}[b]{.31\linewidth}
+  \begin{subfigure}[b]{.33\linewidth}
     \centering
-    \includegraphics[width=\linewidth]{exp-figs/aggregate-queries/pgp_sp.eps}
+    \includegraphics[height=\ht\figbox]{exp-figs/aggregate-queries/pgp_sp.eps}
     \caption{SP CPU Time}
   \end{subfigure}~%
-  \begin{subfigure}[b]{.31\linewidth}
+  \begin{subfigure}[b]{.33\linewidth}
     \centering
-    \includegraphics[width=\linewidth]{exp-figs/aggregate-queries/pgp_client.eps}
+    \includegraphics[height=\ht\figbox]{exp-figs/aggregate-queries/pgp_client.eps}
     \caption{Client CPU Time}
   \end{subfigure}~%
-  \begin{subfigure}[b]{.36\linewidth}
+  \begin{subfigure}[b]{.33\linewidth}
     \centering
-    \includegraphics[width=\linewidth]{exp-figs/aggregate-queries/pgp_vo.eps}
+    \includegraphics[height=\ht\figbox]{exp-figs/aggregate-queries/pgp_vo.eps}
     \caption{VO Size}
   \end{subfigure}
   \caption{Query Performance vs. Selectivity on PGP dataset}\label{fig:aggregate-queries:pgp}
 
   \centering
-  \begin{subfigure}[b]{.31\linewidth}
+  \begin{subfigure}[b]{.33\linewidth}
     \centering
-    \includegraphics[width=\linewidth]{exp-figs/aggregate-queries/foodmarket_sp.eps}
+    \includegraphics[height=\ht\figbox]{exp-figs/aggregate-queries/foodmarket_sp.eps}
     \caption{SP CPU Time}
   \end{subfigure}~%
-  \begin{subfigure}[b]{.3\linewidth}
+  \begin{subfigure}[b]{.33\linewidth}
     \centering
-    \includegraphics[width=\linewidth]{exp-figs/aggregate-queries/foodmarket_client.eps}
+    \includegraphics[height=\ht\figbox]{exp-figs/aggregate-queries/foodmarket_client.eps}
     \caption{Client CPU Time}
   \end{subfigure}~%
-  \begin{subfigure}[b]{.37\linewidth}
+  \begin{subfigure}[b]{.33\linewidth}
     \centering
-    \includegraphics[width=\linewidth]{exp-figs/aggregate-queries/foodmarket_vo.eps}
+    \includegraphics[height=\ht\figbox]{exp-figs/aggregate-queries/foodmarket_vo.eps}
     \caption{VO Size}
   \end{subfigure}
   \caption{Query Performance vs. Selectivity on FoodMarket dataset}\label{fig:aggregate-queries:foodmarket}
 
   \centering
-  \begin{subfigure}[b]{.31\linewidth}
+  \begin{subfigure}[b]{.33\linewidth}
     \centering
-    \includegraphics[width=\linewidth]{exp-figs/aggregate-queries/tpch_sp.eps}
+    \includegraphics[height=\ht\figbox]{exp-figs/aggregate-queries/tpch_sp.eps}
     \caption{SP CPU Time}
   \end{subfigure}~%
-  \begin{subfigure}[b]{.31\linewidth}
+  \begin{subfigure}[b]{.33\linewidth}
     \centering
-    \includegraphics[width=\linewidth]{exp-figs/aggregate-queries/tpch_client.eps}
+    \includegraphics[height=\ht\figbox]{exp-figs/aggregate-queries/tpch_client.eps}
     \caption{Client CPU Time}
   \end{subfigure}~%
-  \begin{subfigure}[b]{.36\linewidth}
+  \begin{subfigure}[b]{.33\linewidth}
     \centering
-    \includegraphics[width=\linewidth]{exp-figs/aggregate-queries/tpch_vo.eps}
+    \includegraphics[height=\ht\figbox]{exp-figs/aggregate-queries/tpch_vo.eps}
     \caption{VO Size}
   \end{subfigure}
   \caption{Query Performance vs. Selectivity on TPC-H dataset}\label{fig:aggregate-queries:tpch}
@@ -796,6 +801,10 @@ In \Cref{fig:aggregate-queries:mt}, we further vary the number of threads in par
 
 We also evaluate the performance of the linear ordering technique in \Cref{fig:aggregate-queries:linear}. We compare it with the baseline $sum(\cdot)$ under one-dimensional data. The results show that it dramatically improves the performance by more than four times. In addition, as the selectivity increases, the performance gain becomes even more eminent.
 
+\savebox{\figbox}{%
+  \includegraphics[width=0.5\linewidth]{exp-figs/aggregate-queries/opt.eps}
+}
+
 \begin{figure}[t]
   \centering
   \includegraphics[width=0.5\linewidth]{exp-figs/aggregate-queries/opt.eps}
@@ -805,33 +814,37 @@ We also evaluate the performance of the linear ordering technique in \Cref{fig:a
 \begin{figure}[t]
   \begin{minipage}[t]{0.5\linewidth}
     \centering
-    \includegraphics[width=.8\linewidth]{exp-figs/aggregate-queries/threads.eps}
+    \includegraphics[height=\ht\figbox]{exp-figs/aggregate-queries/threads.eps}
     \captionof{figure}{Multi-Threaded Acceleration}\label{fig:aggregate-queries:mt}
   \end{minipage}~%
   \begin{minipage}[t]{0.5\linewidth}
     \centering
-    \includegraphics[width=.75\linewidth]{exp-figs/aggregate-queries/linear.eps}
+    \includegraphics[height=\ht\figbox]{exp-figs/aggregate-queries/linear.eps}
     \captionof{figure}{Basic $sum(\cdot)$ vs. Linear Ordering}\label{fig:aggregate-queries:linear}
   \end{minipage}
 \end{figure}
 
 \subsection{Scalability Test on Dimensionality and Object Cardinality}
 
+\savebox{\figbox}{%
+  \includegraphics[width=.33\linewidth]{exp-figs/aggregate-queries/dimension_vo.eps}%
+}
+
 \begin{figure}[t]
   \centering
   \begin{subfigure}[b]{.33\linewidth}
     \centering
-    \includegraphics[width=\linewidth]{exp-figs/aggregate-queries/dimension_sp.eps}
+    \includegraphics[height=\ht\figbox]{exp-figs/aggregate-queries/dimension_sp.eps}
     \caption{SP CPU Time}
   \end{subfigure}~%
   \begin{subfigure}[b]{.33\linewidth}
     \centering
-    \includegraphics[width=\linewidth]{exp-figs/aggregate-queries/dimension_client.eps}
+    \includegraphics[height=\ht\figbox]{exp-figs/aggregate-queries/dimension_client.eps}
     \caption{Client CPU Time}
   \end{subfigure}~%
   \begin{subfigure}[b]{.33\linewidth}
     \centering
-    \includegraphics[width=\linewidth]{exp-figs/aggregate-queries/dimension_vo.eps}
+    \includegraphics[height=\ht\figbox]{exp-figs/aggregate-queries/dimension_vo.eps}
     \caption{VO Size}
   \end{subfigure}
   \caption{Query Performance vs. Dimensionality}\label{fig:aggregate-queries:md}
@@ -839,17 +852,17 @@ We also evaluate the performance of the linear ordering technique in \Cref{fig:a
   \centering
   \begin{subfigure}[b]{.33\linewidth}
     \centering
-    \includegraphics[width=\linewidth]{exp-figs/aggregate-queries/cardinality_sp.eps}
+    \includegraphics[height=\ht\figbox]{exp-figs/aggregate-queries/cardinality_sp.eps}
     \caption{SP CPU Time}
   \end{subfigure}~%
   \begin{subfigure}[b]{.33\linewidth}
     \centering
-    \includegraphics[width=\linewidth]{exp-figs/aggregate-queries/cardinality_client.eps}
+    \includegraphics[height=\ht\figbox]{exp-figs/aggregate-queries/cardinality_client.eps}
     \caption{Client CPU Time}
   \end{subfigure}~%
   \begin{subfigure}[b]{.33\linewidth}
     \centering
-    \includegraphics[width=\linewidth]{exp-figs/aggregate-queries/cardinality_vo.eps}
+    \includegraphics[height=\ht\figbox]{exp-figs/aggregate-queries/cardinality_vo.eps}
     \caption{VO Size}
   \end{subfigure}
   \caption{Query Performance vs. Object Cardinality}\label{fig:aggregate-queries:diversity}
