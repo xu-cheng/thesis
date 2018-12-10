@@ -935,18 +935,22 @@ In the first set of experiments, we test equality queries, whose performance is 
 
 \subsection{Range and Join Query Performance}
 
+\savebox{\figbox}{%
+  \includegraphics[width=.33\linewidth]{exp-figs/access-control/range_sp.eps}
+}
+
 \begin{figure}[t]
     \centering
     \begin{subfigure}{.33\linewidth}
-        \includegraphics[width=\linewidth]{exp-figs/access-control/range_sp.eps}
+        \includegraphics[height=\ht\figbox]{exp-figs/access-control/range_sp.eps}
         \caption{SP CPU Time}
     \end{subfigure}~%
     \begin{subfigure}{.33\linewidth}
-        \includegraphics[width=\linewidth]{exp-figs/access-control/range_user.eps}
+        \includegraphics[height=\ht\figbox]{exp-figs/access-control/range_user.eps}
         \caption{Client CPU Time}
     \end{subfigure}~%
     \begin{subfigure}{.33\linewidth}
-        \includegraphics[width=\linewidth]{exp-figs/access-control/range_vo.eps}
+        \includegraphics[height=\ht\figbox]{exp-figs/access-control/range_vo.eps}
         \caption{VO Size}
     \end{subfigure}
     \caption{Range Query Performance vs. Range}\label{exp-fig:access-control:range}
@@ -954,15 +958,15 @@ In the first set of experiments, we test equality queries, whose performance is 
 \begin{figure}[t]
     \centering
     \begin{subfigure}{.33\linewidth}
-        \includegraphics[width=\linewidth]{exp-figs/access-control/scale_sp.eps}
+        \includegraphics[height=\ht\figbox]{exp-figs/access-control/scale_sp.eps}
         \caption{SP CPU Time}
     \end{subfigure}~%
     \begin{subfigure}{.33\linewidth}
-        \includegraphics[width=\linewidth]{exp-figs/access-control/scale_user.eps}
+        \includegraphics[height=\ht\figbox]{exp-figs/access-control/scale_user.eps}
         \caption{Client CPU Time}
     \end{subfigure}~%
     \begin{subfigure}{.33\linewidth}
-        \includegraphics[width=\linewidth]{exp-figs/access-control/scale_vo.eps}
+        \includegraphics[height=\ht\figbox]{exp-figs/access-control/scale_vo.eps}
         \caption{VO Size}\label{exp-fig:scale_vo}
     \end{subfigure}
     \caption{Range Query Performance vs. Database Scale}\label{exp-fig:access-control:scale}
@@ -970,15 +974,15 @@ In the first set of experiments, we test equality queries, whose performance is 
 \begin{figure}[t]
     \centering
     \begin{subfigure}{.33\linewidth}
-        \includegraphics[width=\linewidth]{exp-figs/access-control/policy_1_sp.eps}
+        \includegraphics[height=\ht\figbox]{exp-figs/access-control/policy_1_sp.eps}
         \caption{SP CPU Time}
     \end{subfigure}~%
     \begin{subfigure}{.33\linewidth}
-        \includegraphics[width=\linewidth]{exp-figs/access-control/policy_1_user.eps}
+        \includegraphics[height=\ht\figbox]{exp-figs/access-control/policy_1_user.eps}
         \caption{Client CPU Time}
     \end{subfigure}~%
     \begin{subfigure}{.33\linewidth}
-        \includegraphics[width=\linewidth]{exp-figs/access-control/policy_1_vo.eps}
+        \includegraphics[height=\ht\figbox]{exp-figs/access-control/policy_1_vo.eps}
         \caption{VO Size}
     \end{subfigure}
     \caption{Range Query Performance vs. Policy Diversity}\label{exp-fig:access-control:policy_1}
@@ -986,15 +990,15 @@ In the first set of experiments, we test equality queries, whose performance is 
 \begin{figure}[t]
     \centering
     \begin{subfigure}{.33\linewidth}
-        \includegraphics[width=\linewidth]{exp-figs/access-control/policy_2_sp.eps}
+        \includegraphics[height=\ht\figbox]{exp-figs/access-control/policy_2_sp.eps}
         \caption{SP CPU Time}
     \end{subfigure}~%
     \begin{subfigure}{.33\linewidth}
-        \includegraphics[width=\linewidth]{exp-figs/access-control/policy_2_user.eps}
+        \includegraphics[height=\ht\figbox]{exp-figs/access-control/policy_2_user.eps}
         \caption{Client CPU Time}
     \end{subfigure}~%
     \begin{subfigure}{.33\linewidth}
-        \includegraphics[width=\linewidth]{exp-figs/access-control/policy_2_vo.eps}
+        \includegraphics[height=\ht\figbox]{exp-figs/access-control/policy_2_vo.eps}
         \caption{VO Size}
     \end{subfigure}
     \caption{Range Query Performance vs. Total Roles}\label{exp-fig:access-control:policy_2}
@@ -1002,15 +1006,15 @@ In the first set of experiments, we test equality queries, whose performance is 
 \begin{figure}[t]
     \centering
     \begin{subfigure}{.33\linewidth}
-        \includegraphics[width=\linewidth]{exp-figs/access-control/join_sp.eps}
+        \includegraphics[height=\ht\figbox]{exp-figs/access-control/join_sp.eps}
         \caption{SP CPU Time}
     \end{subfigure}~%
     \begin{subfigure}{.33\linewidth}
-        \includegraphics[width=\linewidth]{exp-figs/access-control/join_user.eps}
+        \includegraphics[height=\ht\figbox]{exp-figs/access-control/join_user.eps}
         \caption{Client CPU Time}
     \end{subfigure}~%
     \begin{subfigure}{.33\linewidth}
-        \includegraphics[width=\linewidth]{exp-figs/access-control/join_vo.eps}
+        \includegraphics[height=\ht\figbox]{exp-figs/access-control/join_vo.eps}
         \caption{VO Size}
     \end{subfigure}
     \caption{Join Query Performance vs. Range}\label{exp-fig:access-control:join}
@@ -1042,36 +1046,36 @@ Finally, to study the join query performance, we evaluate the join operator of $
 \begin{figure}[t]
     \centering
     \begin{subfigure}{.33\linewidth}
-        \includegraphics[width=\linewidth]{exp-figs/access-control/hierarchical_sp.eps}
+        \includegraphics[height=\ht\figbox]{exp-figs/access-control/hierarchical_sp.eps}
         \caption{SP CPU Time}
     \end{subfigure}~%
     \begin{subfigure}{.33\linewidth}
-        \includegraphics[width=\linewidth]{exp-figs/access-control/hierarchical_user.eps}
+        \includegraphics[height=\ht\figbox]{exp-figs/access-control/hierarchical_user.eps}
         \caption{Client CPU Time}
     \end{subfigure}~%
     \begin{subfigure}{.33\linewidth}
-        \includegraphics[width=\linewidth]{exp-figs/access-control/hierarchical_vo.eps}
+        \includegraphics[height=\ht\figbox]{exp-figs/access-control/hierarchical_vo.eps}
         \caption{VO Size}
     \end{subfigure}
     \caption{Hierarchical Role Assignment Acceleration}\label{exp-fig:access-control:hierarchical}
 \end{figure}
 \begin{figure}[t]
     \centering
-    \includegraphics[width=0.33\linewidth]{exp-figs/access-control/thread.eps}
+    \includegraphics[height=\ht\figbox]{exp-figs/access-control/thread.eps}
     \caption{Multi-Threaded Acceleration}\label{exp-fig:access-control:thread}
 \end{figure}
 \begin{figure}[t]
     \centering
     \begin{subfigure}{.33\linewidth}
-        \includegraphics[width=\linewidth]{exp-figs/access-control/index_1_sp.eps}
+        \includegraphics[height=\ht\figbox]{exp-figs/access-control/index_1_sp.eps}
         \caption{SP CPU Time}
     \end{subfigure}~%
     \begin{subfigure}{.33\linewidth}
-        \includegraphics[width=\linewidth]{exp-figs/access-control/index_1_user.eps}
+        \includegraphics[height=\ht\figbox]{exp-figs/access-control/index_1_user.eps}
         \caption{Client CPU Time}
     \end{subfigure}~%
     \begin{subfigure}{.33\linewidth}
-        \includegraphics[width=\linewidth]{exp-figs/access-control/index_1_vo.eps}
+        \includegraphics[height=\ht\figbox]{exp-figs/access-control/index_1_vo.eps}
         \caption{VO Size}
     \end{subfigure}
     \caption{Range Query Performance vs. Index}\label{exp-fig:access-control:index}
@@ -1088,15 +1092,15 @@ Finally, we study the performance gain if we relax the zero-knowledge confidenti
 \begin{figure}[t]
     \centering
     \begin{subfigure}{.33\linewidth}
-        \includegraphics[width=\linewidth]{exp-figs/access-control/dup_sp.eps}
+        \includegraphics[height=\ht\figbox]{exp-figs/access-control/dup_sp.eps}
         \caption{SP CPU Time}
     \end{subfigure}~%
     \begin{subfigure}{.33\linewidth}
-        \includegraphics[width=\linewidth]{exp-figs/access-control/dup_user.eps}
+        \includegraphics[height=\ht\figbox]{exp-figs/access-control/dup_user.eps}
         \caption{Client CPU Time}
     \end{subfigure}~%
     \begin{subfigure}{.33\linewidth}
-        \includegraphics[width=\linewidth]{exp-figs/access-control/dup_vo.eps}
+        \includegraphics[height=\ht\figbox]{exp-figs/access-control/dup_vo.eps}
         \caption{VO Size}
     \end{subfigure}
     \caption{Range Query Performance with Duplicate Records}\label{exp-fig:access-control:dup}
@@ -1112,12 +1116,14 @@ The index size for the zero-knowledge approach is 12.17 GB (2.91 GB tree structu
 
 \begin{figure}[t]
     \centering
-    \begin{subfigure}[b]{.4\linewidth}
-        \includegraphics[width=\linewidth]{exp-figs/access-control/update_do_time.eps}
+    \begin{subfigure}[b]{.5\linewidth}
+        \centering
+        \includegraphics[height=\ht\figbox]{exp-figs/access-control/update_do_time.eps}
         \caption{DO CPU Time}\label{exp-fig:access-control:update_do_time}
-    \end{subfigure}\quad
-    \begin{subfigure}[b]{.415\linewidth}
-        \includegraphics[width=\linewidth]{exp-figs/access-control/update_do_size.eps}
+    \end{subfigure}~%
+    \begin{subfigure}[b]{.5\linewidth}
+        \centering
+        \includegraphics[height=\ht\figbox]{exp-figs/access-control/update_do_size.eps}
         \caption{Communication Cost}\label{exp-fig:access-control:update_do_size}
     \end{subfigure}
     \caption{Update Performance vs. Update Rate}\label{exp-fig:access-control:update_do}
@@ -1125,15 +1131,15 @@ The index size for the zero-knowledge approach is 12.17 GB (2.91 GB tree structu
 \begin{figure}[t]
     \centering
     \begin{subfigure}{.33\linewidth}
-        \includegraphics[width=\linewidth]{exp-figs/access-control/update_sp.eps}
+        \includegraphics[height=\ht\figbox]{exp-figs/access-control/update_sp.eps}
         \caption{SP CPU Time}
     \end{subfigure}~%
     \begin{subfigure}{.33\linewidth}
-        \includegraphics[width=\linewidth]{exp-figs/access-control/update_user.eps}
+        \includegraphics[height=\ht\figbox]{exp-figs/access-control/update_user.eps}
         \caption{Client CPU Time}
     \end{subfigure}~%
     \begin{subfigure}{.33\linewidth}
-        \includegraphics[width=\linewidth]{exp-figs/access-control/update_vo.eps}
+        \includegraphics[height=\ht\figbox]{exp-figs/access-control/update_vo.eps}
         \caption{VO Size}
     \end{subfigure}
     \caption{Range Query Performance vs. Update}\label{exp-fig:access-control:update}
