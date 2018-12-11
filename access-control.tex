@@ -1,6 +1,6 @@
 \chapter{Authenticating Relational Queries with Fine-Grained Access Control}\label{chap:access-control}
 
-In this chapter, we investigate the problem of authenticating relational queries with fine-grained access control. \Cref{sec:access-control:problem} introduces the formal problem definition, followed by cryptographic primitives in \Cref{sec:access-control:prelim}. \Cref{sec:access-control:equality-query} presents our solution for equality queries, which is then generalized to range queries and join queries in \Cref{sec:access-control:range-query} with the design of AP$^2$G-tree. A security analysis is presented in \Cref{sec:access-control:security-analysis}, and \Cref{sec:access-control:opt} and \Cref{sec:access-control:relaxing-zero-knowledge} present optimization techniques for the zero-knowledge model and a relaxed model, respectively. How to handle duplicate records and data updates are discussed in \Cref{sec:access-control:dup} and \Cref{sec:access-control:update} respectively. \Cref{sec:access-control:evluation} presents the experimental results, followed by a summary in \Cref{sec:access-control:summary}.
+In this chapter, we investigate the problem of authenticating relational queries with fine-grained access control. \Cref{sec:access-control:problem} introduces the formal problem definition, followed by cryptographic primitives in \cref{sec:access-control:prelim}. \Cref{sec:access-control:equality-query} presents our solution for equality queries, which is then generalized to range queries and join queries in \cref{sec:access-control:range-query} with the design of AP$^2$G-tree. A security analysis is presented in \cref{sec:access-control:security-analysis}, and \cref{sec:access-control:opt} and \cref{sec:access-control:relaxing-zero-knowledge} present optimization techniques for the zero-knowledge model and a relaxed model, respectively. How to handle duplicate records and data updates are discussed in \cref{sec:access-control:dup} and \cref{sec:access-control:update} respectively. \Cref{sec:access-control:evluation} presents the experimental results, followed by a summary in \cref{sec:access-control:summary}.
 
 \section{Problem Formulation}\label{sec:access-control:problem}
 
@@ -10,13 +10,13 @@ In this chapter, we investigate the problem of authenticating relational queries
   \caption{Query Authentication with Access Control}\label{fig:access-control:model}
 \end{figure}
 
-As shown in \Cref{fig:access-control:model}, there are three parties in the system:
+As shown in \cref{fig:access-control:model}, there are three parties in the system:
 \begin{inlineenum}
 \item DO\@;
 \item SP\@; and
 \item clients.
 \end{inlineenum}
-The relational database $\mathcal{D}$, owned by the DO, is enforced with access control. Each record in $\mathcal{D}$ is a tuple $\langle o_i, v_i, \Upsilon_i\rangle$, where $o_i$ is the query attribute, $v_i$ is the content attribute, and $\Upsilon_i$ is the access policy. We assume that $o_i$ is discrete and distinct among all records.\footnote{The proposed approach is also applicable to continuous data which can be converted into discrete data by discretization techniques~\cite{Kotsiantis2006}. How to handle duplicate records will be discussed in \Cref{sec:access-control:dup}.} We further assume that $v_i$ is encrypted by CP-ABE~\cite{10.1109/sp.2007.11} (details in \Cref{sec:access-control:prelim}) for access control.\footnote{For simplicity, we assume that the query attribute is in plaintext. In cases where the query attribute is also encrypted,
+The relational database $\mathcal{D}$, owned by the DO, is enforced with access control. Each record in $\mathcal{D}$ is a tuple $\langle o_i, v_i, \Upsilon_i\rangle$, where $o_i$ is the query attribute, $v_i$ is the content attribute, and $\Upsilon_i$ is the access policy. We assume that $o_i$ is discrete and distinct among all records.\footnote{The proposed approach is also applicable to continuous data which can be converted into discrete data by discretization techniques~\cite{Kotsiantis2006}. How to handle duplicate records will be discussed in \cref{sec:access-control:dup}.} We further assume that $v_i$ is encrypted by CP-ABE~\cite{10.1109/sp.2007.11} (details in \cref{sec:access-control:prelim}) for access control.\footnote{For simplicity, we assume that the query attribute is in plaintext. In cases where the query attribute is also encrypted,
 privacy-preserving query techniques~\cite{10.1145/2699026.2699101} can be applied to retrieve query results, which is an orthogonal issue to query authentication.}
 All the records are signed by the DO using an ADS and are outsourced to the SP, who answers queries from the clients on behalf of the DO\@.
 
@@ -25,7 +25,7 @@ During the system setup, the DO generates a public key ${pk}_{client}$ (CP-ABE e
 
 \textbf{Access Policy.}
 Access policies control the results of a query with respect to the roles of the client.\footnote{We use ``roles'' and ``attributes'' interchangeably in the context of ABE and ABS.}
-For example, given the same range query $Q$ in \Cref{fig:access-control:model}, the result set to client $u_1$ with $Role_A$ and $Role_B$ is $\{\langle o_2, v_2\rangle$, $\langle o_3, v_3\rangle\}$ and that to client $u_2$ with $Role_C$ is $\{\langle o_3, v_3\rangle$, $\langle o_4, v_4\rangle\}$. In general, an access policy can be viewed as a boolean function in the form of $\Upsilon : {\{0, 1\}}^n \to \{0, 1\}$. It accepts multiple boolean inputs, each corresponding to a role, and outputs 1 or 0. For example, if $\Upsilon$ is defined as $({Role}_A \land {Role}_C) \lor {Role}_B$, then $\Upsilon({Role}_A) = 0$ and $\Upsilon({Role}_B, {Role}_C) = 1$. Here, for clarity, we omit those inputs with zero values (e.g., a singleton $Role_A$ implies that $Role_B$ and $Role_C$ are missing). While, technically, an access policy can take any boolean function, in the literature, most works focus on a specific type, namely, monotone boolean functions~\cite{10.1145/1180405.1180418,10.1109/sp.2007.11,10.1007/978-3-642-19074-2_24,10.1145/1755688.1755697}. Formally, the monotonic property means that, for all $a_i$ and $b_i$ in $\{0, 1\}$, if $a_1 \le b_1$, $\dots$, $a_n \le b_n$, then $\Upsilon(a_1, \dots, a_n) \le \Upsilon(b_1, \dots, b_n)$ holds. This property suggests that a client with more roles has a higher clearance level and so can access more data. % chktex 8
+For example, given the same range query $Q$ in \cref{fig:access-control:model}, the result set to client $u_1$ with $Role_A$ and $Role_B$ is $\{\langle o_2, v_2\rangle$, $\langle o_3, v_3\rangle\}$ and that to client $u_2$ with $Role_C$ is $\{\langle o_3, v_3\rangle$, $\langle o_4, v_4\rangle\}$. In general, an access policy can be viewed as a boolean function in the form of $\Upsilon : {\{0, 1\}}^n \to \{0, 1\}$. It accepts multiple boolean inputs, each corresponding to a role, and outputs 1 or 0. For example, if $\Upsilon$ is defined as $({Role}_A \land {Role}_C) \lor {Role}_B$, then $\Upsilon({Role}_A) = 0$ and $\Upsilon({Role}_B, {Role}_C) = 1$. Here, for clarity, we omit those inputs with zero values (e.g., a singleton $Role_A$ implies that $Role_B$ and $Role_C$ are missing). While, technically, an access policy can take any boolean function, in the literature, most works focus on a specific type, namely, monotone boolean functions~\cite{10.1145/1180405.1180418,10.1109/sp.2007.11,10.1007/978-3-642-19074-2_24,10.1145/1755688.1755697}. Formally, the monotonic property means that, for all $a_i$ and $b_i$ in $\{0, 1\}$, if $a_1 \le b_1$, $\dots$, $a_n \le b_n$, then $\Upsilon(a_1, \dots, a_n) \le \Upsilon(b_1, \dots, b_n)$ holds. This property suggests that a client with more roles has a higher clearance level and so can access more data. % chktex 8
 For simplicity, we assume that all access control policies are monotone boolean functions that are normalized in a \emph{disjunctive normal form} (DNF).
 
 \textbf{Threat Model.}
@@ -40,7 +40,7 @@ To address the first threat, we advocate authenticated query processing. Specifi
   \item \textbf{Soundness}. No records in $RS$ are tampered with and are truly the results with respect to the roles of the client.
   \item \textbf{Completeness}. All records not in $RS$ are either non-results or are inaccessible to the client.
 \end{itemize}
-Take the range query $Q$ in \Cref{fig:access-control:model} as an example. $RS=\{\langle o_2, v_2\rangle$, $\langle o_3, v_3\rangle\}$ is the correct result set for client $u_1$. $RS_1 = \{\langle o_2, v_2'\rangle$, $\langle o_3, v_3\rangle\}$ and $RS_2 = \{\langle o_2, v_2\rangle$, $\langle o_3, v_3\rangle$, $\langle o_4, v_4\rangle\}$ are not sound because they either contain fake ($v_2'$ in $RS_1$) or inaccessible ($o_4$ in $RS_2$) records. $RS_3 = \{\langle o_2, v_2\rangle\}$ is not complete because $o_3$ is missing.
+Take the range query $Q$ in \cref{fig:access-control:model} as an example. $RS=\{\langle o_2, v_2\rangle$, $\langle o_3, v_3\rangle\}$ is the correct result set for client $u_1$. $RS_1 = \{\langle o_2, v_2'\rangle$, $\langle o_3, v_3\rangle\}$ and $RS_2 = \{\langle o_2, v_2\rangle$, $\langle o_3, v_3\rangle$, $\langle o_4, v_4\rangle\}$ are not sound because they either contain fake ($v_2'$ in $RS_1$) or inaccessible ($o_4$ in $RS_2$) records. $RS_3 = \{\langle o_2, v_2\rangle\}$ is not complete because $o_3$ is missing.
 
 To further address the second threat, we need to protect data access against unauthorized clients during query authentication. We define three levels of confidentiality requirements:
 \begin{itemize}
@@ -49,7 +49,7 @@ To further address the second threat, we need to protect data access against una
   \item \textbf{Zero-Knowledge Confidentiality}.
     Any information beyond the accessible records $\mathcal{D}^+$ in the database $\mathcal{D}$ is protected. That is, the clients can gain nothing about $\mathcal{D}\backslash\mathcal{D}^+$ (e.g., not even its size or the associated access policies).
 \end{itemize}
-The above security notions will be formalized when we perform security analysis in \Cref{sec:access-control:security-analysis-query}. We assume that there is no collusion between the SP and clients.
+The above security notions will be formalized when we perform security analysis in \cref{sec:access-control:security-analysis-query}. We assume that there is no collusion between the SP and clients.
 
 In what follows, we propose a zero-knowledge query authentication solution that addresses both of the security threats under fine-grained access control. We will develop new query authentication techniques for ADS generation, VO construction, and result verification that achieve the zero-knowledge confidentiality. To cater for performance-centric applications, we will also discuss how to further improve the query authentication performance by relaxing the confidentiality requirement.
 
@@ -96,13 +96,13 @@ Introduced in~\cite{10.1007/978-3-642-19074-2_24}, ABS is a signature scheme tha
     On input a master verification key $mvk$, an unverified message $m$, an unverified monotone boolean function predicate $\Upsilon$, and a signature $\sigma_{m,\Upsilon}$, it outputs 1 if the signature is valid.
 \end{itemize}
 
-More elaborate procedures, along with extended algorithms, will be given in \Cref{sec:access-control:abs}.
+More elaborate procedures, along with extended algorithms, will be given in \cref{sec:access-control:abs}.
 
 \section{Equality Query Authentication}\label{sec:access-control:equality-query}
 
 A naive solution to query authentication with fine-grained access control is to use the Merkle hash tree~\cite{10.1007/0-387-34805-0_21} to construct a VO for authenticated query processing and to use CP-ABE to encrypt data records for access control. More specifically, for any query, all data records (including those inaccessible ones) that lie in the query range, along with the VO, are returned to the client. After verifying the records, the client can decrypt and access the authorized records, using the attribute secret key obtained from the DO\@. However, this solution has two problems. First, it will return a large number of inaccessible records to the client, which incurs high computation and communication overheads. Second, for the inaccessible records, thanks to CP-ABE, although they cannot be decrypted by the client, returning them still reveals some information about their existence and their access policies. This violates our zero-knowledge confidentiality requirement.
 
-In the following, we propose new query authentication techniques that support both fine-grained access control and zero-knowledge confidentiality. We start with equality queries by developing a novel signature scheme in this section and then extend it to range queries and join queries in \Cref{sec:access-control:range-query}.
+In the following, we propose new query authentication techniques that support both fine-grained access control and zero-knowledge confidentiality. We start with equality queries by developing a novel signature scheme in this section and then extend it to range queries and join queries in \cref{sec:access-control:range-query}.
 
 In an equality query, the client specifies a query key $o_q$ as well as his/her access role set $\mathcal{A}$. Since the query attribute is distinct, there could be three possible outcomes:
 \begin{itemize}
@@ -115,7 +115,7 @@ Recalling our zero-knowledge confidentiality does not allow the client to distin
 
 \subsection{ADS Generation and Query Processing}
 
-\textbf{ADS Generation.} Our construction for zero-knowledge query authentication is built upon a novel signature scheme. During the system setup, the DO generates a signature for each data record. These signatures, serving as ADS, are sent to the SP, who will then use them to support verifiable queries. As mentioned earlier, the signature has two design requirements. First, given a record $i$, the signature should capture all of its three components (query attribute $o_i$, data content $v_i$, and access policy $\Upsilon_i$) so that it can be used as a proof of integrity. Second, in case the record is inaccessible to some clients, the signature can be tailored to prove the inaccessibility with the zero-knowledge confidentiality. To this end, we propose a new access-policy-preserving (APP) signature based on a variant of the ABS (to be detailed in \Cref{sec:access-control:abs}).
+\textbf{ADS Generation.} Our construction for zero-knowledge query authentication is built upon a novel signature scheme. During the system setup, the DO generates a signature for each data record. These signatures, serving as ADS, are sent to the SP, who will then use them to support verifiable queries. As mentioned earlier, the signature has two design requirements. First, given a record $i$, the signature should capture all of its three components (query attribute $o_i$, data content $v_i$, and access policy $\Upsilon_i$) so that it can be used as a proof of integrity. Second, in case the record is inaccessible to some clients, the signature can be tailored to prove the inaccessibility with the zero-knowledge confidentiality. To this end, we propose a new access-policy-preserving (APP) signature based on a variant of the ABS (to be detailed in \cref{sec:access-control:abs}).
 
 \begin{definition}[APP Signature] Consider a record $\langle o_i$, $v_i$, $\Upsilon_i\rangle$. Let ${sk}_{\textrm{DO}}$ be the signing key of the DO, $H(\cdot)$ a cryptographic hash function, and `$|$' denote string concatenation. The access-policy-preserving (APP) signature for this record is generated as:
   \begin{align*}
@@ -135,9 +135,9 @@ After the SP receives the APP signatures for all records from the DO, it is able
 \Cref{fig:access-control:equality-query} shows an example of two different clients issuing an equality query with key $o_2$.
 Client $u_1$ is allowed to access the record $o_2$, so it is straightforward to return the APP signature generated by the DO as the VO\@. That is, the SP will return $\langle v_2$, $\sigma_2 = \textsf{ABS.Sign}({sk}_\text{DO}$, $H(o_2) | H(v_2)$, $\Upsilon_2)$, $\Upsilon_2\rangle$. On the client side, $H(o_2) | H(v_2)$ will be computed based on the query attribute $o_2$ and the result $v_2$ returned by the SP\@. If it can be verified by the signature $\sigma_2$ under the policy $\Upsilon_2$, $\langle o_2, v_2\rangle$ is a genuine result. % chktex 36
 
-Next, we consider the case in which the data record is inaccessible to the client (e.g., $u_2$ in \Cref{fig:access-control:equality-query}). Since the query attribute is distinct, we only need to prove the inaccessibility of this data record. Simply returning the APP signature does not work, because this would disclose the access policy and hence the specific reason why the client cannot access the record. To achieve the zero-knowledge confidentiality, the SP can only leverage the information which is already known to the client to prove the inaccessibility. Specifically, the global access role set $\mathbb{A}$ and the client's own role set $\mathcal{A}$ are such information the SP can use.
+Next, we consider the case in which the data record is inaccessible to the client (e.g., $u_2$ in \cref{fig:access-control:equality-query}). Since the query attribute is distinct, we only need to prove the inaccessibility of this data record. Simply returning the APP signature does not work, because this would disclose the access policy and hence the specific reason why the client cannot access the record. To achieve the zero-knowledge confidentiality, the SP can only leverage the information which is already known to the client to prove the inaccessibility. Specifically, the global access role set $\mathbb{A}$ and the client's own role set $\mathcal{A}$ are such information the SP can use.
 
-In a monotone boolean function, given an access role set as input, the reason for it to output 0 is only because it lacks one or more roles in $\mathbb{A}\backslash\mathcal{A}$ (i.e., those roles that the client does not own). Thus, our idea is to make use of a \emph{super} access policy, denoted by $\hat{\Upsilon}_{\mathcal{A}}$, that does not honor the role set $\mathcal{A}$. More specifically, it is a boolean function that fuses each role in $\mathbb{A}\backslash\mathcal{A}$ using the OR operator. For example, in \Cref{fig:access-control:equality-query}, if the access role universe $\mathbb{A}$ is $\{{Role}_{\emptyset}$, ${Role}_A$, ${Role}_B$, ${Role}_C\}$,
+In a monotone boolean function, given an access role set as input, the reason for it to output 0 is only because it lacks one or more roles in $\mathbb{A}\backslash\mathcal{A}$ (i.e., those roles that the client does not own). Thus, our idea is to make use of a \emph{super} access policy, denoted by $\hat{\Upsilon}_{\mathcal{A}}$, that does not honor the role set $\mathcal{A}$. More specifically, it is a boolean function that fuses each role in $\mathbb{A}\backslash\mathcal{A}$ using the OR operator. For example, in \cref{fig:access-control:equality-query}, if the access role universe $\mathbb{A}$ is $\{{Role}_{\emptyset}$, ${Role}_A$, ${Role}_B$, ${Role}_C\}$,
 then
 $\hat{\Upsilon}_{\{{Role}_C \}}$ = ${Role}_{\emptyset} \lor {Role}_A \lor {Role}_B$ for client $u_2$. In essence, it is the weakest access policy under which the client still cannot access the record. Based on this concept, we define the following access-policy-stripped (APS) signature that embeds the super access policy.
 
@@ -168,7 +168,7 @@ $\hat{\Upsilon}_{\{{Role}_C \}}$ = ${Role}_{\emptyset} \lor {Role}_A \lor {Role}
     }
     \Else{%
       $\hat{\sigma}_{o_q,\mathcal{A}} \gets \textsf{ABS.Relax}(\sigma_{o_q}, \mathbb{A}\backslash\mathcal{A})$
-      \tcp*{\Cref{sec:access-control:abs}}
+      \tcp*{\cref{sec:access-control:abs}}
       $VO \gets \langle H(v_{o_q}), \hat{\sigma}_{o_q,\mathcal{A}}\rangle$\;
     }
     send $\textsf{CP-ABE.Encrypt}(pp, VO, \land_{a \in \mathcal{A}} a)$ to the client\;
@@ -184,9 +184,9 @@ $\hat{\Upsilon}_{\{{Role}_C \}}$ = ${Role}_{\emptyset} \lor {Role}_A \lor {Role}
   }
 \end{algorithm}
 
-The APS signature, which can be derived from the APP signature (see \Cref{sec:access-control:abs} for details), serves as the VO for an inaccessible record. % chktex 36
+The APS signature, which can be derived from the APP signature (see \cref{sec:access-control:abs} for details), serves as the VO for an inaccessible record. % chktex 36
 By the embedded super access policy, the client is able to verify the inaccessibility, but cannot infer the specific roles he/she lacks.
-In the running example of \Cref{fig:access-control:equality-query}, for client $u_2$, the SP will return $\langle H(v_2)$, $\hat{\sigma}_{2, \mathcal{A}_{u_2}} = \textsf{ABS.Sign}({sk}_\text{DO}$, $H(o_2) | H(v_2)$, $\hat{\Upsilon}_{\{{Role}_C \}})\rangle$. During result verification, $H(o_2) | H(v_2)$ will be computed by the client based on the query attribute $o_2$ and the value $H(v_2)$ returned by the SP, and $\hat{\Upsilon}_{\{{Role}_C \}}$ will be computed from the client's access role set. With these components, the client can verify the super policy $\hat{\Upsilon}_{\{{Role}_C \}}$ via the APS signature $\hat{\sigma}_{2, \mathcal{A}_{u_2}}$ to prove that the record is indeed inaccessible to the client. % chktex 1 chktex 36
+In the running example of \cref{fig:access-control:equality-query}, for client $u_2$, the SP will return $\langle H(v_2)$, $\hat{\sigma}_{2, \mathcal{A}_{u_2}} = \textsf{ABS.Sign}({sk}_\text{DO}$, $H(o_2) | H(v_2)$, $\hat{\Upsilon}_{\{{Role}_C \}})\rangle$. During result verification, $H(o_2) | H(v_2)$ will be computed by the client based on the query attribute $o_2$ and the value $H(v_2)$ returned by the SP, and $\hat{\Upsilon}_{\{{Role}_C \}}$ will be computed from the client's access role set. With these components, the client can verify the super policy $\hat{\Upsilon}_{\{{Role}_C \}}$ via the APS signature $\hat{\sigma}_{2, \mathcal{A}_{u_2}}$ to prove that the record is indeed inaccessible to the client. % chktex 1 chktex 36
 
 Finally, to prevent impersonation attacks, the SP will encrypt the query result as well as the VO using a traditional one-key cipher, such as AES, with the one-key cipher key encrypted using CP-ABE under the access policy $a_1 \land a_2 \land \dots \land a_n$, $a_i \in \mathcal{A}$. Therefore, only the query client who indeed has the access role set $\mathcal{A}$ as claimed can decrypt the query result.
 
@@ -210,7 +210,7 @@ To build the ABS scheme, we first introduce the monotone span program, which is 
 In other words, $\Upsilon(x_1, \dots, x_n) = 1$ if and only if the rows of $\mathbf{M}$ indexed by $\{i~|~x_{a(i)} = 1 \}$ span the vector $[1, 0, 0, \dots, 0]$.
 
 There are many different approaches to constructing a monotone span program from a monotone boolean function~\cite{Nikov:2004,Liu:2010}.
-In our construction, we choose a recursive algorithm as shown in \Cref{alg:access-control:msp}, which accepts a boolean function expressed in AND and OR operators as inputs~\cite{Nikov:2004}.
+In our construction, we choose a recursive algorithm as shown in \cref{alg:access-control:msp}, which accepts a boolean function expressed in AND and OR operators as inputs~\cite{Nikov:2004}.
 
 \begin{algorithm}[t]
   \caption{Build Monotone Span Program}\label{alg:access-control:msp}
@@ -316,9 +316,9 @@ Our ABS scheme supports predicate relaxation. This enables the SP to derive new 
 
 \textsf{ABS.Relax}$(\sigma_{m,\Upsilon}, \mathcal{A}') \to \sigma_{m,\Upsilon'}$:
 Given a signature $\sigma_{m,\Upsilon}$ signed under predicate $\Upsilon$ and an attribute set $\mathcal{A}'$, this operation outputs a new signature $\sigma_{m,\Upsilon'}$ signed under the new predicate $\Upsilon' = \lor_{a \in \mathcal{A}'} a$. It can succeed if and only if $\Upsilon'(\mathcal{A}) = 1$, $\forall \mathcal{A} \in \{ A~|~\Upsilon(A) = 1, A \subseteq \mathbb{A} \}$. In other words, $\mathcal{A}'$ should satisfy the condition $\Upsilon(\mathbb{A}\backslash\mathcal{A}') = 0$.
-For example, in \Cref{fig:access-control:model}, the APP signature of $o_2$ has the predicate $\Upsilon_2 = {Role}_{A} \land {Role}_{B}$. By invoking \textsf{ABS.Relax}, it can be relaxed to a new signature, the predicate of which is $\Upsilon_2' = {Role}_{\emptyset} \lor {Role}_{A} \lor {Role}_{B}$, for client $u_2$ (i.e., $u_2$'s super access policy), because $\Upsilon_2(\mathbb{A}\backslash \{{Role}_{\emptyset}, {Role}_A, {Role}_B\}) = \Upsilon_2(\{{Role}_C\}) = 0$. However, relaxing it to a signature, say with predicate $\Upsilon_2'' = {Role}_{\emptyset} \lor {Role}_{C}$, will fail, as $\Upsilon_2(\mathbb{A}\backslash \{{Role}_{\emptyset}, {Role}_C\}) = \Upsilon_2(\{{Role}_A, {Role}_B\}) = 1$.
+For example, in \cref{fig:access-control:model}, the APP signature of $o_2$ has the predicate $\Upsilon_2 = {Role}_{A} \land {Role}_{B}$. By invoking \textsf{ABS.Relax}, it can be relaxed to a new signature, the predicate of which is $\Upsilon_2' = {Role}_{\emptyset} \lor {Role}_{A} \lor {Role}_{B}$, for client $u_2$ (i.e., $u_2$'s super access policy), because $\Upsilon_2(\mathbb{A}\backslash \{{Role}_{\emptyset}, {Role}_A, {Role}_B\}) = \Upsilon_2(\{{Role}_C\}) = 0$. However, relaxing it to a signature, say with predicate $\Upsilon_2'' = {Role}_{\emptyset} \lor {Role}_{C}$, will fail, as $\Upsilon_2(\mathbb{A}\backslash \{{Role}_{\emptyset}, {Role}_C\}) = \Upsilon_2(\{{Role}_A, {Role}_B\}) = 1$.
 
-The overall procedure is summarized in \Cref{alg:access-control:abs-relax}. It consists of the following steps:
+The overall procedure is summarized in \cref{alg:access-control:abs-relax}. It consists of the following steps:
 \begin{algorithm}[t]
   \caption{\textsf{ABS.Relax}}\label{alg:access-control:abs-relax}
   \SetKwFunction{ABSRelax}{ABS.Relax}
@@ -411,7 +411,7 @@ The overall procedure is summarized in \Cref{alg:access-control:abs-relax}. It c
 
 \begin{enumerate}
   \item Purging the attributes existing in $\Upsilon$ but not existing in $\mathcal{A}'$.
-    The algorithm is illustrated in \Cref{alg:access-control:abs-relax-purge}, which is essentially a modified version of \Cref{alg:access-control:msp}.
+    The algorithm is illustrated in \cref{alg:access-control:abs-relax-purge}, which is essentially a modified version of \cref{alg:access-control:msp}.
     The idea is to perform a bottom-up search on the monotone boolean function tree of $\Upsilon$. However, instead of building the monotone span program, we compute which rows ($S_i$) and columns ($P_j$) in the original monotone span program (signature $\sigma_{m, \Upsilon}$) should be kept. When traversing the tree, both AND and OR operators will be scanned. When the tree node is an AND operator, we choose one of the qualified child nodes to keep. In contrast, when it is an OR operator, we will have to keep all the child nodes and require them to be qualified. Here, we say a node is qualified if and only if the sub-predicate from that node yields 1 when given $\mathcal{A}'$ as input. The result can then be used to construct a new signature whose predicate is $\lor_{i \in kept\_rows} u(i)$, as shown below, where $u$ is the labeling function.
     \begin{align*}
               & \tilde{\sigma} = (\tau, \tilde{Y},\tilde{W},\{\tilde{S}_i\}, \tilde{P}_1); \\
@@ -458,12 +458,12 @@ The overall procedure is summarized in \Cref{alg:access-control:abs-relax}. It c
     \end{align*}
 \end{enumerate}
 
-The security of this ABS construction will be proved in \Cref{sec:access-control:security-analysis-abs}.
+The security of this ABS construction will be proved in \cref{sec:access-control:security-analysis-abs}.
 
 \section{Range \& Join Query Authentication}\label{sec:access-control:range-query}
 
 \subsection{Range Query Authentication}
-In the range query scenario, the client submits a query range $[\alpha, \beta]$\footnote{$\alpha$ and $\beta$ are two points that represent the lower and upper bounds of the query range.} as well as his/her access role set $\mathcal{A}$. In turn, the SP returns all records in the range $[\alpha, \beta]$ that are accessible to the query client. A naive solution would be to execute the equality query algorithm developed in \Cref{sec:access-control:equality-query} repeatedly for every discrete value in the range $[\alpha, \beta]$. However, this is intrinsically costly. To boost the performance, we propose \emph{access-policy-preserving grid-tree} (AP$^2$G-tree), an authenticated index structure for the DO to construct and sign.
+In the range query scenario, the client submits a query range $[\alpha, \beta]$\footnote{$\alpha$ and $\beta$ are two points that represent the lower and upper bounds of the query range.} as well as his/her access role set $\mathcal{A}$. In turn, the SP returns all records in the range $[\alpha, \beta]$ that are accessible to the query client. A naive solution would be to execute the equality query algorithm developed in \cref{sec:access-control:equality-query} repeatedly for every discrete value in the range $[\alpha, \beta]$. However, this is intrinsically costly. To boost the performance, we propose \emph{access-policy-preserving grid-tree} (AP$^2$G-tree), an authenticated index structure for the DO to construct and sign.
 It is worth noting that we choose a grid tree to prevent the client from learning any knowledge regarding the data record distribution through the structure of the index tree.
 
 \begin{figure}[t]
@@ -481,7 +481,7 @@ It is worth noting that we choose a grid tree to prevent the client from learnin
   \caption{Access-Policy-Preserving Grid-Tree (AP$^2$G-Tree)}\label{fig:access-control:access-tree}
 \end{figure}
 
-Consider a 2D data space for illustration. \Cref{fig:access-control:access-tree-struct} shows a multi-layer grid system, which partitions the query attribute space recursively into multiple levels of grid cells until each cell contains only one record. The bounding box of each cell is called a grid box. \Cref{fig:access-control:access-tree-index} shows the corresponding AP$^2$G-tree for the records in \Cref{fig:access-control:access-tree-struct}. Each grid cell has a corresponding tree node $N_i$ in the AP$^2$G-tree, which consists of three components: grid box\footnote{A grid box is represented by the coordinates of its lower-left and upper-right points.} (denoted by $gb_i$), access policy ($p_i$), and APP signature (denoted by $sig_i$). The latter two components are computed from its $C$ child entries, $c_1, \dots, c_C$, in the following fashion.
+Consider a 2D data space for illustration. \Cref{fig:access-control:access-tree-struct} shows a multi-layer grid system, which partitions the query attribute space recursively into multiple levels of grid cells until each cell contains only one record. The bounding box of each cell is called a grid box. \Cref{fig:access-control:access-tree-index} shows the corresponding AP$^2$G-tree for the records in \cref{fig:access-control:access-tree-struct}. Each grid cell has a corresponding tree node $N_i$ in the AP$^2$G-tree, which consists of three components: grid box\footnote{A grid box is represented by the coordinates of its lower-left and upper-right points.} (denoted by $gb_i$), access policy ($p_i$), and APP signature (denoted by $sig_i$). The latter two components are computed from its $C$ child entries, $c_1, \dots, c_C$, in the following fashion.
 
 \begin{definition}[AP$^2$G-tree Non-Leaf Node]
   Let ${sk}_{\textrm{DO}}$ be the signing key of the DO and $H(\cdot)$ a cryptographic hash function. The access policy and APP signature of a non-leaf node are defined as:
@@ -490,7 +490,7 @@ Consider a 2D data space for illustration. \Cref{fig:access-control:access-tree-
     sig_i & = \textsf{ABS.Sign}({sk}_{\textrm{DO}}, gb_i , p_i)
   \end{align*}
 \end{definition}
-For example, in \Cref{fig:access-control:access-tree-index}, the access policy for $N_1$ is computed as $p_{N_1} = p_{N_5} \lor p_{N_6} \lor p_{N_9} \lor p_{N_{10}}$, and its APP signature is $sig_{N_1} = \textsf{ABS.Sign}({sk}_{\textrm{DO}}$, $gb_{N_1}$, $p_{N_1})$.
+For example, in \cref{fig:access-control:access-tree-index}, the access policy for $N_1$ is computed as $p_{N_1} = p_{N_5} \lor p_{N_6} \lor p_{N_9} \lor p_{N_{10}}$, and its APP signature is $sig_{N_1} = \textsf{ABS.Sign}({sk}_{\textrm{DO}}$, $gb_{N_1}$, $p_{N_1})$.
 
 \begin{definition}[AP$^2$G-tree Leaf Node]
   The access policy and APP signature of a leaf node are identical to those of the single record lying in the corresponding cell.
@@ -498,7 +498,7 @@ For example, in \Cref{fig:access-control:access-tree-index}, the access policy f
 For example, for leaf node $N_5$, its policy and signature are $\Upsilon_{o_1}$ and $\sigma_{o_1}$, respectively.
 
 The AP$^2$G-tree is built by the DO in a bottom-up fashion and is then outsourced to the SP\@.
-It is worth noting that the AP$^2$G-tree is always a full tree, since we treat data records not existing in the original database as pseudo records inaccessible to any client, as explained in \Cref{sec:access-control:equality-query}. This construction yields a space cost of $O((n + \log(n))m)$, where $n$ is the size of the index space and $m$ is the size of the monotone span program of the access policies. With the definitions above, the access policy of a non-leaf node essentially represents whether or not a client can access any record inside the grid box of this node. This property will allow us to perform effective pruning in the construction of VO during query processing.
+It is worth noting that the AP$^2$G-tree is always a full tree, since we treat data records not existing in the original database as pseudo records inaccessible to any client, as explained in \cref{sec:access-control:equality-query}. This construction yields a space cost of $O((n + \log(n))m)$, where $n$ is the size of the index space and $m$ is the size of the monotone span program of the access policies. With the definitions above, the access policy of a non-leaf node essentially represents whether or not a client can access any record inside the grid box of this node. This property will allow us to perform effective pruning in the construction of VO during query processing.
 
 On the SP side, the processing of a range query $[\alpha,\beta]$ can be executed as a breadth-first search. Starting from the root node, if a non-leaf node partially intersects the query range, it will be branched, i.e., its subtree is further explored. On the other hand, if a non-leaf node is fully covered by the query range, the SP will check whether or not the query client is allowed to access this node. If access is prohibited, the SP will run \textsf{ABS.Relax} to compute the APS signature for this node and add this signature to the VO\@. In contrast, if the access is permitted, the SP will further explore the subtree until a leaf node is reached. The process of handling a leaf node is the same as that for an equality query. Finally, similar to an equality query, all the results, as well as the VO, will be encrypted using AES and CP-ABE before they are transmitted to the client.
 
@@ -574,8 +574,8 @@ To establish the soundness and completeness of the query results, the client che
   }
 \end{algorithm}
 
-We summarize the algorithm for authenticating range queries with the zero-knowledge confidentiality in \Cref{alg:access-control:range-query}.
-\Cref{fig:access-control:access-tree} illustrates an example in which the client can only access $o_6, o_7, o_8$ (highlighted with a gray color) in the range query $[\alpha,\beta]$ (highlighted as the red rectangle in \Cref{fig:access-control:access-tree-struct}). As a result, the SP will return the records $o_6$, $o_7$ and $o_8$, as well as their APP signatures, to the client. Moreover, the SP will run the \textsf{ABS.Relax} algorithm with the APP signatures of $N_4$, $N_{14}$ and $N_{18}$ as inputs. The derived APS signatures will be sent to the client as part of the VO, to prove their inaccessibility. During result verification, the client will check whether or not all of the signatures in the VO are valid (to verify the soundness) and whether or not the query range $[\alpha, \beta]$ is indeed covered by the union of the indexing spaces for $N_4$, $N_{14}$, $N_{18}$, $o_6$, $o_7$, and $o_8$ (to verify the completeness).
+We summarize the algorithm for authenticating range queries with the zero-knowledge confidentiality in \cref{alg:access-control:range-query}.
+\Cref{fig:access-control:access-tree} illustrates an example in which the client can only access $o_6, o_7, o_8$ (highlighted with a gray color) in the range query $[\alpha,\beta]$ (highlighted as the red rectangle in \cref{fig:access-control:access-tree-struct}). As a result, the SP will return the records $o_6$, $o_7$ and $o_8$, as well as their APP signatures, to the client. Moreover, the SP will run the \textsf{ABS.Relax} algorithm with the APP signatures of $N_4$, $N_{14}$ and $N_{18}$ as inputs. The derived APS signatures will be sent to the client as part of the VO, to prove their inaccessibility. During result verification, the client will check whether or not all of the signatures in the VO are valid (to verify the soundness) and whether or not the query range $[\alpha, \beta]$ is indeed covered by the union of the indexing spaces for $N_4$, $N_{14}$, $N_{18}$, $o_6$, $o_7$, and $o_8$ (to verify the completeness).
 
 \subsection{Join Query Authentication}
 
@@ -627,12 +627,12 @@ We summarize the algorithm for authenticating range queries with the zero-knowle
 
 
 Next, we discuss how to extend the range query authentication algorithm to support join queries. Consider an equi-join query over two tables $R$ and $S$, $R \Join_{R.o = S.o} S \land R.o \in [\alpha, \beta]$, with client's access role set $\mathcal{A}$. The SP should return all record pairs in the query range that are accessible to the query client and satisfy the join condition.
-For example, in \Cref{fig:access-control:join}, the client can access $r_1$, $r_2$ from $R$ and $s_1$, $s_3$ from $S$ (highlighted with a gray color); the join result will be the pair of records $\langle r_1, s_1\rangle$.
+For example, in \cref{fig:access-control:join}, the client can access $r_1$, $r_2$ from $R$ and $s_1$, $s_3$ from $S$ (highlighted with a gray color); the join result will be the pair of records $\langle r_1, s_1\rangle$.
 
 To process the join query, the SP starts by executing a breadth-first search from the root node of the AP$^2$G-tree for the table $R$. The tree search algorithm is almost identical to the one in the range query processing, except for two aspects. First, if a node for $R$, denoted as $N_R$, is accessible to the client, the SP will first check whether or not there exists an inaccessible node in the AP$^2$G-tree for the table $S$ that covers $N_R$. If such a node, denoted as $N_S$, is found, $N_R$ cannot be part of the join result. Hence, the corresponding APS signature for $N_S$ is computed and appended to the VO\@. Otherwise, the subtree of $N_R$ is further explored. Second, an accessible record in $R$ is part of the result only if the matching record in $S$ is also accessible. In this case, the APP signatures for this pair of records will be appended to the VO\@. The rest of the algorithm is the same as the one in the range query processing.
 
-We summarize the VO construction procedure in \Cref{alg:access-control:join-query}, while the ADS generation and result verification procedures are the same as the ones in \Cref{alg:access-control:range-query}.
-In the example of \Cref{fig:access-control:join}, the SP will return the records $r_1$ and $s_1$, as well as their APP signatures, to the client. Moreover, for the inaccessible nodes $R_2$ and $S_4$, their derived APS signatures will be returned as part of the VO\@. On the client side, to verify the soundness, the client will authenticate all the signatures in the VO and check whether or not $r_1$ and $s_1$ share the same value on the join attribute; to verify the completeness, the client will check whether or not the union of the indexing spaces for $R_2$, $S_4$, and $r_1$/$r_2$ covers the whole query range $[\alpha,\beta]$.
+We summarize the VO construction procedure in \cref{alg:access-control:join-query}, while the ADS generation and result verification procedures are the same as the ones in \cref{alg:access-control:range-query}.
+In the example of \cref{fig:access-control:join}, the SP will return the records $r_1$ and $s_1$, as well as their APP signatures, to the client. Moreover, for the inaccessible nodes $R_2$ and $S_4$, their derived APS signatures will be returned as part of the VO\@. On the client side, to verify the soundness, the client will authenticate all the signatures in the VO and check whether or not $r_1$ and $s_1$ share the same value on the join attribute; to verify the completeness, the client will check whether or not the union of the indexing spaces for $R_2$, $S_4$, and $r_1$/$r_2$ covers the whole query range $[\alpha,\beta]$.
 
 This solution can be easily extended to support more general join queries, such as multi-way join and inequality join. The general idea is similar, i.e., using the APS signature of an inaccessible record/node to prove that a certain space does not contribute to the join result. The client verifies the soundness by the given results and their associated APP signatures, and verifies the completeness by checking whether or not the result set and the space represented by the APS signatures together cover the whole query range.
 
@@ -674,11 +674,11 @@ It is worth noting that this security model of ABS is defined with respect to th
 Now we reach the theorem on the security of our ABS scheme.
 
 \begin{restatable}{theorem}{abssecuritytheorem}\label{thm:access-control:abs-sec}
-  The construction of \Cref{sec:access-control:abs} satisfies the security properties of Perfect Privacy (\Cref{def:access-control:abs-privacy}) and Unforgeability (\Cref{def:access-control:abs-unf}) in the generic group model.
+  The construction of \cref{sec:access-control:abs} satisfies the security properties of Perfect Privacy (\cref{def:access-control:abs-privacy}) and Unforgeability (\cref{def:access-control:abs-unf}) in the generic group model.
 \end{restatable}
 
 \begin{proof}
-  Please see \Cref{app:access-control-abs-sec} for detailed proofs.
+  Please see \cref{app:access-control-abs-sec} for detailed proofs.
 \end{proof}
 
 \subsection{Security Analysis on Query Authentication}\label{sec:access-control:security-analysis-query}
@@ -731,11 +731,11 @@ This property ensures that a malicious client could extract any information rega
 With the above security definitions, we can show that our proposed query authentication algorithms indeed satisfy the desired security requirements.
 
 \begin{restatable}{theorem}{querysecuritytheorem}\label{thm:access-control:sec}
-  Our proposed query authentication algorithms satisfy the security properties of Unforgeability (\Cref{def:access-control:query-secure}) and Zero-Knowledge (\Cref{def:access-control:query-zero-knowledge}).
+  Our proposed query authentication algorithms satisfy the security properties of Unforgeability (\cref{def:access-control:query-secure}) and Zero-Knowledge (\cref{def:access-control:query-zero-knowledge}).
 \end{restatable}
 
 \begin{proof}
-  Please see \Cref{app:access-control-sec} for detailed proofs.
+  Please see \cref{app:access-control-sec} for detailed proofs.
 \end{proof}
 
 \section{Optimizations}\label{sec:access-control:opt}
@@ -753,7 +753,7 @@ In our solution to range and join query authentication, the majority of computat
 
 \section{Relaxing Zero-Knowledge Confidentiality Requirement}\label{sec:access-control:relaxing-zero-knowledge}
 
-Zero-knowledge confidentiality is a strong requirement that may not be demanded in some less critical applications. In this section, we discuss how to boost the performance for range queries and join queries (\Cref{sec:access-control:kd-tree}) and support more general continuous query attributes (\Cref{sec:access-control:continuous-attribute}), when such a requirement is relaxed to the less restrictive access policy confidentiality.
+Zero-knowledge confidentiality is a strong requirement that may not be demanded in some less critical applications. In this section, we discuss how to boost the performance for range queries and join queries (\cref{sec:access-control:kd-tree}) and support more general continuous query attributes (\cref{sec:access-control:continuous-attribute}), when such a requirement is relaxed to the less restrictive access policy confidentiality.
 
 \subsection{Using $k$-d Tree Index Structure}\label{sec:access-control:kd-tree}
 
@@ -779,7 +779,7 @@ Zero-knowledge confidentiality is a strong requirement that may not be demanded 
     }
 \end{algorithm}
 
-Recall in \Cref{sec:access-control:range-query} that the grid tree is chosen to prevent information leakage through the tree structure. However, it is well known that the grid tree is not the most efficient index structure, especially for sparse multi-dimensional databases. Here, in the system that only requires the access policy confidentiality, we propose \emph{access-policy-preserving $k$-d-tree} (AP$^2k$d-tree) as an alternative ADS that uses $k$-d tree~\cite{10.1145/361002.361007} to optimize the performance.
+Recall in \cref{sec:access-control:range-query} that the grid tree is chosen to prevent information leakage through the tree structure. However, it is well known that the grid tree is not the most efficient index structure, especially for sparse multi-dimensional databases. Here, in the system that only requires the access policy confidentiality, we propose \emph{access-policy-preserving $k$-d-tree} (AP$^2k$d-tree) as an alternative ADS that uses $k$-d tree~\cite{10.1145/361002.361007} to optimize the performance.
 
 \begin{figure}[t]
     \centering
@@ -808,27 +808,27 @@ Let $\Upsilon_l$ and $\Upsilon_r$ be the access policies of two half-spaces. Our
 where $\Upsilon_l = \lor_{A_j \in X_l}\land_{a_{ij} \in A_j} a_{ij}$ and $\Upsilon_r = \lor_{A_j \in X_r}\land_{a_{ij} \in A_j} a_{ij}$.
 
 For example, if $\Upsilon_l = {Role}_{A} \lor ({Role}_{B} \land {Role}_{C})$ and $\Upsilon_r = {Role}_{A} \lor {Role}_{D}$, then $X_l = \{ {Role}_{A}, {Role}_{B} \land {Role}_{C} \}$, $X_r = \{ {Role}_{A}, {Role}_{D} \}$, and $f(\Upsilon_l, \Upsilon_r) = 1$.
-To find the hyperplane, instead of enumerating all the possible choices, we develop a dynamic programming algorithm in \Cref{alg:access-control:kd-split}.
+To find the hyperplane, instead of enumerating all the possible choices, we develop a dynamic programming algorithm in \cref{alg:access-control:kd-split}.
 It has a time complexity of $O(n)$, where $n$ is the interval length of the query attribute in the splitting dimension.
 Further, to prevent the tree imbalance, we propose to switch back to the AP$^2$G-tree split strategy when the tree depth goes beyond $\log(S)$, where $S$ is the area of the index space.
-\Cref{fig:access-control:access-kd-tree-index} shows the corresponding AP$^2k$d-tree for the data records in \Cref{fig:access-control:access-kd-tree-struct}. The signature definitions for the tree nodes are identical to those in the AP$^2$G-tree.
+\Cref{fig:access-control:access-kd-tree-index} shows the corresponding AP$^2k$d-tree for the data records in \cref{fig:access-control:access-kd-tree-struct}. The signature definitions for the tree nodes are identical to those in the AP$^2$G-tree.
 
-The rest of the algorithm for authenticating range queries and join queries with the access policy confidentiality is the same as that in \Cref{sec:access-control:range-query}.
-Similar to the example shown in \Cref{fig:access-control:access-tree}, if the records $o_{10}$, $o_{11}$, $o_{12}$, $o_{14}$, $o_{15}$ and $o_{16}$ share the same access policy, the AP$^2k$d-tree will be like what is presented in \Cref{fig:access-control:access-kd-tree}. Under the same query range $[\alpha, \beta]$, the SP will return the records $o_6$, $o_7$, and $o_8$, as well as their APP signatures. Moreover, the SP will return the APS signature for $N_6$ as part of the VO\@. During result verification, the client will check whether or not all of the signatures in the VO are valid and whether or not the union of the indexing spaces for $N_6$, $o_6$, $o_7$, and $o_8$ covers the whole query range $[\alpha,\beta]$.
+The rest of the algorithm for authenticating range queries and join queries with the access policy confidentiality is the same as that in \cref{sec:access-control:range-query}.
+Similar to the example shown in \cref{fig:access-control:access-tree}, if the records $o_{10}$, $o_{11}$, $o_{12}$, $o_{14}$, $o_{15}$ and $o_{16}$ share the same access policy, the AP$^2k$d-tree will be like what is presented in \cref{fig:access-control:access-kd-tree}. Under the same query range $[\alpha, \beta]$, the SP will return the records $o_6$, $o_7$, and $o_8$, as well as their APP signatures. Moreover, the SP will return the APS signature for $N_6$ as part of the VO\@. During result verification, the client will check whether or not all of the signatures in the VO are valid and whether or not the union of the indexing spaces for $N_6$, $o_6$, $o_7$, and $o_8$ covers the whole query range $[\alpha,\beta]$.
 
 \subsection{Supporting Continuous Query Attributes}\label{sec:access-control:continuous-attribute}
 
-When dealing with discrete query attribute values, we treat non-existent records as pseudo records with access policy ${Role}_{\emptyset}$. For continuous query attribute values, this method is also applicable since they can be converted into discrete values by discretization techniques~\cite{Kotsiantis2006}. Nevertheless, when the zero-knowledge confidentiality is not required, it is acceptable to disclose to the client about the distribution of data records. As such, the DO can view non-existent records as pseudo regions with access policy ${Role}_{\emptyset}$. For example in \Cref{fig:access-control:model}, if the query attribute is continuous, the DO will generate the APP signatures for the regions $(-\infty,o_1)$, $(o_1, o_2)$, $(o_2, o_3)$, $(o_3, o_4)$, $(o_4, o_5)$, and $(o_5, +\infty)$ with policy ${Role}_{\emptyset}$, which will then be outsourced to the SP\@. When processing an equality query, if the query attribute is located in one of the pseudo regions, the SP will apply the \textsf{ABS.Relax} algorithm to compute the APS signature for the corresponding region and use it as the VO\@. Otherwise, the procedure is the same as the original algorithm introduced in \Cref{sec:access-control:equality-query}. Similarly, for a range or join query, the APS signatures for these pseudo regions that intersect the query range will be constructed as part of the VO\@. The rest of the algorithm is the same as those described in \Cref{sec:access-control:range-query}.
+When dealing with discrete query attribute values, we treat non-existent records as pseudo records with access policy ${Role}_{\emptyset}$. For continuous query attribute values, this method is also applicable since they can be converted into discrete values by discretization techniques~\cite{Kotsiantis2006}. Nevertheless, when the zero-knowledge confidentiality is not required, it is acceptable to disclose to the client about the distribution of data records. As such, the DO can view non-existent records as pseudo regions with access policy ${Role}_{\emptyset}$. For example in \cref{fig:access-control:model}, if the query attribute is continuous, the DO will generate the APP signatures for the regions $(-\infty,o_1)$, $(o_1, o_2)$, $(o_2, o_3)$, $(o_3, o_4)$, $(o_4, o_5)$, and $(o_5, +\infty)$ with policy ${Role}_{\emptyset}$, which will then be outsourced to the SP\@. When processing an equality query, if the query attribute is located in one of the pseudo regions, the SP will apply the \textsf{ABS.Relax} algorithm to compute the APS signature for the corresponding region and use it as the VO\@. Otherwise, the procedure is the same as the original algorithm introduced in \cref{sec:access-control:equality-query}. Similarly, for a range or join query, the APS signatures for these pseudo regions that intersect the query range will be constructed as part of the VO\@. The rest of the algorithm is the same as those described in \cref{sec:access-control:range-query}.
 
 \section{Handling Duplicate Records}\label{sec:access-control:dup}
 
 In this section, we discuss how to extend our solution to support authenticated queries over duplicate records. Since our proof of completeness relies on the distinction of the query attribute, the idea is to transform the records sharing the same query key into distinct ones. To do so, we propose to introduce a new virtual dimension by extending the query attribute for each record with a random value in this virtual dimension. As such, we ensure that there is no duplication in the database with respect to each query key.
-When processing a query, the query range will be transformed accordingly to cover the whole space of the virtual dimension, whereas the rest of the algorithm is the same as that described in \Cref{sec:access-control:range-query}.
+When processing a query, the query range will be transformed accordingly to cover the whole space of the virtual dimension, whereas the rest of the algorithm is the same as that described in \cref{sec:access-control:range-query}.
 Furthermore, it is worth noting that the data records that share the same query key and the same access policy can be aggregated into a super-record before the above transformation. This would reduce the space of the virtual dimension and hence the quantity of pseudo records that need to be introduced into the database.
 
 Consider an example where the database contains three records $\langle o_1, v_1, \Upsilon_1\rangle$, $\langle o_1, v_2, \Upsilon_1\rangle$, and $\langle o_1, v_3, \Upsilon_3\rangle$. We first merge the first two records into $\langle o_1, v_1 || v_2, \Upsilon_1\rangle$ since they share the same access policy. Then, a new virtual dimension $x$ is introduced to distinguish the remaining two records as $\langle (o_1, x_1)$, $v_1 || v_2$, $\Upsilon_1\rangle$ and $\langle (o_1, x_2)$, $v_3$, $\Upsilon_3\rangle$, where $1 \leq x_1 \neq x_2 \leq U_x$ and $U_x$ is the upper bound of the $x$ dimension.\footnote{In practice, $U_x$ can be set to the maximum number of distinct access polices associated with each query key.} Accordingly, if a client issues a range query $[\alpha, \beta]$, the query range will be transformed into $[(\alpha, 1), (\beta, U_x)]$.
 
-Further, in the applications where the zero-knowledge confidentiality requirement can be relaxed, it would be acceptable to disclose to the client about the distribution of the duplicate data records. As such, instead of introducing the virtual dimension and its associated pseudo records, we can embed the duplicate information directly in the APP signatures to reduce the database size and boost query performance. Consider a record $\langle o_i$, $v_i$, $\Upsilon_i\rangle$. Its APP signature will be $\sigma_i = \textsf{ABS.Sign}({sk}_{\textrm{DO}}$, $H(o_i) | H(v_i) | dup\_num | dup\_id $, $\Upsilon_i)$, where $dup\_num$ captures how many duplicate records are associated with the query attribute $o_i$, and $dup\_id$ is used to identify each duplicate record. Thus, the authenticated query processing algorithm remains the same as that described in \Cref{sec:access-control:range-query}, and the client can verify the completeness by checking whether all duplicate records under the query attribute are present in the VO\@.
+Further, in the applications where the zero-knowledge confidentiality requirement can be relaxed, it would be acceptable to disclose to the client about the distribution of the duplicate data records. As such, instead of introducing the virtual dimension and its associated pseudo records, we can embed the duplicate information directly in the APP signatures to reduce the database size and boost query performance. Consider a record $\langle o_i$, $v_i$, $\Upsilon_i\rangle$. Its APP signature will be $\sigma_i = \textsf{ABS.Sign}({sk}_{\textrm{DO}}$, $H(o_i) | H(v_i) | dup\_num | dup\_id $, $\Upsilon_i)$, where $dup\_num$ captures how many duplicate records are associated with the query attribute $o_i$, and $dup\_id$ is used to identify each duplicate record. Thus, the authenticated query processing algorithm remains the same as that described in \cref{sec:access-control:range-query}, and the client can verify the completeness by checking whether all duplicate records under the query attribute are present in the VO\@.
 
 \section{Handling Updates}\label{sec:access-control:update}
 
@@ -931,7 +931,7 @@ The results are reported based on an average of 10 randomly generated queries. N
     \caption{Equality Query Performance}\label{tab:access-control:equality-query}
 \end{table}
 
-In the first set of experiments, we test equality queries, whose performance is essentially the same as the underlying single ABS operation. We vary the max policy length (which affects the costs when the record is accessible) and the inaccessible predicate length (which affects the costs when the record is inaccessible). The results are summarized in \Cref{tab:access-control:equality-query}. Note that we omit the SP CPU time for accessible records since in this case the SP simply returns the APP signature signed by the DO and has little computational cost. For all other reported measures, as expected, the costs in CPU time and VO size are proportional to the policy/predicate length.
+In the first set of experiments, we test equality queries, whose performance is essentially the same as the underlying single ABS operation. We vary the max policy length (which affects the costs when the record is accessible) and the inaccessible predicate length (which affects the costs when the record is inaccessible). The results are summarized in \cref{tab:access-control:equality-query}. Note that we omit the SP CPU time for accessible records since in this case the SP simply returns the APP signature signed by the DO and has little computational cost. For all other reported measures, as expected, the costs in CPU time and VO size are proportional to the policy/predicate length.
 
 \subsection{Range and Join Query Performance}
 
@@ -1023,11 +1023,11 @@ In the first set of experiments, we test equality queries, whose performance is 
 To evaluate the range query authentication performance, we compare two methods:
 \begin{inlineenum}
     \item the basic approach in which equality query authentication is executed repeatedly for every discrete value lying in the query range, and
-    \item the AP$^2$G-tree approach developed in \Cref{sec:access-control:range-query}.
+    \item the AP$^2$G-tree approach developed in \cref{sec:access-control:range-query}.
 \end{inlineenum}
 In each query, the client is assigned with the roles that can access 20\% of the data records.
 
-We first vary the query range from 0.03\% to 1\% of the data space under the default settings. As shown in \Cref{exp-fig:access-control:range}, the AP$^2$G-tree outperforms the basic approach in all metrics. This indicates that the APS signatures generated for AP$^2$G-tree nodes can effectively summarize the inaccessible records in their subtrees. This leads to the reduction in both computation and communication overheads.
+We first vary the query range from 0.03\% to 1\% of the data space under the default settings. As shown in \cref{exp-fig:access-control:range}, the AP$^2$G-tree outperforms the basic approach in all metrics. This indicates that the APS signatures generated for AP$^2$G-tree nodes can effectively summarize the inaccessible records in their subtrees. This leads to the reduction in both computation and communication overheads.
 
 To investigate the impact of the database scale and access policies, we fix the query range at 0.1\%. \Cref{exp-fig:access-control:scale} shows the results when the database scale is varied from 0.1 to 3. All metrics increase monotonically under AP$^2$G-tree, but those of the basic approach fluctuate a bit. This can be explained as follows. With more records, the access policies become more complex. This affects the costs in two ways:
 \begin{inlineenum}
@@ -1037,7 +1037,7 @@ To investigate the impact of the database scale and access policies, we fix the 
 On the other hand, with the increase of database scale, more records can be accessed by the client and, hence, the inaccessible records become fewer. This decreases the costs on both the SP and the client.
 For AP$^2$G-tree, owing to its high pruning power, the decreased number of inaccessible records has less impact on the costs. Therefore, its costs increase steadily.
 
-\Cref{exp-fig:access-control:policy_1} and~\Cref{exp-fig:access-control:policy_2} show the performance trends with the respect to the number of distinct policies and the total number of roles/max policy length, respectively. It can be seen that the performance remains almost the same under different policy diversities. However, the larger the role space and the longer access policy length, the higher the overhead incurred for both the computation and communication costs.
+\Cref{exp-fig:access-control:policy_1} and~\cref{exp-fig:access-control:policy_2} show the performance trends with the respect to the number of distinct policies and the total number of roles/max policy length, respectively. It can be seen that the performance remains almost the same under different policy diversities. However, the larger the role space and the longer access policy length, the higher the overhead incurred for both the computation and communication costs.
 
 Finally, to study the join query performance, we evaluate the join operator of $Q$12 in TPC-H,\footnote{\texttt{SELECT * FROM orders, lineitem WHERE o.orderkey = l.orderkey AND l.orderkey between `?' AND `?'.}} which joins the tables \texttt{Lineitem} and \texttt{Orders} on the attribute $orderkey$. \Cref{exp-fig:access-control:join} reports the results while varying the query range. It is shown that the costs in all metrics under AP$^2$G-tree are substantially lower than those in the basic approach.
 
@@ -1081,11 +1081,11 @@ Finally, to study the join query performance, we evaluate the join operator of $
     \caption{Range Query Performance vs. Index}\label{exp-fig:access-control:index}
 \end{figure}
 
-We now investigate the impact of different optimization techniques proposed in \Cref{sec:access-control:opt}. The results of using hierarchical role assignment are shown in \Cref{exp-fig:access-control:hierarchical}. In our experiment, we simulate a two-level role hierarchy. Two global hierarchical roles are created and attached randomly to each AND gate in all the access policies. As a result, the average size of a client's inaccessible predicate is decreased from 9 to 6. It can be observed that the hierarchical role assignment reduces the cost in all metrics, due to much less overhead in processing inaccessible records.
+We now investigate the impact of different optimization techniques proposed in \cref{sec:access-control:opt}. The results of using hierarchical role assignment are shown in \cref{exp-fig:access-control:hierarchical}. In our experiment, we simulate a two-level role hierarchy. Two global hierarchical roles are created and attached randomly to each AND gate in all the access policies. As a result, the average size of a client's inaccessible predicate is decreased from 9 to 6. It can be observed that the hierarchical role assignment reduces the cost in all metrics, due to much less overhead in processing inaccessible records.
 
-To study the acceleration acquired by parallelism, we vary the number of threads for both the SP processing and client verification running on the blade server. As shown in \Cref{exp-fig:access-control:thread}, more acceleration can be observed with the first 16 threads, but it becomes less effective with more threads. The reason is that the non-parallel part of the algorithm and I/O operations becomes more pronounced after sufficient multi-thread acceleration.
+To study the acceleration acquired by parallelism, we vary the number of threads for both the SP processing and client verification running on the blade server. As shown in \cref{exp-fig:access-control:thread}, more acceleration can be observed with the first 16 threads, but it becomes less effective with more threads. The reason is that the non-parallel part of the algorithm and I/O operations becomes more pronounced after sufficient multi-thread acceleration.
 
-Finally, we study the performance gain if we relax the zero-knowledge confidentiality requirement. As shown in \Cref{exp-fig:access-control:index}, owing to a careful splitting strategy introduced in \Cref{sec:access-control:kd-tree}, AP$^2kd$-tree substantially outperforms AP$^2$G-tree in all evaluation metrics.
+Finally, we study the performance gain if we relax the zero-knowledge confidentiality requirement. As shown in \cref{exp-fig:access-control:index}, owing to a careful splitting strategy introduced in \cref{sec:access-control:kd-tree}, AP$^2kd$-tree substantially outperforms AP$^2$G-tree in all evaluation metrics.
 
 \subsection{Performance with Duplicate Records and Updates}
 
@@ -1106,13 +1106,13 @@ Finally, we study the performance gain if we relax the zero-knowledge confidenti
     \caption{Range Query Performance with Duplicate Records}\label{exp-fig:access-control:dup}
 \end{figure}
 
-To investigate the performance with duplicate records using methods proposed in \Cref{sec:access-control:dup}, we conduct performance evaluation over the default TPC-H database, where the access policies are randomly assigned to all data records.
+To investigate the performance with duplicate records using methods proposed in \cref{sec:access-control:dup}, we conduct performance evaluation over the default TPC-H database, where the access policies are randomly assigned to all data records.
 We compare two solutions of handling duplicate records:
 \begin{inlineenum}
     \item the zero-knowledge approach by adding the virtual dimension (denoted as AP$^2$G-Tree);
     \item the non-zero-knowledge approach by embedding the duplicate information in the APP signatures (denoted as AP$^2$G-Tree (non-ZK)).
 \end{inlineenum}
-The index size for the zero-knowledge approach is 12.17 GB (2.91 GB tree structure + 9.26 GB signatures), whereas in the non-zero-knowledge setting the index is 4.35 GB (1.02 GB tree structure + 3.33 GB signatures). The additional index overhead incurred for the zero-knowledge approach, as the cost of achieving the zero-knowledge requirement, is believed to be reasonable. Regarding the query performance, AP$^2$G-Tree (non-ZK) is approximate to the case without duplicate records since the duplicate information is seamlessly embedded in the APP signatures. As shown in \Cref{exp-fig:access-control:dup}, the query cost in the zero-knowledge AP$^2$G-tree approach is only no more than 3 times worse than that in AP$^2$G-Tree (non-ZK). Moreover, the performance of AP$^2$G-tree is only about half that of the basic approach, which again demonstrates its pruning effectiveness for inaccessible records.
+The index size for the zero-knowledge approach is 12.17 GB (2.91 GB tree structure + 9.26 GB signatures), whereas in the non-zero-knowledge setting the index is 4.35 GB (1.02 GB tree structure + 3.33 GB signatures). The additional index overhead incurred for the zero-knowledge approach, as the cost of achieving the zero-knowledge requirement, is believed to be reasonable. Regarding the query performance, AP$^2$G-Tree (non-ZK) is approximate to the case without duplicate records since the duplicate information is seamlessly embedded in the APP signatures. As shown in \cref{exp-fig:access-control:dup}, the query cost in the zero-knowledge AP$^2$G-tree approach is only no more than 3 times worse than that in AP$^2$G-Tree (non-ZK). Moreover, the performance of AP$^2$G-tree is only about half that of the basic approach, which again demonstrates its pruning effectiveness for inaccessible records.
 
 \begin{figure}[t]
     \centering
@@ -1145,12 +1145,12 @@ The index size for the zero-knowledge approach is 12.17 GB (2.91 GB tree structu
     \caption{Range Query Performance vs. Update}\label{exp-fig:access-control:update}
 \end{figure}
 
-Finally, we conduct an empirical study over the default TPC-H database to evaluate the performance of our update strategy proposed in \Cref{sec:access-control:update}. We compare two update methods:
+Finally, we conduct an empirical study over the default TPC-H database to evaluate the performance of our update strategy proposed in \cref{sec:access-control:update}. We compare two update methods:
 \begin{inlineenum}
     \item the basic approach in which the DO resigns all of the APP signatures; and
     \item our proposed solution described above.
 \end{inlineenum}
-\Cref{exp-fig:access-control:update_do} reports the DO CPU time and the communication cost while varying the update rate from $0.03\%$ to $1\%$ of all the records. It can be observed that our solution is significantly better than the basic approach. Further, we study the performance differences of authenticating range queries with and without data record updates. As shown in \Cref{exp-fig:access-control:update}, the differences in all metrics are insignificant.
+\Cref{exp-fig:access-control:update_do} reports the DO CPU time and the communication cost while varying the update rate from $0.03\%$ to $1\%$ of all the records. It can be observed that our solution is significantly better than the basic approach. Further, we study the performance differences of authenticating range queries with and without data record updates. As shown in \cref{exp-fig:access-control:update}, the differences in all metrics are insignificant.
 
 \section{Chapter Summary}\label{sec:access-control:summary}
 In this chpater, we have studied the problem of authenticating relational queries with fine-grained access control. We developed a new variant of the attribute-based signature scheme, which supports predicate relaxation on super access policies. Based on that, we proposed a novel access-policy-preserving (APP) signature as the primitive ADS to authenticate various types of queries under fine-grained access control. Our approach is zero-knowledge and reveals nothing beyond the accessible records. We also designed a grid-index-based AP$^2$G-tree to improve the performance of processing range queries and join queries. Optimization techniques for both the zero-knowledge model and the access policy confidentiality model were developed. Analytical models and empirical results substantiated the robustness and efficiency of our proposed solutions.

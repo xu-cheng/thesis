@@ -1,4 +1,4 @@
-\chapter{Proof of \texorpdfstring{\Cref*{thm:aggregate-queries:sec}}{Theorem~\ref{thm:aggregate-queries:sec}}}%
+\chapter{Proof of \texorpdfstring{\cref*{thm:aggregate-queries:sec}}{Theorem~\ref{thm:aggregate-queries:sec}}}%
 \label{app:aggregate-queries}
 
 We start by proving the security of the privacy-preserving authentication protocols on multiset operations. Note that the proofs of $sub(\cdot, \cdot)$ and $empty(\cdot)$ are similar to those on set operations in~\cite{10.1007/978-3-642-22792-9_6} and are hence omitted.
@@ -67,7 +67,7 @@ We start by proving the security of the privacy-preserving authentication protoc
 &{e(g, g)}^{1/(x_j + s)}  \nonumber \\
     = &{({e(g, W_i^*)}^{\prod_{k=1}^{j-1}(x_k+s) \cdot \prod_{k=j+1}^{|\widehat{X}_i|}{(x_k+s)}} \cdot {e(g, g)}^{-Q_i(s)})}^{1/\lambda_i},\nonumber
   \end{align}
-  which violates the bilinear $q$-strong Diffie-Hellman assumption mention in \Cref{sec:aggregate-queries:prelim}. Hence, by contradiction, ${P(U)}^*$ must be in the form of $P(U) \cdot Q_U(s)$.
+  which violates the bilinear $q$-strong Diffie-Hellman assumption mention in \cref{sec:aggregate-queries:prelim}. Hence, by contradiction, ${P(U)}^*$ must be in the form of $P(U) \cdot Q_U(s)$.
 
   Next, we prove $U \subseteq acc^{-1}({acc(U)}^*)$, i.e., $Q_U(s)$ can only be a constant value. We prove this by contradiction. For each set $\widehat{X}_i$, ${acc(U - \widehat{X}_i)}^* = g^{P(U-\widehat{X}_i) \cdot Q_U(s)}$. During the execution of $empty(\cdot)$, by expanding $\prod_{i=1}^n e({acc(U-\widehat{X}_i)}^*, F_i^*)=e(g, g)$, the adversary can get:
   \begin{align*}
@@ -92,7 +92,7 @@ We start by proving the security of the privacy-preserving authentication protoc
   Under the bilinear $q$-strong Diffie-Hellman assumption, if the accumulative value returned by $times(X,t)$ passes the client's verification, then the probability of $times(X,t) \neq acc(\uplus_{i=1}^t X)$ is negligible for any PPT adversary.
 \end{lemma}
 \begin{proof}
-  The $times(\cdot, \cdot)$ operation relies only on the $sum(\cdot)$ operation, and therefore the proof is similar to that of \Cref{lem:aggregate-queries:sum}.
+  The $times(\cdot, \cdot)$ operation relies only on the $sum(\cdot)$ operation, and therefore the proof is similar to that of \cref{lem:aggregate-queries:sum}.
 \end{proof}
 
 \section{Security of PA$^2$ Algorithms}
