@@ -308,7 +308,9 @@
   \begin{refsection}[#1]
     \nocite{*}
     \newrefcontext[sorting=ddatent]
+    \toggletrue{bbx:doi}
     \printbibliography[title=List of Publications,heading=bibintoc,env=publicationbib]%
+    \togglefalse{bbx:doi}
   \end{refsection}
   \endgroup%
 }
