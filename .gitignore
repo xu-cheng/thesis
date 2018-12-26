@@ -42,5 +42,6 @@
 *-eps-converted-to.pdf
 .DS_Store
 
+*.xmpdata
 main.pdf
 pdfa.xmpi

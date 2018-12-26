@@ -221,7 +221,7 @@
 % abstract page
 \newcommand{\abstractpage}{%
   \begingroup
-  \newcommand{\sep}{, }
+  \def\sep{, }
   \chapter{Abstract}
   \@abstract%
   \par%
@@ -229,6 +229,21 @@
   \noindent\textbf{Keywords:} \@keywords%
   \endgroup
 }
+
+% generate \jobname.xmpdata
+\newcommand{\genxmpdata}{%
+  \begingroup%
+  \def\sep{\unexpanded{\sep}}
+  \newwrite\xmpwriter%
+  \immediate\openout\xmpwriter=\jobname.xmpdata%
+  \immediate\write\xmpwriter{\unexpanded{\Title}{\@title}}
+  \immediate\write\xmpwriter{\unexpanded{\Author}{\@author}}
+  \immediate\write\xmpwriter{\unexpanded{\Keywords}{\@keywords}}
+  \immediate\write\xmpwriter{\unexpanded{\Subject}{\@abstract}}
+  \immediate\closeout\xmpwriter%
+  \endgroup%
+}
+\AtEndPreamble{\genxmpdata}
 
 \makeatother%
 
