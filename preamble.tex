@@ -8,6 +8,7 @@
 \usepackage{xifthen}
 \usepackage{xpatch}
 \usepackage{calc}
+\usepackage{environ}
 
 % font settings
 \usepackage[utf8]{inputenc}
@@ -155,9 +156,20 @@
 \usepackage[compact]{titlesec}
 \titleformat{\chapter}[display]{\normalfont\LARGE\bfseries\filcenter}{\chaptertitlename~\thechapter}{20pt}{}
 
-% titlepage
 \makeatletter%
+
+% variables
 \newcommand{\supervisor}[1]{\gdef\@supervisor{#1}}
+\supervisor{}
+
+\newcommand{\saveabstract}[1]{\long\gdef\@abstract{#1}}
+\saveabstract{}
+\newenvironment{abstract}{\Collect@Body\saveabstract}{}
+
+\newcommand{\keywords}[1]{\gdef\@keywords{#1}}
+\keywords{}
+
+% titlepage
 \renewcommand{\maketitle}{%
   \thispdfpagelabel{Cover}
   \begin{titlepage}
@@ -179,12 +191,13 @@
     \vfill%
   \end{titlepage}
   \clearpage{\thispagestyle{empty}\thispdfpagelabel{Cover}\cleardoublepage}
+  \setcounter{page}{1}
+  \declarationpage%
+  \abstractpage%
 }
-\makeatother%
 
 % declaration page
-\makeatletter%
-\newcommand{\declaration}{%
+\newcommand{\declarationpage}{%
   \begingroup%
   \phantomsection%
   \chapter*{DECLARATION}
@@ -206,28 +219,20 @@
   \vfill%
   \endgroup%
 }
-\makeatother%
 
 % abstract page
-\newenvironment{abstract}{%
-  \begingroup%
-  \phantomsection%
-  \chapter*{Abstract}
-  \addcontentsline{toc}{chapter}{Abstract}
-  \newcommand{\keywords}[1]{\par\vspace{5ex}\noindent\textbf{Keywords:} ##1}
-}{%
-  \endgroup%
+\newcommand{\abstractpage}{%
+  \begingroup
+  \newcommand{\sep}{, }
+  \chapter{Abstract}
+  \@abstract%
+  \par%
+  \vspace{5ex}
+  \noindent\textbf{Keywords:} \@keywords%
+  \endgroup
 }
 
-% acknowledgements page
-\newenvironment{acknowledgements}{%
-  \begingroup%
-  \phantomsection%
-  \chapter*{Acknowledgements}
-  \addcontentsline{toc}{chapter}{Acknowledgements}
-}{%
-  \endgroup%
-}
+\makeatother%
 
 % table of contents/list of figures/list of tables
 \usepackage[titles]{tocloft}
