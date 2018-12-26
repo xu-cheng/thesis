@@ -234,6 +234,7 @@
 \newcommand{\genxmpdata}{%
   \begingroup%
   \def\sep{\unexpanded{\sep}}
+  \def\par{}
   \newwrite\xmpwriter%
   \immediate\openout\xmpwriter=\jobname.xmpdata%
   \immediate\write\xmpwriter{\unexpanded{\Title}{\@title}}
