@@ -316,7 +316,7 @@ The SP runs on Apache Spark platform locally and we set the slaves (workers) to 
 
 \begin{figure}[t]
   \centering
-  \includegraphics[width=0.35\linewidth]{exp-figs/knn/indexconstructtime.eps}
+  \includegraphics[width=0.4\linewidth]{exp-figs/knn/indexconstructtime.eps}
   \caption{DO's Construction Time}\label{fig:knn:do-time}
 \end{figure}
 
@@ -400,14 +400,14 @@ Finally, we evaluate how the three algorithms scale out with the slave node size
 
 \begin{figure}[t]
   \centering
-  \begin{subfigure}[t]{.4\linewidth}
+  \begin{subfigure}[t]{.5\linewidth}
     \centering
-    \includegraphics[width=\linewidth]{exp-figs/knn/throughput32.eps}
+    \includegraphics[width=.9\linewidth]{exp-figs/knn/throughput32.eps}
     \caption{$k=32$}\label{fig:knn:throughput:32}
-  \end{subfigure}\quad%
-  \begin{subfigure}[t]{.4\linewidth}
+  \end{subfigure}~%
+  \begin{subfigure}[t]{.5\linewidth}
     \centering
-    \includegraphics[width=\linewidth]{exp-figs/knn/throughput1024.eps}
+    \includegraphics[width=.9\linewidth]{exp-figs/knn/throughput1024.eps}
     \caption{$k=\fnum{1024}$}\label{fig:knn:throughput:1024}
   \end{subfigure}
   \caption{Throughput with Different Nodes}\label{fig:knn:throughput}
