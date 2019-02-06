@@ -326,8 +326,10 @@
 % list of publications page
 \newcommand{\publications}[1]{%
   \begingroup%
-  \renewcommand*{\mkbibnamegiven}[1]{\ifitemannotation{highlight}{\textbf{##1}}{##1}}
-  \renewcommand*{\mkbibnamefamily}[1]{\ifitemannotation{highlight}{\textbf{##1}}{##1}}
+  \renewcommand*{\mkbibnamegiven}[1]{\ifitemannotation{highlight}{\mkbibbold{##1}}{##1}}
+  \renewcommand*{\mkbibnamefamily}[1]{\ifitemannotation{highlight}{\mkbibbold{##1}}{##1}}
+  \renewcommand*{\mkbibnameprefix}[1]{\ifitemannotation{highlight}{\mkbibbold{##1}}{##1}}
+  \renewcommand*{\mkbibnameaffix}[1]{\ifitemannotation{highlight}{\mkbibbold{##1}}{##1}}
   \defbibenvironment{publicationbib}{\itemize}{\enditemize}{\item}
   \begin{refsection}[#1]
     \nocite{*}
