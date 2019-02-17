@@ -321,6 +321,11 @@
   }
 }
 
+% control whether to print addendum
+\newbool{clearaddendum}%
+\AtEveryCitekey{\ifbool{clearaddendum}{\clearfield{addendum}}{}}%
+\AtEveryBibitem{\ifbool{clearaddendum}{\clearfield{addendum}}{}}%
+
 % list of publications page
 \newcommand{\publications}[1]{%
   \begingroup%
