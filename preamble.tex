@@ -164,8 +164,8 @@
 \makeatletter%
 
 % variables
-\newcommand{\supervisor}[1]{\gdef\@supervisor{#1}}
-\supervisor{}
+\newcommand{\supervisor}[2]{\gdef\@supervisor{#1}\gdef\@supervisoruni{#2}}
+\supervisor{}{}
 
 \newcommand{\saveabstract}[1]{\long\gdef\@abstract{#1}}
 \saveabstract{}
@@ -186,12 +186,13 @@
     \vfill%
     {\Large \@author}
     \vfill%
-    {\large A thesis submitted in partial fulfillment of the requirements} \\[3ex]
+    {\large A thesis submitted in partial fulfilment of the requirements} \\[3ex]
     {\large for the degree of} \\[3ex]
     {\large Doctor of Philosophy}
     \vfill%
-    {\large Principal Supervisor: \@supervisor} \\[3ex]
-    {\large Hong Kong Baptist University} \\[3ex]
+    {\large Principal Supervisor:} \\[1ex]
+    {\large \@supervisor~(\@supervisoruni)}
+    \vfill%
     {\large \@date}
     \vfill%
   \end{titlepage}
