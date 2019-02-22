@@ -196,7 +196,7 @@
     {\large \@date}
     \vfill%
   \end{titlepage}
-  \clearpage{\thispagestyle{empty}\thispdfpagelabel{Cover}\cleardoublepage}
+  \clearpage{\if@openright\thispagestyle{empty}\thispdfpagelabel{Cover}\cleardoublepage\fi}%
   \setcounter{page}{1}
 }
 
@@ -247,6 +247,10 @@
   \endgroup%
 }
 \AtEndPreamble{\genxmpdata}
+
+% do not insert empty page after frontmatter/mainmatter if openany
+\patchcmd{\frontmatter}{\cleardoublepage}{\if@openright\cleardoublepage\else\clearpage\fi}{}{}%
+\patchcmd{\mainmatter}{\cleardoublepage}{\if@openright\cleardoublepage\else\clearpage\fi}{}{}%
 
 \makeatother%
 
