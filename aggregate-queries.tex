@@ -468,7 +468,7 @@ where $C_{h}, C_{sig}$ are the time costs of calculating a hash value and verify
 
 In this section, we perform a security analysis on our PA$^2$ algorithms for aggregate queries.
 
-\subsection{Security of PA$^2$ Algorithms}
+\subsection{Security of PA\texorpdfstring{$^2$}{\^{}2} Algorithms}
 
 The correctness of our PA$^2$ algorithms is defined in the natural way and is omitted. For soundness, it can be formally defined as follows:
 
@@ -574,7 +574,7 @@ Based on this optimized MG-tree, the query $Q = (max, -, [\alpha, \beta])$ no lo
 
 Regarding the performance, since the number of subsets to compute the $acc$ values from is reduced from $m$ to $\log(m)$, the SP's computation, the client's computation, and the communication complexity of computing the $sum$ set are reduced from $O(m^2)$, $O(m)$, $O(m)$ to $O(m)$, $O(\log(m))$, $O(\log(m))$, respectively. Similarly, the costs of computing the $union$ set are reduced from $O(m \cdot (|S|+ |U|)), O(m), O(m)$ to $O(\log(m) \cdot (|S| + |U|))$, $O(\log(m))$, $O(\log(m))$, respectively. As computing the $sum$ and $union$ sets dominates the total computation and communication complexity of their respective queries, we expect the overall performance gain is significant.
 
-\subsection{Accumulating $sum(\cdot)$ by Linear Ordering}
+\subsection{Accumulating \texorpdfstring{$sum(\cdot)$}{sum(\textcdot)} by Linear Ordering}
 For the $sum(\cdot)$ operation, it has a nice additive property that $sum(\{X\}) + sum(\{Y\}) = sum(\{X\} \uplus \{Y\})$. Therefore, we can ask the DO to pre-compute $sum$ accumulative values in an \emph{accumulative} manner. Let us consider the 1D case for simplicity and sort the objects in ascending order. For each $i \in [1, n]$ ($n$ is the number of objects), the DO pre-computes, $sum_{1-i}$, the $sum$ accumulative value for the objects from $o_1$ up to $o_i$. Then, for any range query $[\alpha, \beta]$ that selects the objects from $i$ to $j$, the sum value $sum_{i-j}$ can be computed as $sum_{i-j} = sub(sum_{1-(i-1)}, sum_{1-j})$. For example, in \cref{fig:aggregate-queries:sum_opt}, all eight objects are sorted by attribute $a_1$. The DO pre-computes the $sum$ accumulative values of $sum(\{X_1\})$, $sum(\{X_1, X_2\})$, $\dots$, $sum(\{X_1, \dots, X_n\})$. As such, the $sum$ accumulative value $sum_{3-6}$ can be computed by $sub(sum_{1-2}, sum_{1- 6})$.
 
 \begin{figure}

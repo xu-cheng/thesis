@@ -3,7 +3,7 @@
 
 We start by proving the security of the privacy-preserving authentication protocols on multiset operations. Note that the proofs of $sub(\cdot, \cdot)$ and $empty(\cdot)$ are similar to those on set operations in~\cite{10.1007/978-3-642-22792-9_6} and are hence omitted.
 
-\section{Security of $sum(\cdot)$ Operation}
+\section{Security of \texorpdfstring{$sum(\cdot)$}{sum(\textcdot)} Operation}
 
 \begin{lemma}[Security of $sum(\cdot)$ operation]\label{lem:aggregate-queries:sum}
   Under the bilinear $q$-strong Diffie-Hellman assumption, if the accumulative value returned by $sum(\{X_1,\dots,X_n\})$ passes the client's verification, then the probability of $sum(\{X_1,\dots,X_n\}) \neq acc(\uplus_{i=1}^n X_i)$ is negligible for any PPT adversary.
@@ -36,7 +36,7 @@ We start by proving the security of the privacy-preserving authentication protoc
   Since $\Pr[\varepsilon_2]$ is negligible according to our proof for $n=2$, we can conclude that $\Pr[\varepsilon_{n}]$ is negligible as $p\gg n$ in a cyclic multiplicative group $\mathbb{G}$. Hence, this lemma is proved.
 \end{proof}
 
-\section{Security of $union(\cdot)$ Operation}
+\section{Security of \texorpdfstring{$union(\cdot)$}{union(\textcdot)} Operation}
 
 \begin{lemma}[Security of $union(\cdot)$ operation]\label{lem:aggregate-queries:union}
   Under the bilinear $q$-strong Diffie-Hellman assumption, if the accumulative value returned by $union(\{X_1,\dots,X_n\})$ passes the client's verification, then the probability of $union(\{X_1,\dots,X_n\}) \neq acc(\cup_{i=1}^n X_i)$ is negligible for any PPT adversary.
@@ -86,7 +86,7 @@ We start by proving the security of the privacy-preserving authentication protoc
   By the above two arguments, we prove that the accumulative value ${acc(U)}^*$ cannot be forged if it passes the client's verification.
 \end{proof}
 
-\section{Security of $times(\cdot, \cdot)$ Operation}
+\section{Security of \texorpdfstring{$times(\cdot, \cdot)$}{times(\textcdot, \textcdot)} Operation}
 
 \begin{lemma}[Security of $times(\cdot,\cdot)$ operation]\label{lem:aggregate-queries:times}
   Under the bilinear $q$-strong Diffie-Hellman assumption, if the accumulative value returned by $times(X,t)$ passes the client's verification, then the probability of $times(X,t) \neq acc(\uplus_{i=1}^t X)$ is negligible for any PPT adversary.
