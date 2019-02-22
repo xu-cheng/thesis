@@ -161,6 +161,9 @@
 \usepackage[compact]{titlesec}
 \titleformat{\chapter}[display]{\normalfont\LARGE\bfseries\filcenter}{\chaptertitlename~\thechapter}{20pt}{}
 
+% insert pdf pages
+\usepackage{pdfpages}
+
 \makeatletter%
 
 % variables
@@ -174,10 +177,23 @@
 \newcommand{\keywords}[1]{\gdef\@keywords{#1}}
 \keywords{}
 
+% acceptance page
+\newcommand{\acceptancepage}[1]{%
+  \begingroup%
+  \includepdf[pages=-,pagecommand={\thispagestyle{empty}\thispdfpagelabel{Acceptance}}]{#1}%
+  \if@openright%
+    \clearpage{\thispagestyle{empty}\thispdfpagelabel{Acceptance}\cleardoublepage}%
+  \else%
+    \setcounter{page}{1}%
+    \clearpage%
+  \fi%
+  \endgroup%
+}
+
 % titlepage
 \renewcommand{\maketitle}{%
-  \thispdfpagelabel{Cover}
   \begin{titlepage}
+    \thispdfpagelabel{Cover}%
     \centering%
     \bfseries%
     \null%
@@ -197,7 +213,7 @@
     \vfill%
   \end{titlepage}
   \clearpage{\if@openright\thispagestyle{empty}\thispdfpagelabel{Cover}\cleardoublepage\fi}%
-  \setcounter{page}{1}
+  \setcounter{page}{1}%
 }
 
 % declaration page
